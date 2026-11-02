@@ -1,0 +1,434 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hardware Inventory — Codeline.AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:       #0A0A0B;
+      --glass:         rgba(255,255,255,0.045);
+      --glass-strong:  rgba(255,255,255,0.08);
+      --glass-border:  rgba(255,255,255,0.09);
+      --glass-blur:    20px;
+      --text-primary:  #F4F4F5;
+      --text-muted:    #A1A1AA;
+      --text-dim:      #52525B;
+      --success:       #34D399;
+      --warning:       #FBBF24;
+      --radius:        16px;
+      --radius-sm:     10px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      background-image:
+        radial-gradient(ellipse at 15% 0%,   rgba(255,255,255,0.04)  0%, transparent 50%),
+        radial-gradient(ellipse at 85% 100%, rgba(255,255,255,0.025) 0%, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar-spacer { width: 240px; flex-shrink: 0; }
+    @media (max-width: 768px) { .sidebar-spacer { display: none; } }
+
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+    @media (max-width: 600px) { .main-workspace { padding: 14px; } }
+
+    /* Mobile nav */
+    .mobile-nav-bar {
+      display: none;
+      height: 48px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur));
+      border-radius: var(--radius-sm);
+      align-items: center;
+      padding: 0 16px;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-bottom: 16px;
+      gap: 10px;
+    }
+    @media (max-width: 768px) { .mobile-nav-bar { display: flex; } }
+
+    /* Header */
+    .header-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .title-area h1 { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; }
+    .title-area p  { font-size: 13px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; }
+
+    .btn-action {
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      backdrop-filter: blur(var(--glass-blur));
+      transition: background 0.18s, border-color 0.18s, transform 0.18s;
+      white-space: nowrap;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-action:hover {
+      background: rgba(255,255,255,0.13);
+      border-color: rgba(255,255,255,0.18);
+      transform: translateY(-1px);
+    }
+
+    /* Table */
+    .table-container {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      width: 100%;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+      min-width: 700px;
+    }
+    .data-table th {
+      background: rgba(255,255,255,0.06);
+      color: var(--text-primary);
+      padding: 13px 16px;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--text-muted);
+    }
+    .data-table td:first-child, .data-table td strong { color: var(--text-primary); }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: rgba(255,255,255,0.025); }
+
+    /* Badges */
+    .status-badge {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .badge-assigned  { background: rgba(251,191,36,0.12);  color: #FCD34D; }
+    .badge-available { background: rgba(52,211,153,0.12);  color: #6EE7B7; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background: rgba(18,18,20,0.80);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      max-width: 480px;
+      width: 100%;
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .modal-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 { font-family: 'Space Grotesk', sans-serif; font-size: 16px; }
+
+    .modal-body { padding: 22px; }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+    .form-group input, .form-group select {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.18s, background 0.18s;
+      backdrop-filter: blur(10px);
+    }
+    .form-group input::placeholder { color: var(--text-dim); }
+    .form-group input:focus, .form-group select:focus {
+      border-color: rgba(255,255,255,0.22);
+      background: var(--glass-strong);
+    }
+
+    /* Dark dropdown so option text is clearly readable */
+    .form-group select {
+      background-color: #1a1a1c;
+      color-scheme: dark;
+    }
+    .form-group select option {
+      background: #1a1a1c;
+      color: #F4F4F5;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: rgba(244,244,245,0.9);
+      color: #0A0A0B;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+    .btn-submit:hover { background: #ffffff; transform: translateY(-1px); }
+
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      border-radius: 5px;
+      padding: 2px 6px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar-spacer"></div>
+
+  <div class="main-workspace">
+    <div class="mobile-nav-bar" onclick="openSidebar()">
+      ☰ <span style="font-size:14px; font-weight:600;">Menu</span>
+    </div>
+
+    <div class="header-block">
+      <div class="title-area">
+        <h1>💻 Company Assets Inventory</h1>
+        <p>Manage hardware devices (laptops, desktops) and their allocations</p>
+      </div>
+      <button class="btn-action" id="addAssetBtn" style="display:none;" onclick="toggleAssetModal(true)">
+        ➕ Register Asset
+      </button>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Asset ID</th>
+            <th>Device Name</th>
+            <th>Type</th>
+            <th>Serial No.</th>
+            <th>Assigned To</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="assetsRowsContainer">
+          <tr>
+            <td colspan="6" style="padding:32px; text-align:center; color:var(--text-dim);">
+              Syncing inventory...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Asset Modal -->
+  <div class="modal-overlay" id="assetModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>💻 Register Hardware Asset</h3>
+        <button style="background:none; border:none; color:var(--text-muted); font-size:22px; cursor:pointer; line-height:1;" onclick="toggleAssetModal(false)">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="newAssetForm" onsubmit="submitAssetData(event)">
+          <div class="form-group">
+            <label>Device Name *</label>
+            <input type="text" id="aName" required placeholder="e.g. Dell Laptop i5"/>
+          </div>
+          <div class="form-group">
+            <label>Asset Type *</label>
+            <select id="aType">
+              <option value="Laptop">Laptop</option>
+              <option value="Desktop">Desktop</option>
+              <option value="Projector">Projector</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Serial Number *</label>
+            <input type="text" id="aSerial" required placeholder="e.g. SN-2024-XXXX"/>
+          </div>
+          <div class="form-group">
+            <label>Branch Code ID *</label>
+            <input type="text" id="aBranch" required placeholder="e.g. BR001"/>
+          </div>
+          <div class="form-group">
+            <label>Assign to Employee (Optional)</label>
+            <input type="text" id="aEmp" placeholder="e.g. EMP002"/>
+          </div>
+          <button type="submit" class="btn-submit">Register Unit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    AppSession.protect();
+
+    // PAGE_* names avoid clashing with variables already declared in app.js.
+    // A clash throws "already been declared" and stops this whole script,
+    // which leaves the table stuck on "Syncing inventory...".
+    const PAGE_TOKEN = AppSession.getToken();
+    const PAGE_USER = AppSession.getUser() || {};
+
+    // Fallback toast in case app.js does not provide one
+    if (typeof showToast !== 'function') {
+      window.showToast = function (msg) { alert(msg); };
+    }
+
+    function setAssetsMessage(msg) {
+      document.getElementById('assetsRowsContainer').innerHTML =
+        `<tr><td colspan="6" style="padding:28px; text-align:center; color:var(--text-dim);">${msg}</td></tr>`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (PAGE_USER.role === 'super_admin' || PAGE_USER.role === 'hr') {
+        document.getElementById('addAssetBtn').style.display = 'inline-flex';
+      }
+      loadAssets();
+    });
+
+    function toggleAssetModal(on) {
+      document.getElementById('assetModal').style.display = on ? 'flex' : 'none';
+      if (!on) document.getElementById('newAssetForm').reset();
+    }
+
+    async function loadAssets() {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 20000); // 20s timeout
+      try {
+        const res = await fetch(`${API_URL}?action=getAssets&token=${PAGE_TOKEN}`, { signal: ctrl.signal });
+        const payload = await res.json();
+
+        if (payload.status !== 'success') {
+          setAssetsMessage(payload.message || 'Failed to load assets.');
+          return;
+        }
+
+        const raw = (payload.data && payload.data.data) || payload.data || [];
+        const arr = Array.isArray(raw) ? raw : [];
+
+        if (arr.length === 0) {
+          setAssetsMessage('No assets available right now.');
+          return;
+        }
+
+        document.getElementById('assetsRowsContainer').innerHTML = arr.map(a => `
+          <tr>
+            <td><code>${a.asset_id}</code></td>
+            <td><strong>${a.asset_name}</strong></td>
+            <td>${a.asset_type}</td>
+            <td><code>${a.serial_no}</code></td>
+            <td>${a.assigned_to || '<span style="color:var(--text-dim);">Pool Available</span>'}</td>
+            <td>
+              <span class="status-badge ${a.status === 'assigned' ? 'badge-assigned' : 'badge-available'}">
+                ${a.status}
+              </span>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error('loadAssets error:', e);
+        setAssetsMessage(e.name === 'AbortError' ? 'Server is slow, please refresh.' : 'Error fetching assets.');
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    async function submitAssetData(e) {
+      e.preventDefault();
+      const payload = {
+        token:       PAGE_TOKEN,
+        action:      'addAsset',
+        asset_name:  document.getElementById('aName').value,
+        asset_type:  document.getElementById('aType').value,
+        serial_no:   document.getElementById('aSerial').value,
+        branch_id:   document.getElementById('aBranch').value.trim(),
+        assigned_to: document.getElementById('aEmp').value.trim()
+      };
+      try {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('Asset registered successfully!');
+          toggleAssetModal(false);
+          loadAssets();
+        } else { showToast(out.message || 'Error.'); }
+      } catch (err) { showToast('Network error.'); }
+    }
+  </script>
+</body>
+</html>

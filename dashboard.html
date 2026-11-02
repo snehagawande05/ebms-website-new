@@ -1,0 +1,2020 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Codeline.AI EBMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-base: #0A0A0B;
+      --glass: rgba(255, 255, 255, 0.045);
+      --glass-strong: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.09);
+      --glass-blur: 20px;
+      --text-primary: #F4F4F5;
+      --text-muted: #A1A1AA;
+      --text-dim: #6B7280;
+      --accent: #A8AFC4;
+      --accent-glow: #D4D9E6;
+      --success: #34D399;
+      --error: #F87171;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      background-image:
+        radial-gradient(circle at 12% -10%, rgba(255, 255, 255, 0.05), transparent 45%),
+        radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.03), transparent 40%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Fixed Layout alignment metrics spacers */
+    .sidebar-spacer {
+      width: 240px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-spacer {
+        display: none;
+      }
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      height: 60px;
+      background: rgba(20, 20, 23, 0.55);
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      padding-top: env(safe-area-inset-top);
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    @media (max-width: 600px) {
+      .topbar {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+    }
+
+    .topbar-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-date {
+      font-size: 12.5px;
+      color: var(--text-dim);
+    }
+
+    @media (max-width: 480px) {
+      .topbar-date {
+        display: none;
+      }
+    }
+
+    .hamburger {
+      display: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 10px;
+      margin: -10px;
+      border-radius: 8px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .hamburger:active {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+    }
+
+    @media (max-width: 768px) {
+      .hamburger {
+        display: block;
+      }
+    }
+
+    .page-content {
+      padding: 24px;
+      flex: 1;
+    }
+
+    @media (max-width: 600px) {
+      .page-content {
+        padding: 16px;
+      }
+    }
+
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-header h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      overflow-wrap: break-word;
+    }
+
+    @media (max-width: 420px) {
+      .page-header h1 {
+        font-size: 19px;
+      }
+    }
+
+    .page-header p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .breadcrumb {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .breadcrumb span {
+      color: var(--accent-glow);
+    }
+
+    .branch-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur));
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--accent-glow);
+      margin-bottom: 20px;
+    }
+
+    /* Performance grids blocks metrics panels */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1100px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s, background 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      background: var(--glass-strong);
+      transform: translateY(-2px);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+    }
+
+    .stat-card.blue::before {
+      background: linear-gradient(90deg, #3F3F46, #A1A1AA);
+    }
+
+    .stat-card.cyan::before {
+      background: linear-gradient(90deg, #155E63, #22D3EE);
+    }
+
+    .stat-card.green::before {
+      background: linear-gradient(90deg, #065F46, #34D399);
+    }
+
+    .stat-card.red::before {
+      background: linear-gradient(90deg, #7F1D1D, #F87171);
+    }
+
+    .stat-card.yellow::before {
+      background: linear-gradient(90deg, #78350F, #FBBF24);
+    }
+
+    .stat-card.purple::before {
+      background: linear-gradient(90deg, #4C1D95, #A78BFA);
+    }
+
+    .stat-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .stat-label {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 10px;
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      border: 1px solid var(--glass-border);
+    }
+
+    .stat-icon.blue {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .stat-icon.green {
+      background: rgba(52, 211, 153, 0.10);
+    }
+
+    .stat-icon.red {
+      background: rgba(248, 113, 113, 0.10);
+    }
+
+    .stat-icon.yellow {
+      background: rgba(251, 191, 36, 0.10);
+    }
+
+    .stat-icon.purple {
+      background: rgba(167, 139, 250, 0.10);
+    }
+
+    .stat-icon.cyan {
+      background: rgba(34, 211, 238, 0.10);
+    }
+
+    .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-change {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.12) 50%, rgba(255, 255, 255, 0.05) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+
+    @keyframes shimmer {
+      to {
+        background-position: -200% 0;
+      }
+    }
+
+    .skel-val {
+      height: 36px;
+      width: 80px;
+      margin-bottom: 4px;
+    }
+
+    .skel-text {
+      height: 14px;
+      width: 60%;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .qa-btn {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur));
+      border-radius: var(--radius);
+      padding: 14px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.18s;
+      text-decoration: none;
+      display: block;
+      color: inherit;
+    }
+
+    .qa-btn:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      background: var(--glass-strong);
+      transform: translateY(-2px);
+    }
+
+    .qa-icon {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .qa-label {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 1100px) {
+      .bottom-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .bottom-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .branch-select {
+      background: transparent;
+      border: none;
+      color: var(--accent-glow);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      padding-right: 4px;
+    }
+
+    .branch-select option {
+      background: #18181B;
+      color: var(--text-primary);
+    }
+
+    .panel-body {
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    .panel {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 14.5px;
+    }
+
+    .panel-link {
+      font-size: 12px;
+      color: var(--accent-glow);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .emp-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .emp-row:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .emp-row:last-child {
+      border-bottom: none;
+    }
+
+    .emp-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--glass-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent-glow);
+      border: 1.5px solid var(--glass-border);
+    }
+
+    .emp-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .emp-name {
+      font-size: 13.5px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .emp-role {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 1px;
+    }
+
+    .status-pill {
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .pill-active {
+      background: rgba(52, 211, 153, 0.12);
+      color: #6EE7B7;
+      border: 1px solid rgba(52, 211, 153, 0.2);
+    }
+
+    .pill-pending {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--accent-glow);
+      border: 1px solid var(--glass-border);
+    }
+
+    .leave-row {
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .leave-row:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .leave-row:last-child {
+      border-bottom: none;
+    }
+
+    .modal-field-label {
+      color: var(--text-dim);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+
+    .leave-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      gap: 8px;
+    }
+
+    .leave-name {
+      font-size: 13.5px;
+      font-weight: 500;
+    }
+
+    .leave-meta {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .leave-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .btn-sm {
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-approve {
+      background: rgba(52, 211, 153, 0.15);
+      color: #6EE7B7;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .btn-reject {
+      background: rgba(248, 113, 113, 0.1);
+      color: #FCA5A5;
+      border: 1px solid rgba(248, 113, 113, 0.2);
+    }
+
+    .stat-card {
+      cursor: pointer;
+    }
+
+    .stat-card:active {
+      transform: translateY(0px) scale(0.98);
+    }
+
+    /* ---- Generic click-through modal for stat cards ---- */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 5, 6, 0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.18s ease;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 460px;
+      max-height: 80vh;
+      background: rgba(20, 20, 23, 0.92);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+      transform: translateY(10px);
+      transition: transform 0.18s ease;
+    }
+
+    .modal-overlay.show .modal-box {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .modal-close {
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 18px;
+      line-height: 1;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    /* ============================================================
+       🆕 [2026-08-08] Admin Dashboard additions:
+       1. Salary-amount privacy eye-toggle (Monthly Salary Expense card)
+       2. "+ Add" quick-add buttons on Present Employees / Work List /
+          Pending Leave Requests panels, opening a lightweight form
+          modal (reuses .modal-overlay/.modal-box from the stat-card
+          modal, new .qform-* classes for the actual form fields).
+       ============================================================ */
+    .stat-eye-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .stat-eye-btn:hover {
+      background: var(--glass-strong);
+      color: var(--text-primary);
+    }
+
+    .panel-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel-add-btn {
+      font-size: 12px;
+      color: var(--accent-glow);
+      cursor: pointer;
+      padding: 3px 10px;
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      background: var(--glass);
+      white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .panel-add-btn:hover {
+      background: var(--glass-strong);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .qform-group {
+      margin-bottom: 14px;
+    }
+
+    .qform-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .qform-row .qform-group {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .qform-label {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .qform-input,
+    .qform-select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .qform-input:focus,
+    .qform-select:focus {
+      border-color: rgba(255, 255, 255, 0.28);
+    }
+
+    .qform-select option {
+      background: #18181B;
+      color: var(--text-primary);
+    }
+
+    .qform-note {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    .qform-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .qform-btn {
+      flex: 1;
+      padding: 11px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      transition: opacity 0.15s, background 0.15s, color 0.15s;
+    }
+
+    .qform-btn-primary {
+      background: var(--accent-glow);
+      color: #0A0A0B;
+    }
+
+    .qform-btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .qform-btn-secondary {
+      background: var(--glass);
+      color: var(--text-muted);
+      border: 1px solid var(--glass-border);
+    }
+
+    .qform-btn-secondary:hover {
+      background: var(--glass-strong);
+      color: var(--text-primary);
+    }
+
+    #loadingOverlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-base);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      transition: opacity 0.4s;
+    }
+
+    .loading-logo {
+      font-size: 40px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .loading-text {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.1);
+        opacity: .7;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="loadingOverlay">
+    <div class="loading-logo">⚡</div>
+    <div class="loading-text">Dashboard is loading...</div>
+  </div>
+
+  <div class="sidebar-spacer"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <span class="hamburger" onclick="openSidebar()">☰</span>
+      <div class="topbar-title" id="topbarTitle">Admin Dashboard</div>
+      <div class="topbar-right">
+        <div class="topbar-date" id="topbarDate"></div>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="breadcrumb">Home / <span>Dashboard</span></div>
+
+      <div class="page-header">
+        <h1 id="pageTitle">📊 Dashboard</h1>
+        <p id="pageSubtitle">Loading your overview..</p>
+      </div>
+
+      <div class="branch-badge" id="branchBadge">
+        🏢 <span id="branchBadgeText">All Branches</span>
+      </div>
+
+      <div class="branch-badge" id="branchFilterWrap" style="display:none;">
+        🏢 <select id="branchSelect" class="branch-select">
+          <option value="all">All Branches</option>
+        </select>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card green" onclick="openPresentModal()">
+          <div class="stat-label">Present Today</div>
+          <div class="stat-row">
+            <div>
+              <div class="stat-value" id="stat-present"><span class="skeleton skel-val"></span></div>
+              <div class="stat-change" id="stat-present-sub"><span class="skeleton skel-text"></span></div>
+            </div>
+            <div class="stat-icon green">✅</div>
+          </div>
+        </div>
+        <div class="stat-card red" onclick="openAbsentModal()">
+          <div class="stat-label">Absent Today</div>
+          <div class="stat-row">
+            <div>
+              <div class="stat-value" id="stat-absent"><span class="skeleton skel-val"></span></div>
+              <div class="stat-change" id="stat-absent-sub"><span class="skeleton skel-text"></span></div>
+            </div>
+            <div class="stat-icon red">❌</div>
+          </div>
+        </div>
+        <div class="stat-card cyan" onclick="openEmployeesModal()">
+          <div class="stat-label">Total Employees</div>
+          <div class="stat-row">
+            <div>
+              <div class="stat-value" id="stat-employees"><span class="skeleton skel-val"></span></div>
+              <div class="stat-change" id="stat-employees-sub"><span class="skeleton skel-text"></span></div>
+            </div>
+            <div class="stat-icon cyan">👥</div>
+          </div>
+        </div>
+        <div class="stat-card yellow" onclick="openLeavesModal()">
+          <div class="stat-label">Pending Leaves</div>
+          <div class="stat-row">
+            <div>
+              <div class="stat-value" id="stat-leaves"><span class="skeleton skel-val"></span></div>
+              <div class="stat-change" id="stat-leaves-sub"><span class="skeleton skel-text"></span></div>
+            </div>
+            <div class="stat-icon yellow">📅</div>
+          </div>
+        </div>
+        <div class="stat-card blue" onclick="openPerformerModal()">
+          <div class="stat-label">Best Performer</div>
+          <div class="stat-row">
+            <div>
+              <div class="stat-value" id="stat-performer"><span class="skeleton skel-val"></span></div>
+              <div class="stat-change" id="stat-performer-sub"><span class="skeleton skel-text"></span></div>
+            </div>
+            <div class="stat-icon blue">🏆</div>
+          </div>
+        </div>
+        <div class="stat-card purple" onclick="goToSalaryPage()">
+          <button class="stat-eye-btn" id="salaryEyeBtn" onclick="toggleSalaryVisibility(event)"
+            title="Toggle amount visibility">👁️</button>
+          <div class="stat-label">Monthly Salary Expense</div>
+          <div class="stat-row">
+            <div>
+              <div class="stat-value" id="stat-salary"><span class="skeleton skel-val"></span></div>
+              <div class="stat-change" id="stat-salary-sub"><span class="skeleton skel-text"></span></div>
+            </div>
+            <div class="stat-icon purple">💰</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generic modal used by all stat-card clicks -->
+      <div class="modal-overlay" id="statModalOverlay" onclick="if(event.target===this) closeStatModal()">
+        <div class="modal-box">
+          <div class="modal-header">
+            <div class="modal-title" id="statModalTitle">Details</div>
+            <div class="modal-close" onclick="closeStatModal()">✕</div>
+          </div>
+          <div class="modal-body" id="statModalBody"></div>
+        </div>
+      </div>
+
+      <!-- 🆕 Quick-add modal — shared shell for Mark Attendance / New Task / Apply Leave forms -->
+      <div class="modal-overlay" id="quickAddModalOverlay" onclick="if(event.target===this) closeQuickAddModal()">
+        <div class="modal-box">
+          <div class="modal-header">
+            <div class="modal-title" id="quickAddModalTitle">Quick Add</div>
+            <div class="modal-close" onclick="closeQuickAddModal()">✕</div>
+          </div>
+          <div class="modal-body" id="quickAddModalBody" style="padding:20px;"></div>
+        </div>
+      </div>
+
+      <div class="bottom-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">✅ Present Employees</div>
+            <div class="panel-header-actions">
+              <span class="panel-add-btn" onclick="openQuickMarkAttendance()">+ Add</span>
+              <a class="panel-link" href="attendance.html">View All →</a>
+            </div>
+          </div>
+          <div class="panel-body" id="presentEmployees">
+            <div style="padding:20px; text-align:center; color:var(--text-dim);">Loading...</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">📝 Work List</div>
+            <div class="panel-header-actions">
+              <span class="panel-add-btn" onclick="openQuickAddTask()">+ Add</span>
+              <a class="panel-link" href="tasks.html">View All →</a>
+            </div>
+          </div>
+          <div class="panel-body" id="workList">
+            <div style="padding:20px; text-align:center; color:var(--text-dim);">Loading...</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">📅 Pending Leave Requests</div>
+            <div class="panel-header-actions">
+              <span class="panel-add-btn" onclick="openQuickApplyLeave()">+ Add</span>
+              <a class="panel-link" href="leaves.html">View All →</a>
+            </div>
+          </div>
+          <div class="panel-body" id="pendingLeaves">
+            <div style="padding:20px; text-align:center; color:var(--text-dim);">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    AppSession.protect();
+    const cachedUser = AppSession.getUser();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setUserInfo();
+      setDateInfo();
+      loadDashboard();
+      initOnboardingInstructions();
+      setTimeout(() => {
+        document.getElementById('loadingOverlay').style.opacity = '0';
+        setTimeout(() => document.getElementById('loadingOverlay').style.display = 'none', 400);
+      }, 600);
+    });
+
+    const CAN_FILTER_BRANCH = cachedUser.role === 'super_admin' || cachedUser.role === 'hr';
+
+    function setUserInfo() {
+      const greeting = getGreeting();
+      document.getElementById('pageTitle').textContent = `${greeting}, ${cachedUser.name.split(' ')[0]}! 👋`;
+
+      if (CAN_FILTER_BRANCH) {
+        // Roles that can see multiple branches get the selector instead of the static badge
+        document.getElementById('branchBadge').style.display = 'none';
+        document.getElementById('branchFilterWrap').style.display = 'inline-flex';
+      } else {
+        document.getElementById('branchBadgeText').textContent = 'Your Branch';
+      }
+
+      document.getElementById('topbarTitle').textContent =
+        cachedUser.role === 'super_admin' ? 'Admin Dashboard' :
+          cachedUser.role === 'branch_manager' ? 'Branch Dashboard' :
+            cachedUser.role === 'hr' ? 'HR Dashboard' : 'Employee Dashboard';
+    }
+
+    function getGreeting() {
+      const h = new Date().getHours();
+      if (h < 12) return 'Good Morning';
+      if (h < 17) return 'Good Afternoon';
+      return 'Good Evening';
+    }
+
+    function setDateInfo() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      document.getElementById('topbarDate').textContent = dateStr;
+      document.getElementById('pageSubtitle').innerHTML = `Todays overview — <strong>${dateStr}</strong>`;
+    }
+
+    // ---- Cached raw datasets (unfiltered by branch) ----
+    let ALL_EMPLOYEES = [];
+    let ALL_ATTENDANCE_TODAY = [];
+    let ALL_LEAVES_PENDING = [];
+    let ALL_TASKS = [];
+    let ALL_BRANCHES = [];
+    let ALL_PERFORMANCE = [];
+    let META = { total_branches: 0, monthly_salary_expense: 0 };
+    let selectedBranchId = 'all';
+
+    // Attendance rows from the backend use the Name / Phone / Email / Date / In-Time / Out-Time format.
+    // This converts them into the shape the rest of this page already expects.
+    let RAW_ATTENDANCE_TODAY = [];
+
+    function rebuildAttendanceToday() {
+      ALL_ATTENDANCE_TODAY = RAW_ATTENDANCE_TODAY.map(row => {
+        const email = String(row['Email'] || '').trim().toLowerCase();
+        const emp = ALL_EMPLOYEES.find(e => String(e.email || '').trim().toLowerCase() === email);
+        return {
+          att_id: email + '|' + (row['Date'] || ''),
+          emp_id: emp ? emp.emp_id : email,
+          branch_id: emp ? emp.branch_id : '',
+          in_time: row['In-Time'] ? formatTime12Hour(row['In-Time']) : '',
+          out_time: row['Out-Time'] ? formatTime12Hour(row['Out-Time']) : '',
+          late_minutes: 0,
+          method: 'QR',
+          remarks: ''
+        };
+      });
+    }
+
+    function getTodayIST() {
+      const now = new Date();
+      const istDate = new Date(now.getTime() + 330 * 60000);
+      return istDate.toISOString().split('T')[0];
+    }
+
+    function filterByBranch(arr) {
+      if (selectedBranchId === 'all') return arr;
+      return arr.filter(row => row.branch_id === selectedBranchId);
+    }
+
+    async function loadDashboard() {
+      try {
+        await Promise.all([
+          loadMeta(),
+          fetchEmployees(),
+          fetchAttendanceToday(),
+          fetchLeavesPending(),
+          fetchTasks(),
+          fetchBranches(),
+          fetchPerformance()
+        ]);
+        renderEverything();
+      } catch (err) {
+        showToast('API connection error. Showing offline mock values.');
+        loadDemoData();
+      }
+    }
+
+    async function loadMeta() {
+      const url = `${API_URL}?action=getDashboard&token=${AppSession.getToken()}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.status === 'success') {
+        META.total_branches = data.data.total_branches;
+        META.monthly_salary_expense = data.data.monthly_salary_expense;
+      }
+    }
+
+    async function fetchEmployees() {
+      try {
+        const res = await fetch(`${API_URL}?action=getEmployees&token=${AppSession.getToken()}&limit=1000`);
+        const data = await res.json();
+        if (data.status === 'success' && data.data && data.data.data) {
+          ALL_EMPLOYEES = data.data.data;
+        }
+      } catch (e) { }
+    }
+
+    async function fetchAttendanceToday() {
+      try {
+        const res = await fetch(`${API_URL}?action=getAttendance&token=${AppSession.getToken()}&date=${getTodayIST()}&limit=1000`);
+        const data = await res.json();
+        if (data.status === 'success' && data.data && data.data.data) {
+          RAW_ATTENDANCE_TODAY = data.data.data;
+        }
+      } catch (e) { }
+    }
+
+    async function fetchLeavesPending() {
+      try {
+        const res = await fetch(`${API_URL}?action=getLeaves&token=${AppSession.getToken()}&status=pending&limit=1000`);
+        const data = await res.json();
+        if (data.status === 'success' && data.data && data.data.data) {
+          ALL_LEAVES_PENDING = data.data.data;
+        }
+      } catch (e) { }
+    }
+
+    async function fetchTasks() {
+      try {
+        const res = await fetch(`${API_URL}?action=getTasks&token=${AppSession.getToken()}&limit=1000`);
+        const data = await res.json();
+        if (data.status === 'success' && data.data && data.data.data) {
+          ALL_TASKS = data.data.data;
+        }
+      } catch (e) { }
+    }
+
+    async function fetchPerformance() {
+      try {
+        const res = await fetch(`${API_URL}?action=getPerformance&token=${AppSession.getToken()}`);
+        const data = await res.json();
+        if (data.status === 'success' && Array.isArray(data.data)) {
+          ALL_PERFORMANCE = data.data;
+        }
+      } catch (e) { }
+    }
+
+    async function fetchBranches() {
+      try {
+        const res = await fetch(`${API_URL}?action=getBranches&token=${AppSession.getToken()}`);
+        const data = await res.json();
+        if (data.status === 'success' && Array.isArray(data.data)) {
+          ALL_BRANCHES = data.data.filter(b => b.status === 'active');
+        }
+      } catch (e) { }
+
+      if (CAN_FILTER_BRANCH) {
+        renderBranchSelector();
+      } else {
+        updateBranchBadgeText();
+      }
+    }
+
+    function findBranchName(branchId) {
+      const b = ALL_BRANCHES.find(br => br.branch_id === branchId);
+      return b ? b.branch_name : (branchId || 'Your Branch');
+    }
+
+    function updateBranchBadgeText() {
+      const el = document.getElementById('branchBadgeText');
+      if (el) el.textContent = findBranchName(cachedUser.branch_id);
+    }
+
+    function renderBranchSelector() {
+      const select = document.getElementById('branchSelect');
+      select.innerHTML = '<option value="all">All Branches</option>' +
+        ALL_BRANCHES.map(b => `<option value="${b.branch_id}">${b.branch_name}</option>`).join('');
+      select.addEventListener('change', (e) => {
+        selectedBranchId = e.target.value;
+        renderEverything();
+      });
+    }
+
+    function renderEverything() {
+      rebuildAttendanceToday();
+      renderStats();
+      renderPresentEmployees();
+      renderWorkList();
+      renderPendingLeaves();
+    }
+
+    function renderStats() {
+      const activeEmps = filterByBranch(ALL_EMPLOYEES.filter(e => e.status === 'active'));
+      const attendance = filterByBranch(ALL_ATTENDANCE_TODAY);
+      const leaves = filterByBranch(ALL_LEAVES_PENDING);
+
+      const presentCount = attendance.filter(a => a.in_time).length;
+      const absentCount = Math.max(activeEmps.length - presentCount, 0);
+
+      setStatCard('present', presentCount, `Out of ${activeEmps.length}`);
+      setStatCard('absent', absentCount, 'Not marked yet');
+      setStatCard('employees', activeEmps.length, selectedBranchId === 'all' ? 'Active employees' : 'In selected branch');
+      setStatCard('leaves', leaves.length, 'Awaiting approval');
+      renderBestPerformer();
+
+      // 🆕 [2026-08-08] Salary amount routed through the privacy toggle —
+      // subtitle stays visible (not sensitive), only the ₹ figure masks.
+      currentSalaryDisplay = '₹' + formatNumber(META.monthly_salary_expense);
+      document.getElementById('stat-salary-sub').textContent = 'This month (company-wide)';
+      updateSalaryDisplay();
+    }
+
+    function renderBestPerformer() {
+      // Performance records only carry emp_id (no branch_id), so branch
+      // filtering goes through the employee's own branch_id.
+      const branchEmpIds = selectedBranchId === 'all'
+        ? null
+        : new Set(ALL_EMPLOYEES.filter(e => e.branch_id === selectedBranchId).map(e => e.emp_id));
+
+      const records = ALL_PERFORMANCE.filter(r => !branchEmpIds || branchEmpIds.has(r.emp_id));
+
+      if (!records.length) {
+        setStatCard('performer', '—', 'No scorecards yet');
+        return;
+      }
+
+      const top = records.reduce((best, r) =>
+        (parseFloat(r.score) || 0) > (parseFloat(best.score) || 0) ? r : best
+      );
+
+      setStatCard('performer', findEmployeeName(top.emp_id), `Score: ${parseFloat(top.score) || 0}`);
+    }
+
+    function loadDemoData() {
+      setStatCard('present', '5', 'Active entries');
+      setStatCard('absent', '3', 'Missing logs');
+      setStatCard('employees', '8', 'Active employees');
+      setStatCard('leaves', '2', 'Pending review');
+      setStatCard('performer', 'Aditi Sharma', 'Score: 92');
+      currentSalaryDisplay = '₹1.8L';
+      document.getElementById('stat-salary-sub').textContent = 'Current billing cycle';
+      updateSalaryDisplay();
+    }
+
+    // ============================================================
+    // 🆕 [2026-08-08] SALARY PRIVACY TOGGLE — eye button on the
+    // Monthly Salary Expense card. Preference persists across page
+    // loads via localStorage (client-side UI preference only, not a
+    // permission — the real number is always in the API response).
+    // ============================================================
+    let salaryHidden = localStorage.getItem('ebms_salary_hidden') === '1';
+    let currentSalaryDisplay = '₹0';
+
+    function updateSalaryDisplay() {
+      const valueEl = document.getElementById('stat-salary');
+      const eyeBtn = document.getElementById('salaryEyeBtn');
+      if (valueEl) valueEl.textContent = salaryHidden ? '••••••' : currentSalaryDisplay;
+      if (eyeBtn) eyeBtn.textContent = salaryHidden ? '🙈' : '👁️';
+    }
+
+    function toggleSalaryVisibility(event) {
+      event.stopPropagation(); // don't trigger the card's goToSalaryPage() click
+      salaryHidden = !salaryHidden;
+      localStorage.setItem('ebms_salary_hidden', salaryHidden ? '1' : '0');
+      updateSalaryDisplay();
+    }
+
+    function findEmployeeName(empId) {
+      if (!empId) return empId;
+      const target = String(empId).trim().toLowerCase();
+      const emp = ALL_EMPLOYEES.find(e => String(e.emp_id || '').trim().toLowerCase() === target);
+      return (emp && emp.name) ? emp.name : empId;
+    }
+
+    function initials(name) {
+      return String(name || '?').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    }
+
+    function renderPresentEmployees() {
+      const attendance = filterByBranch(ALL_ATTENDANCE_TODAY).filter(a => a.in_time);
+      const container = document.getElementById('presentEmployees');
+
+      if (attendance.length === 0) {
+        container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-dim);">No one has punched in yet today</div>';
+        return;
+      }
+
+      container.innerHTML = attendance.map(a => {
+        const name = findEmployeeName(a.emp_id);
+        const punchedOut = !!a.out_time;
+        return `
+          <div class="emp-row" onclick="openAttendanceDetail('${a.att_id}')">
+            <div class="emp-avatar">${initials(name)}</div>
+            <div class="emp-info"><div class="emp-name">${name}</div><div class="emp-role">In: ${a.in_time}${punchedOut ? ' · Out: ' + a.out_time : ''}</div></div>
+            <span class="status-pill ${punchedOut ? 'pill-pending' : 'pill-active'}">${punchedOut ? 'Punched Out' : 'Present'}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderWorkList() {
+      const statusMap = {
+        todo: { label: 'To Do', cls: 'pill-pending' },
+        in_progress: { label: 'In Progress', cls: 'pill-active' },
+        in_review: { label: 'In Review', cls: 'pill-pending' },
+        completed: { label: 'Completed', cls: 'pill-active' }
+      };
+
+      const tasks = filterByBranch(ALL_TASKS)
+        .filter(t => t.status !== 'completed')
+        .slice(0, 8);
+
+      const container = document.getElementById('workList');
+
+      if (tasks.length === 0) {
+        container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-dim);">No active tasks right now 🎉</div>';
+        return;
+      }
+
+      container.innerHTML = tasks.map(t => {
+        const assignedName = t.assigned_to ? findEmployeeName(t.assigned_to) : 'Unassigned';
+        const st = statusMap[t.status] || { label: t.status, cls: 'pill-pending' };
+        return `
+          <div class="leave-row" onclick="openTaskDetail('${t.task_id}')">
+            <div class="leave-row-top"><div class="leave-name">${t.title}</div><span class="status-pill ${st.cls}">${st.label}</span></div>
+            <div class="leave-meta">👤 ${assignedName}${t.due_date ? ' · Due ' + t.due_date : ''}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderPendingLeaves() {
+      const leaves = filterByBranch(ALL_LEAVES_PENDING).slice(0, 6);
+      const container = document.getElementById('pendingLeaves');
+
+      if (leaves.length === 0) {
+        container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-dim);">No leaves pending review 🎉</div>';
+        return;
+      }
+
+      container.innerHTML = leaves.map(l => `
+          <div class="leave-row" onclick="openLeaveDetail('${l.leave_id}')">
+            <div class="leave-row-top"><div class="leave-name">${findEmployeeName(l.emp_id)}</div><span class="status-pill pill-pending">${l.leave_type}</span></div>
+            <div class="leave-meta">📅 ${l.from_date} to ${l.to_date} · ${l.days} Days</div>
+          </div>
+        `).join('');
+    }
+
+    // ============================================================
+    // ROW-LEVEL DETAIL MODALS — clicking a row in Present Employees /
+    // Work List / Pending Leave Requests opens the full record.
+    // ============================================================
+    function openAttendanceDetail(attId) {
+      const a = ALL_ATTENDANCE_TODAY.find(x => x.att_id === attId);
+      if (!a) return;
+      const name = findEmployeeName(a.emp_id);
+      const punchedOut = !!a.out_time;
+      const lateMins = parseInt(a.late_minutes) || 0;
+
+      const html = `
+        <div style="padding:20px;">
+          <div class="emp-row" style="padding:0 0 16px 0; margin-bottom:16px; border-bottom:1px solid var(--glass-border); cursor:default;">
+            <div class="emp-avatar" style="width:44px; height:44px; font-size:16px;">${initials(name)}</div>
+            <div class="emp-info"><div class="emp-name" style="font-size:15px;">${name}</div><div class="emp-role">${a.emp_id} · ${a.branch_id || '—'}</div></div>
+            <span class="status-pill ${punchedOut ? 'pill-pending' : 'pill-active'}">${punchedOut ? 'Punched Out' : 'Present'}</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; font-size:13px;">
+            <div><div class="modal-field-label">In Time</div><div style="font-weight:600; color:#6EE7B7;">${a.in_time || '—'}</div></div>
+            <div><div class="modal-field-label">Out Time</div><div style="font-weight:600; color:${punchedOut ? '#FCA5A5' : 'var(--text-dim)'};">${a.out_time || 'Still In'}</div></div>
+            <div><div class="modal-field-label">Late By</div><div style="font-weight:600;">${lateMins > 0 ? lateMins + ' mins' : 'On time'}</div></div>
+            <div><div class="modal-field-label">Method</div><div style="font-weight:600;">${a.method || '—'}</div></div>
+            <div style="grid-column:1/-1;"><div class="modal-field-label">Remarks</div><div>${a.remarks || '—'}</div></div>
+          </div>
+        </div>`;
+      openStatModal(`✅ Attendance — ${name}`, html);
+    }
+
+    const TASK_STATUS_MAP = {
+      todo: { label: 'To Do', cls: 'pill-pending' },
+      in_progress: { label: 'In Progress', cls: 'pill-active' },
+      in_review: { label: 'In Review', cls: 'pill-pending' },
+      completed: { label: 'Completed', cls: 'pill-active' }
+    };
+
+    function openTaskDetail(taskId) {
+      const t = ALL_TASKS.find(x => x.task_id === taskId);
+      if (!t) return;
+      const assignedName = t.assigned_to ? findEmployeeName(t.assigned_to) : 'Unassigned';
+      const st = TASK_STATUS_MAP[t.status] || { label: t.status, cls: 'pill-pending' };
+
+      let submissionHtml = '';
+      if (t.submission_link) {
+        submissionHtml = `
+          <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--glass-border);">
+            <div class="modal-field-label">Submission</div>
+            <a href="${t.submission_link}" target="_blank" rel="noopener" style="color:var(--accent-glow); font-size:13px; word-break:break-all;">${t.submission_link}</a>
+            ${t.submission_note ? `<div style="margin-top:6px; font-size:13px; color:var(--text-muted);">📝 ${t.submission_note}</div>` : ''}
+          </div>`;
+      }
+
+      let reviewHtml = '';
+      if (t.review_note) {
+        reviewHtml = `
+          <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--glass-border);">
+            <div class="modal-field-label">Review Note (${t.submission_status || t.status})</div>
+            <div style="font-size:13px;">${t.review_note}</div>
+          </div>`;
+      }
+
+      const html = `
+        <div style="padding:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:12px;">
+            <div style="font-size:15px; font-weight:600;">${t.title}</div>
+            <span class="status-pill ${st.cls}">${st.label}</span>
+          </div>
+          ${t.description ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">${t.description}</div>` : ''}
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; font-size:13px;">
+            <div><div class="modal-field-label">Assigned To</div><div style="font-weight:600;">👤 ${assignedName}</div></div>
+            <div><div class="modal-field-label">Priority</div><div style="font-weight:600; text-transform:capitalize;">${t.priority || '—'}</div></div>
+            <div><div class="modal-field-label">Due Date</div><div style="font-weight:600;">${t.due_date || '—'}</div></div>
+            <div><div class="modal-field-label">Created</div><div style="font-weight:600;">${t.created_at ? new Date(t.created_at).toLocaleDateString('en-IN') : '—'}</div></div>
+          </div>
+          ${submissionHtml}
+          ${reviewHtml}
+        </div>`;
+      openStatModal(`📝 Task Detail`, html);
+    }
+
+    function openLeaveDetail(leaveId) {
+      const l = ALL_LEAVES_PENDING.find(x => x.leave_id === leaveId);
+      if (!l) return;
+      const name = findEmployeeName(l.emp_id);
+      const canAct = cachedUser.role !== 'employee' && l.status === 'pending';
+
+      const actionsHtml = canAct ? `
+        <div style="display:flex; gap:10px; margin-top:18px;">
+          <button class="btn-sm btn-approve" style="flex:1; padding:10px;" onclick="actOnLeave('${l.leave_id}','approveLeave')">✓ Approve</button>
+          <button class="btn-sm btn-reject" style="flex:1; padding:10px;" onclick="actOnLeave('${l.leave_id}','rejectLeave')">✕ Reject</button>
+        </div>` : '';
+
+      const html = `
+        <div style="padding:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div style="font-size:15px; font-weight:600;">${name}</div>
+            <span class="status-pill pill-pending">${l.leave_type}</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; font-size:13px;">
+            <div><div class="modal-field-label">From</div><div style="font-weight:600;">${l.from_date}</div></div>
+            <div><div class="modal-field-label">To</div><div style="font-weight:600;">${l.to_date}</div></div>
+            <div><div class="modal-field-label">Days</div><div style="font-weight:600;">${l.days}</div></div>
+            <div><div class="modal-field-label">Applied On</div><div style="font-weight:600;">${l.applied_on ? new Date(l.applied_on).toLocaleDateString('en-IN') : '—'}</div></div>
+            <div style="grid-column:1/-1;"><div class="modal-field-label">Reason</div><div>${l.reason || '—'}</div></div>
+          </div>
+          ${actionsHtml}
+        </div>`;
+      openStatModal(`📅 Leave Request`, html);
+    }
+
+    async function actOnLeave(leaveId, action) {
+      closeStatModal();
+      showPageLoader('Saving...');
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ token: AppSession.getToken(), action: action, leave_id: leaveId })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('✅ ' + (out.message || 'Leave updated'));
+          await fetchLeavesPending();
+          renderEverything();
+        } else {
+          showToast('❌ ' + (out.message || 'Could not update leave'));
+        }
+      } catch (err) {
+        showToast('Network error — could not update leave.');
+      } finally {
+        hidePageLoader();
+      }
+    }
+
+    // ============================================================
+    // 🆕 [2026-08-08] QUICK-ADD MODALS — the "+ Add" buttons on
+    // Present Employees / Work List / Pending Leave Requests panels.
+    // Each opens the shared quickAddModalOverlay with a form specific
+    // to that panel, posting straight to the existing backend actions
+    // (markAttendance / addTask / applyLeave) — no new routes needed.
+    //
+    // ⚠️ ASSUMPTION TO VERIFY: markAttendance's exact param names
+    // (emp_id/date/in_time/out_time below) are inferred from the
+    // getAttendance response shape used elsewhere on this page
+    // (a.emp_id, a.in_time, a.out_time) — appscript_attendance.gs
+    // itself wasn't available to confirm handleMarkAttendance()'s
+    // signature. addTask and applyLeave param names ARE confirmed
+    // (addTask per README's Tasks module row; applyLeave per the
+    // actual appscript_leaves.gs handleApplyLeave() reviewed this
+    // session — admin/hr/branch_manager passing body.emp_id is the
+    // documented on-behalf-of path, and body.days is now ignored
+    // server-side since the Phase 10 holiday-aware day-count change).
+    // ============================================================
+    function openQuickAddModal(title, bodyHtml) {
+      document.getElementById('quickAddModalTitle').textContent = title;
+      document.getElementById('quickAddModalBody').innerHTML = bodyHtml;
+      document.getElementById('quickAddModalOverlay').classList.add('show');
+    }
+
+    function closeQuickAddModal() {
+      document.getElementById('quickAddModalOverlay').classList.remove('show');
+    }
+
+    function activeEmpOptions() {
+      const emps = filterByBranch(ALL_EMPLOYEES.filter(e => e.status === 'active'));
+      return { emps, optionsHtml: emps.map(e => `<option value="${e.emp_id}">${e.name}</option>`).join('') };
+    }
+
+    // ---- 1) Mark Attendance (Present Employees panel) ----
+    function openQuickMarkAttendance() {
+      const { emps, optionsHtml } = activeEmpOptions();
+      if (!emps.length) { showToast('No active employees found for this branch.'); return; }
+
+      const html = `
+        <div class="qform-group">
+          <label class="qform-label">Employee</label>
+          <select class="qform-select" id="qaEmpId">${optionsHtml}</select>
+        </div>
+        <div class="qform-row">
+          <div class="qform-group">
+            <label class="qform-label">Date</label>
+            <input type="date" class="qform-input" id="qaDate" value="${getTodayIST()}">
+          </div>
+          <div class="qform-group">
+            <label class="qform-label">In Time</label>
+            <input type="time" class="qform-input" id="qaInTime">
+          </div>
+        </div>
+        <div class="qform-group">
+          <label class="qform-label">Out Time (optional)</label>
+          <input type="time" class="qform-input" id="qaOutTime">
+        </div>
+        <div class="qform-actions">
+          <button class="qform-btn qform-btn-secondary" onclick="closeQuickAddModal()">Cancel</button>
+          <button class="qform-btn qform-btn-primary" onclick="submitQuickAttendance()">Mark Attendance</button>
+        </div>
+      `;
+      openQuickAddModal('✅ Mark Attendance', html);
+    }
+
+    async function submitQuickAttendance() {
+      const empId = document.getElementById('qaEmpId').value;
+      const date = document.getElementById('qaDate').value;
+      const inTime = document.getElementById('qaInTime').value;
+      const outTime = document.getElementById('qaOutTime').value;
+
+      if (!empId || !date || !inTime) {
+        showToast('Employee, Date, and In Time are required.');
+        return;
+      }
+
+      closeQuickAddModal();
+      showPageLoader('Saving...');
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            token: AppSession.getToken(), action: 'markAttendance',
+            emp_id: empId, date: date, in_time: inTime, out_time: outTime || ''
+          })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('✅ ' + (out.message || 'Attendance marked'));
+          await fetchAttendanceToday();
+          renderEverything();
+        } else {
+          showToast('❌ ' + (out.message || 'Could not mark attendance'));
+        }
+      } catch (err) {
+        showToast('Network error — could not mark attendance.');
+      } finally {
+        hidePageLoader();
+      }
+    }
+
+    // ---- 2) Add Task (Work List panel) ----
+    function openQuickAddTask() {
+      const { optionsHtml } = activeEmpOptions();
+      const html = `
+        <div class="qform-group">
+          <label class="qform-label">Task Title</label>
+          <input type="text" class="qform-input" id="qtTitle" placeholder="e.g. Prepare monthly report">
+        </div>
+        <div class="qform-group">
+          <label class="qform-label">Assign To</label>
+          <select class="qform-select" id="qtAssignedTo">
+            <option value="">Unassigned</option>
+            ${optionsHtml}
+          </select>
+        </div>
+        <div class="qform-row">
+          <div class="qform-group">
+            <label class="qform-label">Due Date</label>
+            <input type="date" class="qform-input" id="qtDueDate">
+          </div>
+          <div class="qform-group">
+            <label class="qform-label">Priority</label>
+            <select class="qform-select" id="qtPriority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+        </div>
+        <div class="qform-actions">
+          <button class="qform-btn qform-btn-secondary" onclick="closeQuickAddModal()">Cancel</button>
+          <button class="qform-btn qform-btn-primary" onclick="submitQuickTask()">Add Task</button>
+        </div>
+      `;
+      openQuickAddModal('📝 New Task', html);
+    }
+
+    async function submitQuickTask() {
+      const title = document.getElementById('qtTitle').value.trim();
+      const assignedTo = document.getElementById('qtAssignedTo').value;
+      const dueDate = document.getElementById('qtDueDate').value;
+      const priority = document.getElementById('qtPriority').value;
+
+      if (!title) {
+        showToast('Task title is required.');
+        return;
+      }
+
+      closeQuickAddModal();
+      showPageLoader('Saving...');
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            token: AppSession.getToken(), action: 'addTask',
+            title: title, assigned_to: assignedTo, due_date: dueDate, priority: priority
+          })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('✅ ' + (out.message || 'Task added'));
+          await fetchTasks();
+          renderEverything();
+        } else {
+          showToast('❌ ' + (out.message || 'Could not add task'));
+        }
+      } catch (err) {
+        showToast('Network error — could not add task.');
+      } finally {
+        hidePageLoader();
+      }
+    }
+
+    // ---- 3) Apply Leave on behalf of an employee (Pending Leave Requests panel) ----
+    function openQuickApplyLeave() {
+      const { emps, optionsHtml } = activeEmpOptions();
+      if (!emps.length) { showToast('No active employees found for this branch.'); return; }
+
+      const html = `
+        <div class="qform-group">
+          <label class="qform-label">Employee</label>
+          <select class="qform-select" id="qlEmpId">${optionsHtml}</select>
+        </div>
+        <div class="qform-group">
+          <label class="qform-label">Leave Type</label>
+          <select class="qform-select" id="qlLeaveType">
+            <option value="Casual Leave">Casual Leave</option>
+            <option value="Sick Leave">Sick Leave</option>
+            <option value="Earned Leave">Earned Leave</option>
+            <option value="Unpaid Leave">Unpaid Leave</option>
+          </select>
+        </div>
+        <div class="qform-row">
+          <div class="qform-group">
+            <label class="qform-label">From Date</label>
+            <input type="date" class="qform-input" id="qlFromDate">
+          </div>
+          <div class="qform-group">
+            <label class="qform-label">To Date</label>
+            <input type="date" class="qform-input" id="qlToDate">
+          </div>
+        </div>
+        <div class="qform-group">
+          <label class="qform-label">Reason (optional)</label>
+          <input type="text" class="qform-input" id="qlReason" placeholder="e.g. Personal work">
+        </div>
+        <div class="qform-note">📌 Days will be calculated automatically — company holidays will be excluded automatically. (Phase 10).</div>
+        <div class="qform-actions">
+          <button class="qform-btn qform-btn-secondary" onclick="closeQuickAddModal()">Cancel</button>
+          <button class="qform-btn qform-btn-primary" onclick="submitQuickLeave()">Apply Leave</button>
+        </div>
+      `;
+      openQuickAddModal('📅 Apply Leave (On Behalf)', html);
+    }
+
+    async function submitQuickLeave() {
+      const empId = document.getElementById('qlEmpId').value;
+      const leaveType = document.getElementById('qlLeaveType').value;
+      const fromDate = document.getElementById('qlFromDate').value;
+      const toDate = document.getElementById('qlToDate').value;
+      const reason = document.getElementById('qlReason').value.trim();
+
+      if (!empId || !fromDate || !toDate) {
+        showToast('Employee, From Date, and To Date are required.');
+        return;
+      }
+
+      closeQuickAddModal();
+      showPageLoader('Saving...');
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            token: AppSession.getToken(), action: 'applyLeave',
+            emp_id: empId, leave_type: leaveType, from_date: fromDate, to_date: toDate, reason: reason
+          })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('✅ ' + (out.message || 'Leave applied'));
+          await fetchLeavesPending();
+          renderEverything();
+        } else {
+          showToast('❌ ' + (out.message || 'Could not apply leave'));
+        }
+      } catch (err) {
+        showToast('Network error — could not apply leave.');
+      } finally {
+        hidePageLoader();
+      }
+    }
+
+    // ============================================================
+    // STAT CARD MODALS — clicking any stat card opens a popup with
+    // the underlying list, filtered by the currently selected branch.
+    // ============================================================
+    function openStatModal(title, bodyHtml) {
+      document.getElementById('statModalTitle').textContent = title;
+      document.getElementById('statModalBody').innerHTML = bodyHtml;
+      document.getElementById('statModalOverlay').classList.add('show');
+    }
+
+    function closeStatModal() {
+      document.getElementById('statModalOverlay').classList.remove('show');
+    }
+
+    function emptyState(msg) {
+      return `<div style="padding:20px; text-align:center; color:var(--text-dim);">${msg}</div>`;
+    }
+
+    function empRowHtml(name, meta, pillLabel, pillCls) {
+      return `
+        <div class="emp-row">
+          <div class="emp-avatar">${initials(name)}</div>
+          <div class="emp-info"><div class="emp-name">${name}</div><div class="emp-role">${meta}</div></div>
+          <span class="status-pill ${pillCls}">${pillLabel}</span>
+        </div>
+      `;
+    }
+
+    function openPresentModal() {
+      const attendance = filterByBranch(ALL_ATTENDANCE_TODAY).filter(a => a.in_time);
+      if (attendance.length === 0) {
+        openStatModal('✅ Present Today', emptyState('No one has punched in yet today'));
+        return;
+      }
+      const html = attendance.map(a => {
+        const name = findEmployeeName(a.emp_id);
+        const punchedOut = !!a.out_time;
+        return empRowHtml(
+          name,
+          `In: ${a.in_time}${punchedOut ? ' · Out: ' + a.out_time : ''}`,
+          punchedOut ? 'Punched Out' : 'Present',
+          punchedOut ? 'pill-pending' : 'pill-active'
+        );
+      }).join('');
+      openStatModal(`✅ Present Today (${attendance.length})`, html);
+    }
+
+    function openAbsentModal() {
+      const activeEmps = filterByBranch(ALL_EMPLOYEES.filter(e => e.status === 'active'));
+      const presentIds = new Set(filterByBranch(ALL_ATTENDANCE_TODAY).filter(a => a.in_time).map(a => a.emp_id));
+      const absentEmps = activeEmps.filter(e => !presentIds.has(e.emp_id));
+
+      if (absentEmps.length === 0) {
+        openStatModal('❌ Absent Today', emptyState('Everyone has punched in today 🎉'));
+        return;
+      }
+      const html = absentEmps.map(e =>
+        empRowHtml(e.name, e.branch_id ? 'Branch: ' + e.branch_id : '', 'Absent', 'pill-pending')
+      ).join('');
+      openStatModal(`❌ Absent Today (${absentEmps.length})`, html);
+    }
+
+    function openEmployeesModal() {
+      const activeEmps = filterByBranch(ALL_EMPLOYEES.filter(e => e.status === 'active'));
+      if (activeEmps.length === 0) {
+        openStatModal('👥 Total Employees', emptyState('No active employees found'));
+        return;
+      }
+      const html = activeEmps.map(e =>
+        empRowHtml(e.name, e.designation_id || (e.branch_id ? 'Branch: ' + e.branch_id : ''), 'Active', 'pill-active')
+      ).join('');
+      openStatModal(`👥 Total Employees (${activeEmps.length})`, html);
+    }
+
+    function openLeavesModal() {
+      const leaves = filterByBranch(ALL_LEAVES_PENDING);
+      if (leaves.length === 0) {
+        openStatModal('📅 Pending Leaves', emptyState('No leaves pending review 🎉'));
+        return;
+      }
+      const html = leaves.map(l => `
+          <div class="leave-row">
+            <div class="leave-row-top"><div class="leave-name">${findEmployeeName(l.emp_id)}</div><span class="status-pill pill-pending">${l.leave_type}</span></div>
+            <div class="leave-meta">📅 ${l.from_date} to ${l.to_date} · ${l.days} Days</div>
+          </div>
+        `).join('');
+      openStatModal(`📅 Pending Leaves (${leaves.length})`, html);
+    }
+
+    function openPerformerModal() {
+      const branchEmpIds = selectedBranchId === 'all'
+        ? null
+        : new Set(ALL_EMPLOYEES.filter(e => e.branch_id === selectedBranchId).map(e => e.emp_id));
+
+      const records = ALL_PERFORMANCE.filter(r => !branchEmpIds || branchEmpIds.has(r.emp_id));
+
+      if (records.length === 0) {
+        openStatModal('🏆 Best Performer', emptyState('No performance scorecards yet'));
+        return;
+      }
+
+      const sorted = [...records].sort((a, b) => (parseFloat(b.score) || 0) - (parseFloat(a.score) || 0));
+      const html = sorted.map((r, i) =>
+        empRowHtml(
+          findEmployeeName(r.emp_id),
+          (r.month && r.year ? `${r.month}/${r.year}` : '') + (r.remarks ? ' · ' + r.remarks : ''),
+          `#${i + 1} · ${parseFloat(r.score) || 0}`,
+          i === 0 ? 'pill-active' : 'pill-pending'
+        )
+      ).join('');
+      openStatModal(`🏆 Performance Leaderboard (${sorted.length})`, html);
+    }
+
+    function goToSalaryPage() {
+      navigateWithLoader('salary.html');
+    }
+
+    function setStatCard(id, value, subtitle) {
+      document.getElementById('stat-' + id).textContent = value;
+      document.getElementById('stat-' + id + '-sub').textContent = subtitle;
+    }
+
+    function formatNumber(num) {
+      if (!num) return '0';
+      if (num >= 100000) return (num / 100000).toFixed(1) + 'L';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+      return num;
+    }
+  </script>
+
+  <!-- ── Onboarding Instructions Modal (first-time dashboard visit, content from 'instructions' sheet) ── -->
+  <style>
+    .ob-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      z-index: 5000;
+      display: none; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    .ob-overlay.open { display: flex; }
+    .ob-card {
+      background: rgba(18, 18, 20, 0.94);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      max-width: 480px; width: 100%; max-height: 86vh;
+      overflow-y: auto;
+      backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    .ob-header { padding: 24px 24px 14px; text-align: center; border-bottom: 1px solid var(--glass-border); }
+    .ob-header .ob-icon { font-size: 34px; margin-bottom: 8px; }
+    .ob-header h3 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; margin-bottom: 4px; }
+    .ob-header p { color: var(--text-muted); font-size: 13px; }
+    .ob-body { padding: 18px 24px; display: flex; flex-direction: column; gap: 12px; }
+    .ob-item { background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 14px 16px; }
+    .ob-item-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; color: var(--text-primary); }
+    .ob-item-content { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    .ob-footer { padding: 16px 24px 22px; position: sticky; bottom: 0; background: rgba(18, 18, 20, 0.95); }
+    .ob-btn {
+      width: 100%; padding: 12px; border-radius: 10px; border: none;
+      background: var(--accent-glow, #D4D9E6); color: #0A0A0B;
+      font-weight: 700; font-size: 14px; cursor: pointer;
+    }
+    .ob-btn:hover { opacity: 0.9; }
+  </style>
+
+  <div class="ob-overlay" id="onboardingModal">
+    <div class="ob-card">
+      <div class="ob-header">
+        <div class="ob-icon">👋</div>
+        <h3>Welcome to Codeline.AI EBMS</h3>
+        <p>Here's a quick overview before you get started</p>
+      </div>
+      <div class="ob-body" id="onboardingBody"></div>
+      <div class="ob-footer">
+        <button class="ob-btn" onclick="dismissOnboarding()">Got it, let's go →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ── Onboarding Instructions (first-time dashboard visit) ── */
+    async function initOnboardingInstructions() {
+      try {
+        const token = AppSession.getToken();
+        const res = await fetch(`${API_URL}?action=getInstructions&token=${token}&_ts=${Date.now()}`, { cache: 'no-store' });
+        const result = await res.json();
+        if (result.status !== 'success') return;
+
+        const { already_seen, instructions } = result.data;
+        if (already_seen || !instructions || !instructions.length) return;
+
+        const body = document.getElementById('onboardingBody');
+        body.innerHTML = instructions.map(item => `
+          <div class="ob-item">
+            <div class="ob-item-title">${item.title || ''}</div>
+            <div class="ob-item-content">${item.content || ''}</div>
+          </div>
+        `).join('');
+
+        document.getElementById('onboardingModal').classList.add('open');
+      } catch (e) { /* silent fail — never block the dashboard */ }
+    }
+
+    async function dismissOnboarding() {
+      document.getElementById('onboardingModal').classList.remove('open');
+      try {
+        const token = AppSession.getToken();
+        await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'markInstructionsSeen', token: token })
+        });
+      } catch (e) { /* silent fail */ }
+    }
+  </script>
+</body>
+
+</html>

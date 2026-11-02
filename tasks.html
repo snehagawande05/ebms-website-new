@@ -1,0 +1,1604 @@
+ <!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tasks — Codeline.AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-base: #0A0A0B;
+      --glass: rgba(255, 255, 255, 0.045);
+      --glass-strong: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.09);
+      --glass-blur: 20px;
+      --text-primary: #F4F4F5;
+      --text-muted: #A1A1AA;
+      --text-dim: #52525B;
+      --success: #34D399;
+      --warning: #FBBF24;
+      --danger: #F87171;
+      --indigo: #818CF8;
+      --radius: 16px;
+      --radius-sm: 10px;
+
+      /* Column accent colours */
+      --col-todo: rgba(161, 161, 170, 0.10);
+      --col-todo-b: rgba(161, 161, 170, 0.20);
+      --col-prog: rgba(251, 191, 36, 0.08);
+      --col-prog-b: rgba(251, 191, 36, 0.22);
+      --col-verify: rgba(129, 140, 248, 0.08);
+      --col-verify-b: rgba(129, 140, 248, 0.22);
+      --col-done: rgba(52, 211, 153, 0.08);
+      --col-done-b: rgba(52, 211, 153, 0.22);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      background-image:
+        radial-gradient(ellipse at 15% 0%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 100%, rgba(255, 255, 255, 0.025) 0%, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar-spacer {
+      width: 240px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-spacer {
+        display: none;
+      }
+    }
+
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    @media (max-width: 600px) {
+      .main-workspace {
+        padding: 14px;
+      }
+    }
+
+    .mobile-nav-bar {
+      display: none;
+      height: 48px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur));
+      border-radius: var(--radius-sm);
+      align-items: center;
+      padding: 0 16px;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-bottom: 16px;
+      gap: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-nav-bar {
+        display: flex;
+      }
+    }
+
+    /* ── Header ── */
+    .header-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .title-area h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .title-area p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .btn-action {
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      backdrop-filter: blur(var(--glass-blur));
+      transition: background 0.18s, border-color 0.18s, transform 0.18s;
+      white-space: nowrap;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.13);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 860px) {
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    /* ── Kanban board ── */
+    .board-wrap {
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+
+    .kanban-board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(260px, 1fr));
+      gap: 14px;
+      min-width: 1060px;
+    }
+
+    .kanban-col {
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-height: 420px;
+    }
+
+    .col-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 16px 11px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      border: 1px solid transparent;
+      border-bottom: none;
+    }
+
+    .col-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .col-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .col-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .col-count {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text-muted);
+      min-width: 22px;
+      text-align: center;
+    }
+
+    .col-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .col-header-add {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.07);
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .col-header-add:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: var(--text-primary);
+    }
+
+    /* Per-column accent */
+    .col-todo .col-header {
+      background: var(--col-todo);
+      border-color: var(--col-todo-b);
+    }
+
+    .col-todo .col-dot {
+      background: #A1A1AA;
+    }
+
+    .col-prog .col-header {
+      background: var(--col-prog);
+      border-color: var(--col-prog-b);
+    }
+
+    .col-prog .col-dot {
+      background: #FBBF24;
+    }
+
+    .col-verify .col-header {
+      background: var(--col-verify);
+      border-color: var(--col-verify-b);
+    }
+
+    .col-verify .col-dot {
+      background: #818CF8;
+    }
+
+    .col-done .col-header {
+      background: var(--col-done);
+      border-color: var(--col-done-b);
+    }
+
+    .col-done .col-dot {
+      background: #34D399;
+    }
+
+    .col-body {
+      flex: 1;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.018);
+      border: 1px solid var(--glass-border);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      min-height: 200px;
+    }
+
+    /* ── Task cards ── */
+    .task-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      transition: border-color 0.18s, background 0.18s, transform 0.15s;
+    }
+
+    .task-card:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.07);
+      transform: translateY(-1px);
+    }
+
+    .card-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .card-desc {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .card-due {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .card-due.overdue {
+      color: var(--danger);
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    /* Badges */
+    .badge {
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .badge-high {
+      background: rgba(248, 113, 113, 0.12);
+      color: #FCA5A5;
+    }
+
+    .badge-medium {
+      background: rgba(251, 191, 36, 0.12);
+      color: #FCD34D;
+    }
+
+    .badge-low {
+      background: rgba(161, 161, 170, 0.12);
+      color: #A1A1AA;
+    }
+
+    .badge-todo {
+      background: rgba(161, 161, 170, 0.10);
+      color: #A1A1AA;
+    }
+
+    .badge-progress {
+      background: rgba(251, 191, 36, 0.12);
+      color: #FCD34D;
+    }
+
+    .badge-review {
+      background: rgba(129, 140, 248, 0.12);
+      color: #818CF8;
+    }
+
+    .badge-done {
+      background: rgba(52, 211, 153, 0.12);
+      color: #6EE7B7;
+    }
+
+    .badge-rejected {
+      background: rgba(248, 113, 113, 0.12);
+      color: #F87171;
+    }
+
+    /* Inline action buttons on cards */
+    .btn-card {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 11px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s, transform 0.12s;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .btn-card:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-card:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-assign {
+      background: rgba(251, 191, 36, 0.10);
+      border-color: rgba(251, 191, 36, 0.28);
+      color: #FCD34D;
+    }
+
+    .btn-assign:hover {
+      background: rgba(251, 191, 36, 0.2);
+    }
+
+    .btn-revoke {
+      background: rgba(161, 161, 170, 0.08);
+      border-color: rgba(161, 161, 170, 0.2);
+      color: #A1A1AA;
+    }
+
+    .btn-revoke:hover {
+      background: rgba(161, 161, 170, 0.18);
+    }
+
+    .btn-accept {
+      background: rgba(52, 211, 153, 0.10);
+      border-color: rgba(52, 211, 153, 0.28);
+      color: #34D399;
+    }
+
+    .btn-accept:hover {
+      background: rgba(52, 211, 153, 0.2);
+    }
+
+    .btn-reject {
+      background: rgba(248, 113, 113, 0.08);
+      border-color: rgba(248, 113, 113, 0.25);
+      color: #F87171;
+    }
+
+    .btn-reject:hover {
+      background: rgba(248, 113, 113, 0.18);
+    }
+
+    /* Assign inline mini-form (inside TO DO card) */
+    .assign-inline {
+      display: none;
+      margin-top: 8px;
+      gap: 6px;
+    }
+
+    .assign-inline.open {
+      display: flex;
+    }
+
+    .assign-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 7px;
+      padding: 6px 10px;
+      color: var(--text-primary);
+      font-size: 12px;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .assign-input:focus {
+      border-color: rgba(251, 191, 36, 0.4);
+    }
+
+    .assign-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .col-add-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed rgba(255, 255, 255, 0.08);
+      color: var(--text-dim);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      margin-top: 2px;
+    }
+
+    .col-add-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+      color: var(--text-muted);
+    }
+
+    .empty-col {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      min-height: 80px;
+      color: var(--text-dim);
+      font-size: 12px;
+      text-align: center;
+      padding: 20px 12px;
+    }
+
+    /* Submission preview in VERIFY col */
+    .sub-preview {
+      margin-top: 8px;
+      background: rgba(129, 140, 248, 0.06);
+      border: 1px solid rgba(129, 140, 248, 0.18);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 11.5px;
+    }
+
+    .sub-preview a {
+      color: #818CF8;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .sub-preview a:hover {
+      text-decoration: underline;
+    }
+
+    .sub-note {
+      color: var(--text-dim);
+      margin-top: 4px;
+      font-size: 11px;
+    }
+
+    /* DONE card review info */
+    .review-info {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .review-info span {
+      color: var(--success);
+    }
+
+    /* ── Modals ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: rgba(18, 18, 20, 0.92);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      max-width: 480px;
+      width: 100%;
+      backdrop-filter: blur(28px) saturate(160%);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-card.wide {
+      max-width: 560px;
+    }
+
+    .modal-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: rgba(18, 18, 20, 0.95);
+      backdrop-filter: blur(20px);
+      z-index: 1;
+    }
+
+    .modal-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+    }
+
+    .modal-body {
+      padding: 22px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.18s, background 0.18s;
+      resize: none;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--text-dim);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: rgba(255, 255, 255, 0.22);
+      background: var(--glass-strong);
+    }
+
+    .form-group select option {
+      background: #1a1a1c;
+      color: var(--text-primary);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: rgba(244, 244, 245, 0.9);
+      color: #0A0A0B;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+
+    .btn-submit:hover {
+      background: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Review modal */
+    .link-preview {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(129, 140, 248, 0.08);
+      border: 1px solid rgba(129, 140, 248, 0.22);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      word-break: break-all;
+    }
+
+    .link-preview a {
+      color: #818CF8;
+      text-decoration: none;
+    }
+
+    .link-preview a:hover {
+      text-decoration: underline;
+    }
+
+    .review-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .btn-accept-lg {
+      flex: 1;
+      padding: 10px;
+      background: rgba(52, 211, 153, 0.10);
+      border: 1px solid rgba(52, 211, 153, 0.28);
+      color: #34D399;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s;
+    }
+
+    .btn-accept-lg:hover {
+      background: rgba(52, 211, 153, 0.2);
+    }
+
+    .btn-accept-lg:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-reject-lg {
+      flex: 1;
+      padding: 10px;
+      background: rgba(248, 113, 113, 0.08);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      color: #F87171;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s;
+    }
+
+    .btn-reject-lg:hover {
+      background: rgba(248, 113, 113, 0.18);
+    }
+
+    .btn-reject-lg:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11.5px;
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      border-radius: 5px;
+      padding: 2px 6px;
+      color: var(--text-muted);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(30, 30, 34, 0.96);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      padding: 11px 22px;
+      border-radius: 50px;
+      font-size: 13.5px;
+      font-weight: 500;
+      backdrop-filter: blur(16px);
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      white-space: nowrap;
+      max-width: 90vw;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.09) 50%, rgba(255, 255, 255, 0.04) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+      height: 80px;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0
+      }
+
+      100% {
+        background-position: -200% 0
+      }
+    }
+
+    /* Board-level loading overlay: shown between "action succeeded" and
+       "board re-rendered with fresh data" (create task, assign task, etc.) */
+    .board-wrap {
+      position: relative;
+    }
+
+    .board-loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 10, 11, 0.72);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      border-radius: var(--radius);
+      z-index: 50;
+    }
+
+    .board-loading-overlay.show {
+      display: flex;
+    }
+
+    .board-spinner {
+      width: 34px;
+      height: 34px;
+      border: 3px solid var(--glass-border);
+      border-top-color: var(--indigo);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .board-loading-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Small inline spinner for the assign button */
+    .btn-spin {
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+    }
+
+     .assign-select {
+  background: #1a1a1c;
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  max-width: 140px;
+  color-scheme: dark;
+}
+
+.assign-select option {
+  background: #1a1a1c;
+  color: #F4F4F5;
+}
+
+.assign-select option:checked,
+.assign-select option:hover {
+  background: #2a2a2e;
+  color: #FFFFFF;
+}
+  </style>
+</head>
+
+<body>
+  <div class="sidebar-spacer"></div>
+
+  <div class="main-workspace">
+    <div class="mobile-nav-bar" onclick="openSidebar()">
+      ☰ <span style="font-size:14px;font-weight:600;">Menu</span>
+    </div>
+
+    <!-- Header -->
+    <div class="header-block">
+      <div class="title-area">
+        <h1>📋 Task Board</h1>
+        <p>Create tasks, assign them to employees, and review submissions.</p>
+      </div>
+      <button class="btn-action" id="createTaskBtn" style="display:none;" onclick="openCreateModal()">
+        ➕ New Task
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Tasks</div>
+        <div class="stat-value" id="statTotal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">In Progress</div>
+        <div class="stat-value" id="statInProg" style="color:var(--warning);">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pending Review</div>
+        <div class="stat-value" id="statVerify" style="color:var(--indigo);">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value" id="statDone" style="color:var(--success);">—</div>
+      </div>
+    </div>
+
+    <!-- Kanban Board -->
+    <div class="board-wrap">
+      <div class="board-loading-overlay" id="boardLoadingOverlay">
+        <div class="board-spinner"></div>
+        <div class="board-loading-text" id="boardLoadingText">Loading...</div>
+      </div>
+      <div class="kanban-board">
+
+        <!-- TO DO -->
+        <div class="kanban-col col-todo">
+          <div class="col-header">
+            <div class="col-header-left">
+              <span class="col-dot"></span>
+              <span class="col-title">TO DO</span>
+            </div>
+            <div class="col-header-right">
+              <span class="col-count" id="cntTodo">0</span>
+              <button class="col-header-add" title="Add task" onclick="openCreateModal()">+</button>
+            </div>
+          </div>
+          <div class="col-body" id="colTodo">
+            <div class="skeleton"></div>
+          </div>
+        </div>
+
+        <!-- IN PROGRESS -->
+        <div class="kanban-col col-prog">
+          <div class="col-header">
+            <div class="col-header-left">
+              <span class="col-dot"></span>
+              <span class="col-title">IN PROGRESS</span>
+            </div>
+            <div class="col-header-right">
+              <span class="col-count" id="cntProg">0</span>
+              <button class="col-header-add" title="Add task" onclick="openCreateModal()">+</button>
+            </div>
+          </div>
+          <div class="col-body" id="colProg">
+            <div class="skeleton"></div>
+          </div>
+        </div>
+
+        <!-- VERIFY -->
+        <div class="kanban-col col-verify">
+          <div class="col-header">
+            <div class="col-header-left">
+              <span class="col-dot"></span>
+              <span class="col-title">VERIFY</span>
+            </div>
+            <div class="col-header-right">
+              <span class="col-count" id="cntVerify">0</span>
+              <button class="col-header-add" title="Add task" onclick="openCreateModal()">+</button>
+            </div>
+          </div>
+          <div class="col-body" id="colVerify">
+            <div class="skeleton"></div>
+          </div>
+        </div>
+
+        <!-- DONE -->
+        <div class="kanban-col col-done">
+          <div class="col-header">
+            <div class="col-header-left">
+              <span class="col-dot"></span>
+              <span class="col-title">DONE</span>
+            </div>
+            <span class="col-count" id="cntDone">0</span>
+          </div>
+          <div class="col-body" id="colDone">
+            <div class="skeleton"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Review Modal ── -->
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal-card wide">
+      <div class="modal-header">
+        <h3>🔍 Review Submission</h3>
+        <button style="background:none;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;line-height:1;"
+          onclick="closeReviewModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="reviewTaskTitle"
+          style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;margin-bottom:5px;"></div>
+        <div id="reviewTaskMeta" style="font-size:12px;color:var(--text-muted);margin-bottom:16px;"></div>
+
+        <div
+          style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:6px;">
+          Submitted Link</div>
+        <div class="link-preview">
+          <span>🔗</span>
+          <a id="reviewLink" href="#" target="_blank" rel="noopener">—</a>
+        </div>
+
+        <div id="reviewNoteWrap" style="display:none;margin-bottom:14px;">
+          <div
+            style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:5px;">
+            Employee Note</div>
+          <div id="reviewEmployeeNote"
+            style="font-size:13px;color:var(--text-muted);background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:10px 12px;">
+          </div>
+        </div>
+
+        <div id="reviewSubDate" style="font-size:12px;color:var(--text-dim);margin-bottom:16px;"></div>
+
+        <div class="form-group">
+          <label>Review Note (Required for Rejection)</label>
+          <textarea id="reviewNoteInput" rows="3" placeholder="Write your feedback or rejection reason..."></textarea>
+        </div>
+
+        <div class="review-actions">
+          <button class="btn-accept-lg" id="btnAccept" onclick="doAcceptSubmission()">✓ Accept</button>
+          <button class="btn-reject-lg" id="btnReject" onclick="doRejectSubmission()">✕ Reject</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Create Task Modal ── -->
+  <div class="modal-overlay" id="taskModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📋 Create New Task</h3>
+        <button style="background:none;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;line-height:1;"
+          onclick="closeCreateModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Task Title *</label>
+          <input type="text" id="tTitle" placeholder="e.g. Monthly Report Submit" />
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" id="tDate" />
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="tPriority">
+            <option value="low">🟢 Low</option>
+            <option value="medium" selected>🟡 Medium</option>
+            <option value="high">🔴 High</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="tDesc" rows="3" placeholder="Write task details..."></textarea>
+        </div>
+        <button class="btn-submit" id="createBtn" onclick="doCreateTask()">Create Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toastEl"></div>
+
+  <script src="app.js"></script>
+  <script>
+    AppSession.protect();
+
+    // Page-specific names (PAGE_*) are used on purpose so they can never clash
+    // with variables that app.js already declares (TOKEN, USER, IS_ADMIN, ...).
+    // A clash would throw "already been declared" and stop this whole script,
+    // which leaves the board stuck on the loading skeleton.
+    const PAGE_TOKEN = AppSession.getToken();
+    const PAGE_USER = AppSession.getUser();
+
+    // Incomplete session (token exists but user data is missing) -> redirect to login
+    if (!PAGE_TOKEN || !PAGE_USER) {
+      localStorage.clear();
+      window.location.href = 'index.html';
+    }
+
+    // tasks.html is an admin-only page: treat all roles except 'employee' as admin.
+    const PAGE_IS_ADMIN = !!PAGE_USER && PAGE_USER.role !== 'employee';
+
+// Safe date helpers: return '' for empty or invalid dates instead of "Invalid Date"
+ function parseDateSafe(value) {
+  if (!value) return null;
+  // Support dd/mm/yyyy or dd-mm-yyyy strings
+  const m = String(value).trim().match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  const d = m ? new Date(+m[3], +m[2] - 1, +m[1]) : new Date(value);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function fmtDate(value, opts) {
+  const d = parseDateSafe(value);
+  return d ? d.toLocaleDateString('en-IN', opts) : '';
+}
+
+function fmtDateTime(value, opts) {
+  const d = parseDateSafe(value);
+  return d ? d.toLocaleString('en-IN', opts) : '';
+}
+    const priorityClass = { high: 'badge-high', medium: 'badge-medium', low: 'badge-low' };
+
+    let ALL_TASKS = [];
+    let activeReviewTaskId = null;
+
+    // ── Toast ─────────────────────────────────────────────────
+    function showToast(msg, dur = 3000) {
+      const el = document.getElementById('toastEl');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), dur);
+    }
+
+    // ── Init ──────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      // Always show on this page: employees should not reach tasks.html anyway
+      document.getElementById('createTaskBtn').style.display = 'inline-flex';
+      loadTasks();
+    });
+
+    // ── Load tasks (with timeout so the skeleton never hangs forever) ──
+    async function loadTasks() {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 20000); // 20s timeout
+      try {
+        const res = await fetch(
+          `${API_URL}?action=getTasks&token=${PAGE_TOKEN}&limit=300`,
+          { signal: ctrl.signal }
+        );
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          const d = (payload.data && payload.data.data) || payload.data || [];
+          ALL_TASKS = Array.isArray(d) ? d : [];
+          renderBoard();
+        } else {
+          showToast(payload.message || 'Tasks failed to load.');
+          clearBoard();
+        }
+      } catch (e) {
+        console.error('loadTasks error:', e);
+        showToast(e.name === 'AbortError' ? 'Server is slow, please retry.' : 'Tasks failed to load.');
+        clearBoard();
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    function clearBoard() {
+      ['colProg', 'colVerify', 'colDone'].forEach(id => {
+        document.getElementById(id).innerHTML = '<div class="empty-col">No tasks found.</div>';
+      });
+      document.getElementById('colTodo').innerHTML =
+        '<div class="empty-col">No tasks found.</div>' +
+        '<button class="col-add-btn" onclick="openCreateModal()">➕ New Task</button>';
+
+      ['statTotal', 'statInProg', 'statVerify', 'statDone'].forEach(id => {
+        document.getElementById(id).textContent = '0';
+      });
+    }
+
+    // ── Render Board ──────────────────────────────────────────
+    function renderBoard() {
+      const todo = ALL_TASKS.filter(t => t.status === 'todo' || (t.status === 'pending' && !t.assigned_to));
+      // in_progress: assigned but not submitted
+      const prog = ALL_TASKS.filter(t => t.status === 'in_progress' || (t.status === 'pending' && t.assigned_to));
+      const verify = ALL_TASKS.filter(t => t.status === 'in_review');
+      const done = ALL_TASKS.filter(t => t.status === 'completed');
+
+      // Stats
+      document.getElementById('statTotal').textContent = ALL_TASKS.length;
+      document.getElementById('statInProg').textContent = prog.length;
+      document.getElementById('statVerify').textContent = verify.length;
+      document.getElementById('statDone').textContent = done.length;
+
+      // Counts
+      document.getElementById('cntTodo').textContent = todo.length;
+      document.getElementById('cntProg').textContent = prog.length;
+      document.getElementById('cntVerify').textContent = verify.length;
+      document.getElementById('cntDone').textContent = done.length;
+
+      // Columns
+      renderCol('colTodo', todo, 'todo');
+      renderCol('colProg', prog, 'prog');
+      renderCol('colVerify', verify, 'verify');
+      renderCol('colDone', done, 'done');
+    }
+
+    function renderCol(colId, tasks, colType) {
+      const col = document.getElementById(colId);
+      if (tasks.length === 0) {
+        let emptyMsg = 'No tasks.';
+        if (colType === 'todo') emptyMsg = ALL_TASKS.length > 0
+          ? '✨ All tasks assigned! Create a new one below.'
+          : 'No tasks available right now. Create one below.';
+        if (colType === 'verify') emptyMsg = 'No submissions pending.';
+        if (colType === 'done') emptyMsg = 'No completed tasks yet.';
+        col.innerHTML = `<div class="empty-col">${emptyMsg}</div>`;
+        if (colType === 'todo') {
+          col.innerHTML += `<button class="col-add-btn" onclick="openCreateModal()">➕ New Task</button>`;
+        }
+        return;
+      }
+      col.innerHTML = tasks.map(t => renderCard(t, colType)).join('');
+      if (colType === 'todo') {
+        col.innerHTML += `<button class="col-add-btn" onclick="openCreateModal()">➕ New Task</button>`;
+      }
+    }
+
+    function renderCard(t, colType) {
+        const dueDate = fmtDate(t.due_date, { day: '2-digit', month: 'short', year: 'numeric' });
+      const pClass = priorityClass[t.priority] || 'badge-low';
+      const descHtml = t.description
+        ? `<div class="card-desc">${(t.description || '').slice(0, 80)}${t.description.length > 80 ? '…' : ''}</div>`
+        : '';
+       const dueHtml = `<span class="card-due">📅 ${dueDate || 'No due date'}</span>`;
+
+      let actionsHtml = '';
+      let extraHtml = '';
+
+      if (colType === 'todo') {
+        // Assign button with inline mini-form
+        actionsHtml = `
+          <button class="btn-card btn-assign" onclick="toggleAssignForm('${t.task_id}')">
+            👤 Assign
+          </button>
+          <div class="assign-inline" id="assignForm_${t.task_id}">
+            <select class="assign-select" id="assignEmp_${t.task_id}">
+              <option value="">Select Employee</option>
+            </select>
+            <button class="btn-card btn-assign" id="assignGo_${t.task_id}" onclick="doAssignTask('${t.task_id}')">→</button>
+          </div>`;
+      }
+
+      if (colType === 'prog') {
+        actionsHtml = `
+          <code style="font-size:10.5px;">👤 ${t.assigned_to || '—'}</code>
+          <button class="btn-card btn-revoke" onclick="doRevokeTask('${t.task_id}')">↩ Revoke</button>`;
+      }
+
+      if (colType === 'verify') {
+         const subDate = fmtDateTime(t.submission_date, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) || '—';
+        extraHtml = `
+          <div class="sub-preview">
+            🔗 <a href="${t.submission_link}" target="_blank" rel="noopener">${(t.submission_link || '').slice(0, 45)}${(t.submission_link || '').length > 45 ? '…' : ''}</a>
+            ${t.submission_note ? `<div class="sub-note">📝 ${t.submission_note.slice(0, 60)}${t.submission_note.length > 60 ? '…' : ''}</div>` : ''}
+            <div class="sub-note">🕐 ${subDate}</div>
+          </div>`;
+        actionsHtml = `
+          <code style="font-size:10.5px;">👤 ${t.assigned_to || '—'}</code>
+          <button class="btn-card btn-accept" onclick="openReviewModal('${t.task_id}')">✓ Accept</button>
+          <button class="btn-card btn-reject" onclick="openReviewModal('${t.task_id}')">✕ Reject</button>`;
+      }
+
+      if (colType === 'done') {
+         const reviewDate = fmtDate(t.review_date, { day: '2-digit', month: 'short', year: 'numeric' });
+        extraHtml = `
+          <div class="review-info">
+            <span>✓ Accepted</span>${t.reviewed_by ? ` by <code>${t.reviewed_by}</code>` : ''}${reviewDate ? ` · ${reviewDate}` : ''}
+            ${t.review_note ? `<div style="margin-top:3px;color:var(--text-dim);">${t.review_note.slice(0, 60)}${t.review_note.length > 60 ? '…' : ''}</div>` : ''}
+          </div>`;
+      }
+
+      return `
+        <div class="task-card" id="card_${t.task_id}">
+          <div class="card-title">${t.title}</div>
+          ${descHtml}
+          <div class="card-meta">
+            <span class="badge ${pClass}">${(t.priority || '').toUpperCase()}</span>
+            ${dueHtml}
+          </div>
+          ${extraHtml}
+          ${actionsHtml ? `<div class="card-actions">${actionsHtml}</div>` : ''}
+        </div>`;
+    }
+
+    // ── Board loading overlay ────────────────────────────────
+    function showBoardLoading(msg) {
+      document.getElementById('boardLoadingText').textContent = msg || 'Loading...';
+      document.getElementById('boardLoadingOverlay').classList.add('show');
+    }
+    function hideBoardLoading() {
+      document.getElementById('boardLoadingOverlay').classList.remove('show');
+    }
+
+    // ── Employees (for assign dropdown) ──────────────────────
+    let EMPLOYEES_CACHE = null; // null = not fetched yet, [] = fetched but empty/failed
+    async function fetchEmployees() {
+      if (EMPLOYEES_CACHE && EMPLOYEES_CACHE.length > 0) return EMPLOYEES_CACHE;
+      try {
+        // NOTE: assumes a backend action `getEmployees` exists (list of
+        // { employee_id, name }). Adjust the action name here if your
+        // Employees module uses a different one.
+        const res = await fetch(`${API_URL}?action=getEmployees&token=${PAGE_TOKEN}&limit=500&status=active`);
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          const d = (payload.data && payload.data.data) || payload.data || [];
+          EMPLOYEES_CACHE = Array.isArray(d) ? d : [];
+        } else {
+          EMPLOYEES_CACHE = [];
+        }
+      } catch (e) {
+        console.error('fetchEmployees error:', e);
+        EMPLOYEES_CACHE = [];
+      }
+      return EMPLOYEES_CACHE;
+    }
+
+    async function populateEmployeeSelect(taskId) {
+      const sel = document.getElementById('assignEmp_' + taskId);
+      if (!sel) return;
+      sel.innerHTML = '<option value="">Loading employees...</option>';
+      sel.disabled = true;
+
+      const employees = await fetchEmployees();
+
+      if (!employees || employees.length === 0) {
+        // Fallback: employee list not available, let the admin type the ID manually.
+        sel.outerHTML = `<input class="assign-input" id="assignEmp_${taskId}" placeholder="Employee ID, e.g. EMP004"/>`;
+        showToast('Employee list failed to load. Please enter the ID manually.', 4000);
+        return;
+      }
+
+      sel.innerHTML = '<option value="">Select Employee</option>' +
+        employees.map(emp => {
+          const id = emp.emp_id || emp.employee_id || '';
+          const name = emp.name || emp.full_name || id;
+          return `<option value="${id}">${name} (${id})</option>`;
+        }).join('');
+      sel.disabled = false;
+    }
+
+    // ── Toggle assign inline form ─────────────────────────────
+    function toggleAssignForm(taskId) {
+      const form = document.getElementById('assignForm_' + taskId);
+      if (!form) return;
+      form.classList.toggle('open');
+      if (form.classList.contains('open')) {
+        populateEmployeeSelect(taskId);
+      }
+    }
+
+    // ── Assign task ───────────────────────────────────────────
+    async function doAssignTask(taskId) {
+      const empField = document.getElementById('assignEmp_' + taskId);
+      const empId = (empField?.value || '').trim();
+      if (!empId) { showToast('Select an employee or enter their ID.'); return; }
+
+      const goBtn = document.getElementById('assignGo_' + taskId);
+      if (goBtn) { goBtn.disabled = true; goBtn.innerHTML = '<span class="btn-spin"></span>'; }
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ token: PAGE_TOKEN, action: 'assignTask', task_id: taskId, assigned_to: empId })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showBoardLoading('Assigning task...');
+          await loadTasks(); // waits until the task actually shows up in IN PROGRESS
+          hideBoardLoading();
+          showToast('Task assigned successfully! ✓');
+        } else {
+          showToast(out.message || 'Error.');
+          if (goBtn) { goBtn.disabled = false; goBtn.innerHTML = '→'; }
+        }
+      } catch (e) {
+        showToast('Network error.');
+        if (goBtn) { goBtn.disabled = false; goBtn.innerHTML = '→'; }
+      }
+    }
+
+    // ── Revoke task ───────────────────────────────────────────
+    async function doRevokeTask(taskId) {
+      if (!confirm('Revoke task assignment?')) return;
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ token: PAGE_TOKEN, action: 'revokeTask', task_id: taskId })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showBoardLoading('Revoking assignment...');
+          await loadTasks();
+          hideBoardLoading();
+          showToast('Task revoked successfully!');
+        } else { showToast(out.message || 'Error.'); }
+      } catch (e) { showToast('Network error.'); }
+    }
+
+    // ── Review Modal ──────────────────────────────────────────
+    function openReviewModal(taskId) {
+      const t = ALL_TASKS.find(x => x.task_id === taskId);
+      if (!t) return;
+      activeReviewTaskId = taskId;
+
+      document.getElementById('reviewTaskTitle').textContent = t.title;
+      document.getElementById('reviewTaskMeta').textContent = `👤 ${t.assigned_to}  ·  🆔 ${t.task_id}`;
+      const link = document.getElementById('reviewLink');
+      link.href = t.submission_link;
+      link.textContent = t.submission_link;
+
+      const noteWrap = document.getElementById('reviewNoteWrap');
+      if (t.submission_note) {
+        noteWrap.style.display = 'block';
+        document.getElementById('reviewEmployeeNote').textContent = t.submission_note;
+      } else {
+        noteWrap.style.display = 'none';
+      }
+      const subStr = fmtDateTime(t.submission_date);
+      document.getElementById('reviewSubDate').textContent = subStr ? '📅 Submitted: ' + subStr : '';
+      document.getElementById('reviewNoteInput').value = '';
+      document.getElementById('reviewModal').classList.add('open');
+    }
+
+    function closeReviewModal() {
+      document.getElementById('reviewModal').classList.remove('open');
+      activeReviewTaskId = null;
+    }
+
+    async function doAcceptSubmission() {
+      if (!activeReviewTaskId) return;
+      const btn = document.getElementById('btnAccept');
+      btn.disabled = true; btn.textContent = 'Accepting...';
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            token: PAGE_TOKEN, action: 'acceptSubmission',
+            task_id: activeReviewTaskId,
+            review_note: document.getElementById('reviewNoteInput').value.trim()
+          })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          closeReviewModal();
+          showBoardLoading('Accepting submission...');
+          await loadTasks();
+          hideBoardLoading();
+          showToast('Submission accepted! ✓');
+        } else { showToast(out.message || 'Error.'); }
+      } catch (e) { showToast('Network error.'); }
+      finally { btn.disabled = false; btn.textContent = '✓ Accept'; }
+    }
+
+    async function doRejectSubmission() {
+      if (!activeReviewTaskId) return;
+      const note = document.getElementById('reviewNoteInput').value.trim();
+      if (!note) { showToast('A rejection reason is required!'); return; }
+      const btn = document.getElementById('btnReject');
+      btn.disabled = true; btn.textContent = 'Rejecting...';
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            token: PAGE_TOKEN, action: 'rejectSubmission',
+            task_id: activeReviewTaskId,
+            review_note: note
+          })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          closeReviewModal();
+          showBoardLoading('Rejecting submission...');
+          await loadTasks();
+          hideBoardLoading();
+          showToast('Submission rejected.');
+        } else { showToast(out.message || 'Error.'); }
+      } catch (e) { showToast('Network error.'); }
+      finally { btn.disabled = false; btn.textContent = '✕ Reject'; }
+    }
+
+    // ── Create Task Modal ─────────────────────────────────────
+    function openCreateModal() {
+      document.getElementById('tTitle').value = '';
+      document.getElementById('tDate').value = '';
+      document.getElementById('tDesc').value = '';
+      document.getElementById('tPriority').value = 'medium';
+      document.getElementById('taskModal').classList.add('open');
+      document.getElementById('tTitle').focus();
+    }
+
+    function closeCreateModal() {
+      document.getElementById('taskModal').classList.remove('open');
+    }
+
+    async function doCreateTask() {
+      const title = document.getElementById('tTitle').value.trim();
+      if (!title) { showToast('Task title is required.'); return; }
+      const btn = document.getElementById('createBtn');
+      btn.disabled = true; btn.textContent = 'Creating...';
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            token: PAGE_TOKEN, action: 'addTask',
+            title,
+            assigned_to: '',
+            due_date: document.getElementById('tDate').value,
+            priority: document.getElementById('tPriority').value,
+            description: document.getElementById('tDesc').value.trim()
+          })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          closeCreateModal();
+          showBoardLoading('Creating task...');
+          await loadTasks(); // waits until the new task actually shows up in TO DO
+          hideBoardLoading();
+          showToast('Task created successfully! ✓');
+        } else { showToast(out.message || 'Error.'); }
+      } catch (e) { showToast('Network error.'); }
+      finally { btn.disabled = false; btn.textContent = 'Create Task'; }
+    }
+  </script>
+</body>
+
+</html>

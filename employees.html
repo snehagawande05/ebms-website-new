@@ -1,0 +1,4379 @@
+ <!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Dashboard — Codeline.AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-base: #0A0A0B;
+      --glass: rgba(255, 255, 255, 0.045);
+      --glass-strong: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.09);
+      --glass-blur: 20px;
+      --text-primary: #F4F4F5;
+      --text-muted: #A1A1AA;
+      --text-dim: #6B7280;
+      --accent: #A8AFC4;
+      --accent-glow: #D4D9E6;
+      --success: #34D399;
+      --warning: #FBBF24;
+      --danger: #F87171;
+      --purple: #C084FC;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      background-image:
+        radial-gradient(circle at 12% -10%, rgba(255, 255, 255, 0.05), transparent 45%),
+        radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.03), transparent 40%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    /* ── Top Navbar (no sidebar on this page) ── */
+    .top-navbar {
+      height: 64px;
+      background: rgba(16, 16, 18, 0.65);
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      gap: 16px;
+    }
+
+    .navbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .navbar-logo-icon {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, #2A2A30, #404048);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .navbar-logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .navbar-logo-text span {
+      color: var(--accent-glow);
+      font-weight: 500;
+    }
+
+    .navbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(var(--glass-blur));
+      transition: background 0.18s, border-color 0.18s, transform 0.18s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover {
+      background: var(--glass-strong);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn.logout {
+      color: #FC9999;
+      border-color: rgba(248, 113, 113, 0.18);
+      background: rgba(248, 113, 113, 0.06);
+    }
+
+    .nav-btn.logout:hover {
+      background: rgba(248, 113, 113, 0.12);
+    }
+
+    .navbar-mobile-toggle {
+      display: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+    }
+
+    /* ── Navbar dropdown Menu (ID Card / Bank & Docs / Password) ── */
+    .nav-menu-wrap {
+      position: relative;
+    }
+
+    .nav-menu-dropdown {
+      display: none;
+      flex-direction: column;
+      gap: 2px;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 200px;
+      background: rgba(18, 18, 20, 0.97);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      padding: 6px;
+      z-index: 150;
+    }
+
+    .nav-menu-dropdown.open {
+      display: flex;
+    }
+
+    .nav-menu-item {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      text-align: left;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    .nav-menu-item:hover {
+      background: var(--glass-strong);
+    }
+
+    @media (max-width: 760px) {
+      .navbar-actions.desktop-actions {
+        display: none;
+      }
+
+      .navbar-mobile-toggle {
+        display: block;
+      }
+    }
+
+    .mobile-actions-sheet {
+      display: none;
+      position: fixed;
+      top: 64px;
+      right: 0;
+      left: 0;
+      background: rgba(14, 14, 16, 0.97);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      flex-direction: column;
+      gap: 8px;
+      padding: 14px;
+      z-index: 99;
+    }
+
+    .mobile-actions-sheet.open {
+      display: flex;
+    }
+
+    /* ── Page shell ── */
+    .page-content {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+    }
+
+    @media (max-width: 600px) {
+      .page-content {
+        padding: 18px 14px 50px;
+      }
+    }
+
+    .glass-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    }
+
+    .section-label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--accent-glow);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Section 1: Profile Banner ── */
+    .profile-banner {
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .profile-avatar {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2A2A32, #3A3A44);
+      border: 2px solid rgba(255, 255, 255, 0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent-glow);
+      flex-shrink: 0;
+    }
+
+    .profile-meta h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .profile-meta .meta-line {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+    }
+
+    .profile-meta .meta-line span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* ── Section 2: Stats Row (5 cards) ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .stats-row .stat-card {
+      padding: 16px 16px;
+    }
+
+    @media (max-width: 1100px) {
+      .stats-row {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .stat-card {
+      padding: 18px 20px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-2px);
+    }
+
+    .stat-card .stat-icon-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .stat-card .stat-icon {
+      font-size: 20px;
+      opacity: 0.85;
+    }
+
+    .stat-card .stat-title {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .stat-card .stat-main {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .stat-card .stat-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .weekly-off-select {
+      width: 100%;
+      margin-top: 8px;
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      padding: 7px 10px;
+      font-size: 12.5px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .weekly-off-select option {
+      background: #18181B;
+    }
+
+    /* ── Profile banner: employee info shown on the right side ── */
+    .profile-info-grid {
+      order: 3;
+      margin-left: auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(150px, auto));
+      gap: 14px 36px;
+    }
+
+    .profile-info-item .info-label {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .profile-info-item .info-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      overflow-wrap: anywhere;
+    }
+
+    .profile-info-item .info-sub {
+      font-size: 11.5px;
+      color: var(--accent-glow);
+      margin-top: 2px;
+    }
+
+    @media (max-width: 900px) {
+      .profile-info-grid {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .profile-info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── Section 3: Info Cards ── */
+    .info-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    @media (max-width: 900px) {
+      .info-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .info-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .info-card {
+      padding: 16px 18px;
+    }
+
+    .info-card .info-label {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .info-card .info-value {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      overflow-wrap: break-word;
+    }
+
+    .info-card .info-sub {
+      font-size: 11.5px;
+      color: var(--accent-glow);
+      margin-top: 3px;
+    }
+
+    /* ── Section 4: Attendance Calendar ── */
+    .calendar-card {
+      padding: 20px;
+      margin-bottom: 22px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .calendar-month-label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15.5px;
+      font-weight: 600;
+    }
+
+    .calendar-nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-cal-nav {
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-cal-nav:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .btn-cal-nav:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .calendar-legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .legend-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-dot span {
+      width: 9px;
+      height: 9px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .cal-weekday {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .cal-cell {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12.5px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      position: relative;
+      min-height: 36px;
+    }
+
+    .cal-cell.empty {
+      background: transparent;
+    }
+
+    .cal-present {
+      background: rgba(52, 211, 153, 0.16);
+      color: #6EE7B7;
+      border-color: rgba(52, 211, 153, 0.25);
+    }
+
+    /* Present but didn't follow the shift timing (late in / early out / missed punch-out) */
+    .cal-irregular {
+      background: rgba(168, 85, 247, 0.18);
+      color: #C084FC;
+      border-color: rgba(168, 85, 247, 0.3);
+    }
+
+    .cal-absent {
+      background: rgba(248, 113, 113, 0.16);
+      color: #FCA5A5;
+      border-color: rgba(248, 113, 113, 0.25);
+    }
+
+    /* Distinct from .cal-irregular (purple) so an approved leave day is
+       never visually confused with an irregular-timing punch day. */
+    .cal-leave {
+      background: rgba(96, 165, 250, 0.16);
+      color: #93C5FD;
+      border-color: rgba(96, 165, 250, 0.25);
+    }
+
+    .cal-off {
+      background: rgba(212, 217, 230, 0.14);
+      color: var(--accent-glow);
+      border-color: rgba(212, 217, 230, 0.2);
+    }
+
+    .cal-future {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-dim);
+    }
+
+    /* Public holiday (orange) */
+    .cal-holiday {
+      background: rgba(249, 115, 22, 0.18);
+      color: #C2410C;
+      border-color: rgba(249, 115, 22, 0.35);
+    }
+
+    .cal-day-modal-status.st-holiday { background: rgba(249, 115, 22, 0.18); color: #C2410C; }
+
+    /* Small corner dot marking a day where Admin/HR assigned a
+       date-specific shift override (Shift Roster), layered on top of
+       whatever present/irregular/absent/off colour the cell already has. */
+    .cal-cell.cal-hasshift::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-glow);
+    }
+
+    .cal-cell.cal-clickable {
+      cursor: pointer;
+      transition: filter 0.15s;
+    }
+
+    .cal-cell.cal-clickable:hover {
+      filter: brightness(1.35);
+    }
+
+    /* ── Attendance day-detail popup ── */
+    .cal-day-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(6px);
+      z-index: 1300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .cal-day-modal-overlay.open {
+      display: flex;
+    }
+
+    .cal-day-modal-card {
+      background: rgba(24, 24, 27, 0.92);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(28px) saturate(160%);
+      border-radius: var(--radius);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 380px;
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .cal-day-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .cal-day-modal-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .cal-day-modal-close {
+      background: var(--danger);
+      border: none;
+      color: #fff;
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .cal-day-modal-status {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: 3px 10px;
+      border-radius: 99px;
+      margin-bottom: 14px;
+    }
+
+    .cal-day-modal-status.st-present { background: rgba(52, 211, 153, 0.16); color: var(--success); }
+    .cal-day-modal-status.st-irregular { background: rgba(168, 85, 247, 0.18); color: var(--purple); }
+    .cal-day-modal-status.st-absent { background: rgba(248, 113, 113, 0.16); color: var(--danger); }
+    .cal-day-modal-status.st-off { background: rgba(212, 217, 230, 0.16); color: var(--accent-glow); }
+    .cal-day-modal-status.st-leave { background: rgba(96, 165, 250, 0.16); color: #60A5FA; }
+
+    .cal-day-modal-row {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .cal-day-modal-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .cal-day-modal-row label {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .cal-day-modal-row .cal-day-modal-time {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .cal-day-modal-row.in-time .cal-day-modal-time {
+      color: var(--success);
+    }
+
+    .cal-day-modal-row.out-time .cal-day-modal-time {
+      color: #60A5FA;
+    }
+
+    .cal-day-modal-row.shift-time .cal-day-modal-time {
+      color: var(--accent-glow);
+      font-size: 15px;
+    }
+
+    /* ── Daily Tasks panel inside the day-detail popup (Phase 11 §7.5/§7.7) ── */
+    .dt-section {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .dt-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .dt-section-header label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .btn-dt-add {
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s;
+    }
+
+    .btn-dt-add:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .dt-empty {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      text-align: center;
+      padding: 14px 4px;
+    }
+
+    .dt-item {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+
+    .dt-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .dt-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .dt-item-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.35;
+    }
+
+    .dt-item-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    .dt-item-remark {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--glass-border);
+    }
+
+    .badge-pending-approval {
+      background: rgba(251, 191, 36, 0.12);
+      color: #FCD34D;
+    }
+
+    .badge-correction {
+      background: rgba(192, 132, 252, 0.14);
+      color: var(--purple);
+    }
+
+    .btn-dt-resubmit {
+      margin-top: 8px;
+      background: rgba(192, 132, 252, 0.14);
+      border: 1px solid rgba(192, 132, 252, 0.3);
+      color: var(--purple);
+      border-radius: 8px;
+      padding: 5px 11px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .dt-add-form {
+      display: none;
+      margin-top: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+
+    .dt-add-form.open {
+      display: block;
+      animation: dtFormIn 0.15s ease-out;
+    }
+
+    @keyframes dtFormIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dt-add-form .form-group {
+      margin-bottom: 11px;
+    }
+
+    .dt-add-form .form-group:last-of-type {
+      margin-bottom: 14px;
+    }
+
+    .dt-add-form .date-row {
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .dt-add-form .date-row .form-group {
+      margin-bottom: 0;
+    }
+
+    .dt-add-form input[type="time"] {
+      font-size: 12.5px;
+      padding: 9px 8px;
+    }
+
+    @media (max-width: 380px) {
+      .dt-add-form .date-row {
+        grid-template-columns: 1fr;
+        gap: 11px;
+      }
+    }
+
+    /* ── Section 5: Tasks ── */
+    .tasks-section {
+      margin-bottom: 22px;
+    }
+
+    .task-card {
+      padding: 16px 18px;
+    }
+
+    .task-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .task-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    .task-due {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .task-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-high {
+      background: rgba(248, 113, 113, 0.12);
+      color: #FCA5A5;
+    }
+
+    .badge-medium {
+      background: rgba(251, 191, 36, 0.12);
+      color: #FCD34D;
+    }
+
+    .badge-low {
+      background: rgba(161, 161, 170, 0.12);
+      color: #A1A1AA;
+    }
+
+    .badge-pending {
+      background: rgba(251, 191, 36, 0.12);
+      color: #FCD34D;
+    }
+
+    .badge-completed {
+      background: rgba(52, 211, 153, 0.12);
+      color: #6EE7B7;
+    }
+
+    .badge-approved {
+      background: rgba(52, 211, 153, 0.12);
+      color: #6EE7B7;
+    }
+
+    .badge-rejected {
+      background: rgba(248, 113, 113, 0.12);
+      color: #FCA5A5;
+    }
+
+    .btn-done {
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      color: #34D399;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.18s, transform 0.15s;
+    }
+
+    .btn-done:hover {
+      background: rgba(52, 211, 153, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .empty-note {
+      padding: 26px;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+
+    /* ── Task Board (4 columns) ── */
+    .kanban-board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    @media (max-width: 1100px) {
+      .kanban-board { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .kanban-board { grid-template-columns: 1fr; }
+    }
+
+    .kanban-col {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .kanban-col-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--glass-border);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .kanban-col-header.col-assigned { background: rgba(161, 161, 170, 0.08); }
+    .kanban-col-header.col-progress { background: rgba(251, 191, 36, 0.08); }
+    .kanban-col-header.col-review { background: rgba(129, 140, 248, 0.08); }
+    .kanban-col-header.col-done { background: rgba(52, 211, 153, 0.08); }
+
+    .kanban-col-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .kanban-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .kanban-count {
+      background: var(--glass-strong);
+      border-radius: 99px;
+      padding: 2px 9px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .kanban-col-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 640px;
+      overflow-y: auto;
+    }
+
+    .kanban-col-body .task-card {
+      padding: 14px;
+    }
+
+    .kanban-col-body .task-footer {
+      flex-wrap: wrap;
+    }
+
+    .kanban-empty {
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--text-dim);
+      padding: 22px 6px;
+    }
+
+    .task-sub-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      margin: 8px 0;
+      color: var(--text-muted);
+    }
+
+    .task-sub-box a {
+      color: #818CF8;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    /* ── Section 6: Leave Request ── */
+    .leave-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    @media (max-width: 900px) { .leave-summary-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 480px) { .leave-summary-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .stat-card.mini { padding: 12px 14px; }
+    .stat-card.mini .stat-title { font-size: 10px; }
+    .stat-card.mini .stat-main { font-size: 17px; }
+    .stat-card.mini .stat-icon-row { margin-bottom: 4px; }
+    .stat-card.mini .stat-icon { font-size: 15px; }
+
+    .leave-section {
+      margin-bottom: 22px;
+    }
+
+    .leave-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .leave-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .modal-card .leave-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .leave-form-card {
+      padding: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 13px;
+    }
+
+    .form-group label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      color: var(--text-primary);
+      font-size: 13.5px;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.18s, background 0.18s;
+      resize: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: rgba(255, 255, 255, 0.22);
+      background: var(--glass-strong);
+    }
+
+    .form-group select option {
+      background: #18181B;
+    }
+
+    .date-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 900px) {
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        font-size: 16px;
+      }
+    }
+
+    .btn-submit-leave {
+      width: 100%;
+      background: rgba(244, 244, 245, 0.92);
+      color: #0A0A0B;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+      transition: all 0.2s;
+      margin-top: 2px;
+    }
+
+    .btn-submit-leave:hover {
+      background: #fff;
+      transform: translateY(-1px);
+    }
+
+    .btn-submit-leave:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .my-leaves-card {
+      padding: 20px;
+    }
+
+    .leave-row-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .leave-row-item:last-child {
+      border-bottom: none;
+    }
+
+    .leave-row-left .leave-type-text {
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    .leave-row-left .leave-dates-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(1.3);
+      }
+    }
+
+    /* ── Section 7: Punch Status (read-only) ── */
+    .punch-status-card {
+      padding: 20px 22px;
+      margin-bottom: 10px;
+    }
+
+    .punch-status-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .punch-status-cols {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .punch-status-cols {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .punch-col {
+      text-align: center;
+      padding: 14px 10px;
+      background: rgba(255, 255, 255, 0.025);
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .punch-col-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .punch-col-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .punch-note {
+      margin-top: 14px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      line-height: 1.5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #systemToastNotification {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* ── Modals shared shell ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.68);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: rgba(18, 18, 20, 0.92);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      max-width: 480px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .modal-card.wide {
+      max-width: 560px;
+    }
+
+    .modal-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: rgba(18, 18, 20, 0.95);
+      z-index: 1;
+    }
+
+    .modal-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+    }
+
+    .modal-close-btn {
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      color: #FCA5A5;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .modal-close-btn:hover {
+      background: rgba(248, 113, 113, 0.2);
+    }
+
+    .modal-body {
+      padding: 22px;
+    }
+
+    /* ── ID Card ── */
+    .id-card-shell {
+      background: linear-gradient(165deg, rgba(40, 40, 46, 0.55), rgba(10, 10, 12, 0.85));
+      border: 1px solid rgba(108, 142, 255, 0.35);
+      border-radius: var(--radius);
+      padding: 26px 22px;
+      text-align: center;
+    }
+
+    .id-card-brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .id-card-brand span {
+      color: #6C8EFF;
+    }
+
+    .id-card-tagline {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 2px;
+      margin-bottom: 18px;
+    }
+
+    .id-card-avatar {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      margin: 0 auto 14px;
+      background: linear-gradient(135deg, #2A2A32, #3A3A44);
+      border: 2px solid rgba(52, 211, 153, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #6EE7B7;
+    }
+
+    .id-card-name {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .id-card-role {
+      font-size: 12.5px;
+      color: #6EE7B7;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-top: 3px;
+      margin-bottom: 18px;
+    }
+
+    .id-card-info {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .id-card-info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+    }
+
+    .id-card-info-row span:first-child {
+      color: var(--text-muted);
+    }
+
+    .id-card-info-row span:last-child {
+      font-weight: 600;
+    }
+
+    .id-card-qr-wrap {
+      background: #fff;
+      width: 140px;
+      height: 140px;
+      margin: 0 auto;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+
+    .btn-download-pdf {
+      width: 100%;
+      margin-top: 18px;
+      background: linear-gradient(135deg, #059669, #34D399);
+      color: #fff;
+      border: none;
+      padding: 11px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+      transition: transform 0.18s;
+    }
+
+    .btn-download-pdf:hover {
+      transform: translateY(-1px);
+    }
+
+    /* ── Bank & Docs tabs ── */
+    .bd-tabs {
+      display: flex;
+      gap: 22px;
+      border-bottom: 1px solid var(--glass-border);
+      padding: 0 22px;
+    }
+
+    .bd-tab {
+      padding: 12px 2px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .bd-tab.active {
+      color: var(--accent-glow);
+      border-bottom-color: #6C8EFF;
+    }
+
+    .bd-panel {
+      display: none;
+    }
+
+    .bd-panel.active {
+      display: block;
+    }
+
+    .bd-note {
+      background: rgba(251, 191, 36, 0.08);
+      border: 1px solid rgba(251, 191, 36, 0.22);
+      border-left: 3px solid #FBBF24;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .bd-note strong {
+      color: #FCD34D;
+    }
+
+    .bd-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .bd-form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .bd-form-grid .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .bd-readonly-card {
+      background: rgba(52, 211, 153, 0.06);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+
+    .bd-readonly-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      font-size: 13px;
+    }
+
+    .bd-readonly-row span:first-child {
+      color: var(--text-muted);
+    }
+
+    .bd-readonly-row span:last-child {
+      font-weight: 600;
+    }
+
+    .doc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .doc-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .doc-tile {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 18px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+      position: relative;
+    }
+
+    .doc-tile:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .doc-tile .doc-icon {
+      font-size: 26px;
+      margin-bottom: 8px;
+    }
+
+    .doc-tile .doc-label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .doc-tile .doc-status {
+      font-size: 10.5px;
+      color: #6EE7B7;
+      margin-top: 4px;
+    }
+
+    .doc-tile .doc-status.empty {
+      color: var(--text-dim);
+    }
+
+    .doc-tile input[type="file"] {
+      display: none;
+    }
+
+    /* ── Password modal ── */
+    .pw-strength-hint {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      margin-top: -5px;
+      margin-bottom: 12px;
+    }
+
+    /* ── Full Payslip Card (Employee Dashboard) ── */
+    .slip-card {
+      background: #ffffff;
+      color: #111827;
+      border-radius: 12px;
+      padding: 32px 28px;
+      margin-top: 6px;
+    }
+    .slip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 18px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #E5E7EB;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .slip-brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #111827; letter-spacing: -0.3px; }
+    .slip-brand-name span { color: #3B82F6; }
+    .slip-brand-sub { font-size: 10px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.7px; margin-top: 3px; }
+    .slip-title-block { text-align: right; }
+    .slip-title-block .slip-title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: #1E40AF; text-transform: uppercase; letter-spacing: 1px; }
+    .slip-title-block .slip-period { font-size: 11.5px; color: #6B7280; margin-top: 4px; }
+    .slip-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; margin-bottom: 20px; font-size: 13px; line-height: 1.7; }
+    .slip-meta-grid .meta-row { display: flex; gap: 6px; }
+    .slip-meta-grid .meta-label { color: #6B7280; min-width: 100px; }
+    .slip-meta-grid .meta-val { color: #111827; font-weight: 600; }
+    .slip-divider { height: 1px; background: #E5E7EB; margin: 18px 0; }
+    .slip-section-title { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #9CA3AF; margin-bottom: 10px; }
+    .slip-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 18px; }
+    .slip-table th { background: #F9FAFB; color: #374151; padding: 8px 10px; font-weight: 600; text-align: left; border: 1px solid #E5E7EB; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .slip-table td { padding: 8px 10px; border: 1px solid #E5E7EB; color: #1F2937; }
+    .slip-table td:not(:first-child) { text-align: right; }
+    .slip-table th:not(:first-child) { text-align: right; }
+    .net-pay-box { background: #EFF6FF; border: 1.5px dashed #93C5FD; border-radius: 10px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+    .net-pay-label { font-size: 12.5px; font-weight: 600; color: #374151; }
+    .net-pay-amount { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #1E40AF; }
+    .slip-signatures { display: flex; justify-content: space-between; margin-top: 40px; font-size: 11.5px; color: #9CA3AF; }
+    .sig-line { width: 100%; max-width: 150px; border-top: 1px solid #D1D5DB; padding-top: 7px; margin-top: 28px; }
+    .btn-print-slip {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: background 0.15s;
+    }
+    .btn-print-slip:hover { background: rgba(255,255,255,0.16); }
+
+    /* ═══ THEME: Purple light (Brinjal classic) — replace this block to change the theme ═══ */
+    :root {
+      --bg-base: #F6F3F8;
+      --glass: #FFFFFF;
+      --glass-strong: #F1E9F4;
+      --glass-border: #E4D9E9;
+      --text-primary: #26112B;
+      --text-muted: #6F5A79;
+      --text-dim: #85728F;
+      --accent: #6E217D;
+      --accent-glow: #6E217D;
+      --success: #15803D;
+      --warning: #B45309;
+      --danger: #DC2626;
+      --purple: #6D28D9;
+    }
+    body { background: #F6F3F8; background-image: none; }
+    .glass-card, .top-navbar, .nav-btn, .modal-card, .cal-day-modal-card { backdrop-filter: none; -webkit-backdrop-filter: none; }
+    .top-navbar { background: #FFFFFF; }
+    .navbar-logo-icon { background: #6E217D; border-color: #6E217D; color: #fff; }
+    .nav-btn.logout { color: #B91C1C; background: #FEF2F2; border-color: #FECACA; }
+    .nav-btn.logout:hover { background: #FEE2E2; }
+    .nav-menu-dropdown, .mobile-actions-sheet { background: #FFFFFF; box-shadow: 0 14px 34px rgba(60, 20, 70, 0.14); }
+    .profile-avatar { background: #F1E1F5; border-color: #E4D9E9; color: #6E217D; }
+    .weekly-off-select option, .form-group select option { background: #FFFFFF; color: #26112B; }
+    .form-group input, .form-group select, .form-group textarea { background: #FFFFFF; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #6E217D; background: #FFFFFF; }
+    .modal-card, .modal-header, .ob-card, .ob-footer { background: #FFFFFF; }
+    .modal-overlay, .cal-day-modal-overlay, .ob-overlay { background: rgba(38, 17, 43, 0.45); }
+    .modal-close-btn { background: #FEF2F2; border-color: #FECACA; color: #B91C1C; }
+    .modal-close-btn:hover { background: #FEE2E2; }
+    .btn-cal-nav:hover, .btn-dt-add:hover { background: #E9DAEE; }
+    .btn-submit-leave { background: #6E217D; color: #FFFFFF; }
+    .btn-submit-leave:hover { background: #581C66; }
+    .btn-done { background: #DCFCE7; border-color: #86EFAC; color: #166534; }
+    .btn-done:hover { background: #BBF7D0; }
+    .btn-print-slip { background: #6E217D; color: #fff; border-color: #6E217D; }
+    .badge-high { background: #FEE2E2; color: #B91C1C; }
+    .badge-medium { background: #FEF3C7; color: #92400E; }
+    .badge-low { background: #F4F4F5; color: #52525B; }
+    .badge-pending, .badge-pending-approval { background: #FEF3C7; color: #92400E; }
+    .badge-completed, .badge-approved { background: #DCFCE7; color: #166534; }
+    .badge-rejected { background: #FEE2E2; color: #B91C1C; }
+    .badge-correction { background: #EDE9FE; color: #6D28D9; }
+    .kanban-col { background: #FBF9FC; }
+    .task-sub-box a { color: #6E217D; }
+    .task-sub-box { background: #FAF7FB; }
+    .leave-row-item { border-bottom-color: #EEE7F1; }
+    .cal-present { background: rgba(34, 197, 94, 0.14); color: #166534; border-color: rgba(34, 197, 94, 0.35); }
+    .cal-irregular { background: rgba(124, 58, 237, 0.12); color: #6D28D9; border-color: rgba(124, 58, 237, 0.3); }
+    .cal-absent { background: rgba(220, 38, 38, 0.10); color: #B91C1C; border-color: rgba(220, 38, 38, 0.28); }
+    .cal-leave { background: rgba(59, 130, 246, 0.12); color: #1D4ED8; border-color: rgba(59, 130, 246, 0.3); }
+    .cal-off { background: #F1F1F4; color: #52525B; border-color: #D4D4DB; }
+    .cal-future { background: #FFFFFF; color: #A39AAA; }
+    .cal-cell.cal-hasshift::after { background: #6E217D; }
+    .cal-day-modal-row, .dt-item { background: #FAF7FB; }
+    .cal-day-modal-row.out-time .cal-day-modal-time { color: #1D4ED8; }
+    .cal-day-modal-status.st-off { background: #F1F1F4; color: #52525B; }
+    .cal-day-modal-status.st-leave { background: rgba(59, 130, 246, 0.14); color: #1D4ED8; }
+    .id-card-shell { background: #FAF7FB; border-color: #E4D9E9; }
+    .id-card-role { color: #15803D; }
+    .id-card-avatar { background: #F1E1F5; color: #6E217D; border-color: #6E217D; }
+    .btn-download-pdf { background: #6E217D; }
+    .punch-col-label { color: #85728F; }
+    .bd-tab.active { border-bottom-color: #6E217D; }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── Top Navbar ── -->
+  <div class="top-navbar">
+    <div class="navbar-logo">
+      <div class="navbar-logo-icon">⚡</div>
+      <div class="navbar-logo-text">Codeline<span>.AI</span></div>
+    </div>
+
+    <div class="navbar-actions desktop-actions">
+      <button class="nav-btn" onclick="openLeaveModal()">📅 Leave Requests</button>
+      <button class="nav-btn" onclick="openDailyTasksModal()">📝 Daily Tasks</button>
+      <button class="nav-btn" onclick="openExpenseModal()">💰 Expenses</button>
+      <div class="nav-menu-wrap" id="navMenuWrap">
+        <button class="nav-btn" onclick="toggleNavMenu(event)">⋯ Menu</button>
+        <div class="nav-menu-dropdown" id="navMenuDropdown">
+          <button class="nav-menu-item" onclick="closeNavMenu(); openIdCardModal();">🪪 Virtual ID Card</button>
+          <button class="nav-menu-item" onclick="closeNavMenu(); openTargetModal();">🎯 My Target</button>
+          <button class="nav-menu-item" onclick="closeNavMenu(); openBankDocsModal('bank');">📁 Bank &amp; Docs</button>
+          <button class="nav-menu-item" onclick="closeNavMenu(); openPasswordModal();">🔒 Change Password</button>
+        </div>
+      </div>
+      <button class="nav-btn logout" onclick="doLogout()">🚪 Logout</button>
+    </div>
+
+    <button class="navbar-mobile-toggle" onclick="toggleMobileActions()">☰</button>
+  </div>
+
+  <div class="mobile-actions-sheet" id="mobileActionsSheet">
+    <button class="nav-btn" onclick="openLeaveModal()">📅 Leave Requests</button>
+    <button class="nav-btn" onclick="openDailyTasksModal()">📝 Daily Tasks</button>
+    <button class="nav-btn" onclick="openExpenseModal()">💰 Expenses</button>
+    <button class="nav-btn" onclick="openTargetModal()">🎯 My Target</button>
+    <button class="nav-btn" onclick="openBankDocsModal('bank')">📁 Bank & Docs</button>
+    <button class="nav-btn" onclick="openPasswordModal()">🔒 Change Password</button>
+    <button class="nav-btn logout" onclick="doLogout()">🚪 Logout</button>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Section 1: Profile Banner -->
+    <div class="glass-card profile-banner">
+      <div class="profile-info-grid">
+        <div class="profile-info-item">
+          <div class="info-label">Employee ID</div>
+          <div class="info-value" id="infoEmpId">—</div>
+        </div>
+        <div class="profile-info-item">
+          <div class="info-label">Date of Joining</div>
+          <div class="info-value" id="infoJoinDate">—</div>
+          <div class="info-sub" id="infoJoinDays"></div>
+        </div>
+        <div class="profile-info-item">
+          <div class="info-label">Email Address</div>
+          <div class="info-value" id="infoEmail">—</div>
+        </div>
+        <div class="profile-info-item">
+          <div class="info-label">Contact Number</div>
+          <div class="info-value" id="infoMobile">—</div>
+        </div>
+      </div>
+      <div class="profile-avatar" id="profileAvatarInitials">—</div>
+      <div class="profile-meta">
+        <h2 id="profileName">Loading...</h2>
+        <div class="meta-line">
+          <span id="profileDesignation">💼 —</span>
+          <span id="profileDepartment">🏷️ —</span>
+          <span id="profileBranch">🏢 —</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Stats Row -->
+    <div class="stats-row">
+      <div class="glass-card stat-card">
+        <div class="stat-icon-row">
+          <div class="stat-title">Total Hours This Month</div>
+          <div class="stat-icon">⏱️</div>
+        </div>
+        <div class="stat-main" id="statMonthHours">—</div>
+        <div class="stat-sub" id="statMonthHoursSub">Calculating...</div>
+      </div>
+
+      <div class="glass-card stat-card">
+        <div class="stat-icon-row">
+          <div class="stat-title">Total Present Days</div>
+          <div class="stat-icon">✅</div>
+        </div>
+        <div class="stat-main" id="statPresentDays">—</div>
+        <div class="stat-sub">This month</div>
+      </div>
+
+      <div class="glass-card stat-card">
+        <div class="stat-icon-row">
+          <div class="stat-title">Late / Early Exit</div>
+          <div class="stat-icon">⚠️</div>
+        </div>
+        <div class="stat-main" id="statIrregularDays">—</div>
+        <div class="stat-sub">Irregular timing days</div>
+      </div>
+
+      <div class="glass-card stat-card">
+        <div class="stat-icon-row">
+          <div class="stat-title">Total Absent Days</div>
+          <div class="stat-icon">❌</div>
+        </div>
+        <div class="stat-main" id="statAbsentDays">—</div>
+        <div class="stat-sub">This month</div>
+      </div>
+
+      <div class="glass-card stat-card">
+        <div class="stat-icon-row">
+          <div class="stat-title">Approved Leave</div>
+          <div class="stat-icon">🏖️</div>
+        </div>
+        <div class="stat-main" id="statLeaveDays">—</div>
+        <div class="stat-sub">Days this month</div>
+      </div>
+
+      <div class="glass-card stat-card">
+        <div class="stat-icon-row">
+          <div class="stat-title">My Target</div>
+          <div class="stat-icon">🎯</div>
+        </div>
+        <div class="stat-main" id="statTarget">—</div>
+        <div class="stat-sub" id="statTargetSub">Loading...</div>
+        <div style="height:5px; border-radius:99px; background:var(--glass-strong); margin-top:8px; overflow:hidden;">
+          <div id="statTargetBar" style="height:100%; width:0%; background:var(--accent); border-radius:99px; transition:width 0.3s;"></div>
+        </div>
+      </div>
+
+      <!-- Hidden: JS still references these IDs -->
+      <div style="display:none;">
+        <div id="statShiftTime"></div>
+        <div id="statShiftName"></div>
+        <div id="weeklyOffIcon"></div>
+        <div id="weeklyOffLocked"><div id="statWeeklyOff"></div></div>
+        <div id="weeklyOffSetter">
+          <select id="weeklyOffSelect"></select>
+          <button id="weeklyOffConfirmBtn"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Task Board -->
+    <div class="tasks-section">
+      <div class="section-label">📋 My Tasks</div>
+      <div class="kanban-board">
+
+        <div class="kanban-col">
+          <div class="kanban-col-header col-assigned">
+            <div class="kanban-col-title"><span class="kanban-dot" style="background:#A1A1AA;"></span>Assigned</div>
+            <span class="kanban-count" id="cntAssigned">0</span>
+          </div>
+          <div class="kanban-col-body" id="colAssigned">
+            <div class="kanban-empty">Loading...</div>
+          </div>
+        </div>
+
+        <div class="kanban-col">
+          <div class="kanban-col-header col-progress">
+            <div class="kanban-col-title"><span class="kanban-dot" style="background:#FBBF24;"></span>In Progress</div>
+            <span class="kanban-count" id="cntProgress">0</span>
+          </div>
+          <div class="kanban-col-body" id="colProgress">
+            <div class="kanban-empty">Loading...</div>
+          </div>
+        </div>
+
+        <div class="kanban-col">
+          <div class="kanban-col-header col-review">
+            <div class="kanban-col-title"><span class="kanban-dot" style="background:#818CF8;"></span>Review</div>
+            <span class="kanban-count" id="cntReview">0</span>
+          </div>
+          <div class="kanban-col-body" id="colReview">
+            <div class="kanban-empty">Loading...</div>
+          </div>
+        </div>
+
+        <div class="kanban-col">
+          <div class="kanban-col-header col-done">
+            <div class="kanban-col-title"><span class="kanban-dot" style="background:#34D399;"></span>Done</div>
+            <span class="kanban-count" id="cntDone">0</span>
+          </div>
+          <div class="kanban-col-body" id="colDone">
+            <div class="kanban-empty">Loading...</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Daily Tasks Modal (Phase 11 §7.5) — self-logged work, separate from Kanban tasks above -->
+    <div class="modal-overlay" id="dailyTasksModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>📝 Daily Tasks</h3>
+          <button class="modal-close-btn" onclick="closeDailyTasksModal()">✕ Close</button>
+        </div>
+        <div class="modal-body">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div style="font-size:12px; color:var(--text-muted);">Your self-logged daily work, submitted for admin approval.</div>
+            <button type="button" class="btn-dt-add" id="dtmAddToggleBtn" onclick="toggleDtModalAddForm()">+ Add Task</button>
+          </div>
+
+          <div class="dt-add-form" id="dtmAddForm">
+            <div class="form-group">
+              <label>Date *</label>
+              <input type="date" id="dtmDate" />
+            </div>
+            <div class="form-group">
+              <label>Task Title *</label>
+              <input type="text" id="dtmTaskTitle" placeholder="What did you work on?" />
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea id="dtmTaskDescription" rows="2" placeholder="Details (optional)"></textarea>
+            </div>
+            <div class="date-row">
+              <div class="form-group">
+                <label>Start Time</label>
+                <input type="time" id="dtmStartTime" />
+              </div>
+              <div class="form-group">
+                <label>Completion Time</label>
+                <input type="time" id="dtmCompletionTime" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="dtmTaskStatus">
+                <option value="Completed">Completed</option>
+                <option value="Pending">Pending / In progress</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Remark (optional)</label>
+              <input type="text" id="dtmEmployeeRemark" placeholder="Anything the reviewer should know" />
+            </div>
+            <button type="button" class="btn-submit-leave" id="dtmSubmitBtn" onclick="submitDtModalTask()">Submit Task</button>
+          </div>
+
+          <div id="dailyTasksList" style="margin-top:14px;">
+            <div class="dt-empty">Loading…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Work Modal -->
+    <div class="modal-overlay" id="submitWorkModal" style="z-index:300;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>📤 Submit Work</h3>
+          <button class="modal-close-btn" onclick="closeSubmitModal()">✕ Close</button>
+        </div>
+        <div class="modal-body">
+          <div id="submitWorkTaskTitle"
+            style="font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700; margin-bottom:4px; color:var(--text-primary);">
+          </div>
+          <div id="submitWorkTaskId" style="font-size:11.5px; color:var(--text-dim); margin-bottom:18px;"></div>
+          <div class="form-group">
+            <label>Google Drive Link *</label>
+            <input type="url" id="submitWorkLink" placeholder="https://drive.google.com/..." required />
+          </div>
+          <div class="form-group">
+            <label>Note (Optional)</label>
+            <textarea id="submitWorkNote" rows="3" placeholder="Any note or instructions..."></textarea>
+          </div>
+          <div style="font-size:11.5px; color:var(--text-dim); margin-bottom:14px; line-height:1.5;">
+            💡 Share the drive link — make sure the file is set to "Anyone with link can view".
+          </div>
+          <button class="btn-submit-leave" id="submitWorkBtn" onclick="doSubmitWork()">Submit Work 📤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Punch Status (read-only) -->
+    <div class="glass-card punch-status-card" id="punchStatusCard" style="margin-bottom:22px;">
+      <div class="punch-status-top">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="section-label" style="margin-bottom:0;">✅ Today's Attendance</div>
+          <div id="punchLiveBadge"
+            style="display:none; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:600; background:rgba(34,197,94,0.12); color:#15803D; border:1px solid rgba(34,197,94,0.3);">
+            <span style="width:6px; height:6px; border-radius:50%; background:#22C55E; display:inline-block; animation:pulse 1.5s ease-in-out infinite;"></span>
+            Punched In
+          </div>
+        </div>
+        <div style="font-size:12px; color:var(--text-dim);" id="punchTodayDate">—</div>
+      </div>
+
+      <div class="punch-status-cols">
+        <div class="punch-col" style="text-align:center; background:rgba(34,197,94,0.07); border-radius:12px; padding:16px 10px; border:1px solid rgba(34,197,94,0.25);">
+          <div style="font-size:22px; margin-bottom:6px;">⬆️</div>
+          <div class="punch-col-label" style="margin-bottom:4px;">Punch IN</div>
+          <div class="punch-col-value" style="color:#15803D; font-size:20px;" id="punchInTime">—</div>
+        </div>
+
+        <div class="punch-col" style="text-align:center; background:rgba(110,33,125,0.07); border-radius:12px; padding:16px 10px; border:1px solid rgba(110,33,125,0.22);">
+          <div style="font-size:22px; margin-bottom:6px;">⏱️</div>
+          <div class="punch-col-label" style="margin-bottom:4px;">Time Spent Today</div>
+          <div class="punch-col-value" style="color:#6E217D; font-size:22px; letter-spacing:1px;" id="punchHoursToday">00:00:00</div>
+        </div>
+
+        <div class="punch-col" style="text-align:center; background:rgba(220,38,38,0.06); border-radius:12px; padding:16px 10px; border:1px solid rgba(220,38,38,0.22);">
+          <div style="font-size:22px; margin-bottom:6px;">⬇️</div>
+          <div class="punch-col-label" style="margin-bottom:4px;">Punch OUT</div>
+          <div class="punch-col-value" style="color:#B91C1C; font-size:20px;" id="punchOutTime">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Attendance Calendar -->
+    <div class="glass-card calendar-card">
+      <div class="calendar-header">
+        <div class="calendar-month-label" id="calendarMonthLabel">— —</div>
+        <div class="calendar-nav">
+          <button class="btn-cal-nav" id="btnCalPrev" onclick="changeCalendarMonth(-1)">← Prev</button>
+          <button class="btn-cal-nav" id="btnCalNext" onclick="changeCalendarMonth(1)">Next →</button>
+        </div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid">
+        <div class="empty-note" style="grid-column: 1 / -1;">Loading calendar...</div>
+      </div>
+
+      <div class="calendar-legend">
+        <span class="legend-dot"><span style="background:#34D399;"></span>Present</span>
+        <span class="legend-dot"><span style="background:#C084FC;"></span>Irregular Timing</span>
+        <span class="legend-dot"><span style="background:#F87171;"></span>Absent</span>
+        <span class="legend-dot"><span style="background:#D4D9E6;"></span>Weekly Off</span>
+        <span class="legend-dot"><span style="background:#F97316;"></span>Public Holiday</span>
+        <span class="legend-dot"><span style="background:#D4D9E6;"></span>Shift Override</span>
+        <span class="legend-dot"><span style="background:#60A5FA;"></span>Approved Leave</span>
+      </div>
+    </div>
+
+    <!-- Attendance day-detail popup -->
+    <div class="cal-day-modal-overlay" id="calDayModalOverlay" onclick="calCloseDayModal()">
+      <div class="cal-day-modal-card" onclick="event.stopPropagation()">
+        <div class="cal-day-modal-header">
+          <h3 id="calDayModalTitle">—</h3>
+          <button type="button" class="cal-day-modal-close" onclick="calCloseDayModal()">✕</button>
+        </div>
+        <div class="cal-day-modal-status" id="calDayModalStatus"></div>
+        <div class="cal-day-modal-row in-time">
+          <label>In-Time</label>
+          <div class="cal-day-modal-time" id="calDayModalIn">—</div>
+        </div>
+        <div class="cal-day-modal-row out-time">
+          <label>Out-Time</label>
+          <div class="cal-day-modal-time" id="calDayModalOut">—</div>
+        </div>
+        <div class="cal-day-modal-row shift-time">
+          <label id="calDayModalShiftLabel">Shift</label>
+          <div class="cal-day-modal-time" id="calDayModalShift">—</div>
+        </div>
+
+        <!-- Daily Tasks (Phase 11 §7.7) — read-only view; adding/editing now lives in the "📝 Daily Tasks" modal (navbar, next to Leave Requests) -->
+        <div class="dt-section">
+          <div class="dt-section-header">
+            <label>📝 Daily Tasks</label>
+          </div>
+          <div id="calDayModalTasksList">
+            <div class="dt-empty">Loading…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+  <!-- ═══ Virtual ID Card Modal ═══ -->
+  <div class="modal-overlay" id="idCardModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🪪 Virtual ID Card</h3>
+        <button class="modal-close-btn" onclick="closeModal('idCardModal')">✕ Close</button>
+      </div>
+      <div class="modal-body">
+        <div class="id-card-shell">
+          <div class="id-card-brand">CODELINE<span>.AI</span></div>
+          <div class="id-card-tagline">Employee Identity Card</div>
+
+          <div class="id-card-avatar" id="idCardAvatar">—</div>
+          <div class="id-card-name" id="idCardName">—</div>
+          <div class="id-card-role" id="idCardRole">STAFF</div>
+
+          <div class="id-card-info">
+            <div class="id-card-info-row"><span>EMP ID:</span><span id="idCardEmpId">—</span></div>
+            <div class="id-card-info-row"><span>Department:</span><span id="idCardDept">—</span></div>
+            <div class="id-card-info-row"><span>Joining Date:</span><span id="idCardJoin">—</span></div>
+            <div class="id-card-info-row"><span>Contact:</span><span id="idCardMobile">—</span></div>
+          </div>
+
+          <div class="id-card-qr-wrap" id="idCardQrWrap"></div>
+        </div>
+        <button class="btn-download-pdf" onclick="downloadIdCardPdf()">⬇️ Download PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Leave Requests Modal ═══ -->
+  <div class="modal-overlay" id="leaveModal">
+    <div class="modal-card wide">
+      <div class="modal-header">
+        <h3>📅 Leave Requests</h3>
+        <button class="modal-close-btn" onclick="closeModal('leaveModal')">✕ Close</button>
+      </div>
+      <div class="modal-body">
+        <!-- 🆕 Phase 11 §7.2 — Leave summary (Total/Used/Remaining/Pending/Approved/Rejected) -->
+        <div class="leave-summary-grid" id="leaveSummaryGrid">
+          <div class="glass-card stat-card mini">
+            <div class="stat-icon-row"><span class="stat-title">Total</span><span class="stat-icon">📆</span></div>
+            <div class="stat-main" id="lsTotal">—</div>
+          </div>
+          <div class="glass-card stat-card mini">
+            <div class="stat-icon-row"><span class="stat-title">Used</span><span class="stat-icon">✅</span></div>
+            <div class="stat-main" id="lsUsed">—</div>
+          </div>
+          <div class="glass-card stat-card mini">
+            <div class="stat-icon-row"><span class="stat-title">Remaining</span><span class="stat-icon">🌿</span></div>
+            <div class="stat-main" id="lsRemaining">—</div>
+          </div>
+          <div class="glass-card stat-card mini">
+            <div class="stat-icon-row"><span class="stat-title">Pending</span><span class="stat-icon">⏳</span></div>
+            <div class="stat-main" id="lsPending">—</div>
+          </div>
+          <div class="glass-card stat-card mini">
+            <div class="stat-icon-row"><span class="stat-title">Approved</span><span class="stat-icon">👍</span></div>
+            <div class="stat-main" id="lsApproved">—</div>
+          </div>
+          <div class="glass-card stat-card mini">
+            <div class="stat-icon-row"><span class="stat-title">Rejected</span><span class="stat-icon">🚫</span></div>
+            <div class="stat-main" id="lsRejected">—</div>
+          </div>
+        </div>
+
+        <div class="leave-grid">
+          <div class="glass-card leave-form-card">
+            <form id="quickLeaveForm" onsubmit="submitQuickLeave(event)">
+              <div class="form-group">
+                <label>Leave Type</label>
+                <select id="qlType" required>
+                  <option value="Sick Leave">🤒 Sick Leave</option>
+                  <option value="Casual Leave">🏖️ Casual Leave</option>
+                  <option value="Annual Leave">📆 Annual Leave</option>
+                  <option value="Emergency Leave">🚨 Emergency Leave</option>
+                </select>
+              </div>
+              <div class="date-row">
+                <div class="form-group">
+                  <label>From Date</label>
+                  <input type="date" id="qlFrom" required />
+                </div>
+                <div class="form-group">
+                  <label>To Date</label>
+                  <input type="date" id="qlTo" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Reason</label>
+                <textarea id="qlReason" rows="3" placeholder="Brief reason for leave..."></textarea>
+              </div>
+              <button type="submit" class="btn-submit-leave" id="qlSubmitBtn">Submit Leave Request</button>
+            </form>
+          </div>
+
+          <div class="glass-card my-leaves-card">
+            <div class="section-label" style="margin-bottom:10px; font-size:13.5px;">My Recent Leaves</div>
+            <div id="myLeavesList">
+              <div class="empty-note">Loading...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ My Target Modal (Phase 11 §7.8) ═══ -->
+  <div class="modal-overlay" id="targetModal">
+    <div class="modal-card wide">
+      <div class="modal-header">
+        <h3>🎯 My Target</h3>
+        <button class="modal-close-btn" onclick="closeModal('targetModal')">✕ Close</button>
+      </div>
+      <div class="modal-body">
+        <div id="targetSelectorWrap" style="margin-bottom:14px; display:none;">
+          <label style="font-size:12px; color:var(--text-secondary); margin-bottom:6px; display:block;">Period</label>
+          <select id="targetPeriodSelect" onchange="renderSelectedTarget()"
+            style="background:var(--bg-layer4); border:1px solid var(--border2); border-radius:var(--radius-sm); color:var(--text-primary); padding:8px 12px; font-size:13px; font-family:'Inter',sans-serif;"></select>
+        </div>
+
+        <div id="targetEmptyState" class="empty-note" style="display:none;">
+          No target has been assigned yet.
+        </div>
+
+        <div id="targetContentWrap" style="display:none;">
+          <div class="leave-summary-grid">
+            <div class="glass-card stat-card mini">
+              <div class="stat-icon-row"><span class="stat-title">Assigned</span><span class="stat-icon">🎯</span></div>
+              <div class="stat-main" id="tgAssigned">—</div>
+            </div>
+            <div class="glass-card stat-card mini">
+              <div class="stat-icon-row"><span class="stat-title">Achieved</span><span class="stat-icon">✅</span></div>
+              <div class="stat-main" id="tgAchieved">—</div>
+            </div>
+            <div class="glass-card stat-card mini">
+              <div class="stat-icon-row"><span class="stat-title">Remaining</span><span class="stat-icon">🌿</span></div>
+              <div class="stat-main" id="tgRemaining">—</div>
+            </div>
+            <div class="glass-card stat-card mini">
+              <div class="stat-icon-row"><span class="stat-title">Progress</span><span class="stat-icon">📈</span></div>
+              <div class="stat-main" id="tgProgress">—</div>
+            </div>
+          </div>
+
+          <div style="margin-top:16px; background:var(--bg-layer3); border-radius:var(--radius-sm); height:10px; overflow:hidden;">
+            <div id="tgProgressBar" style="height:100%; width:0%; background:var(--accent); border-radius:var(--radius-sm); transition:width 0.3s;"></div>
+          </div>
+          <div id="tgTypeLabel" style="margin-top:8px; font-size:12px; color:var(--text-secondary);">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Expenses Modal ═══ -->
+  <div class="modal-overlay" id="expenseModal">
+    <div class="modal-card wide">
+      <div class="modal-header">
+        <h3>💰 Expense Claims</h3>
+        <button class="modal-close-btn" onclick="closeModal('expenseModal')">✕ Close</button>
+      </div>
+      <div class="modal-body">
+        <div class="leave-grid">
+          <div class="glass-card leave-form-card">
+            <form id="quickExpenseForm" onsubmit="submitQuickExpense(event)">
+              <div class="form-group">
+                <label>Category</label>
+                <select id="qeCategory" required>
+                  <option value="Travel">🚗 Travel</option>
+                  <option value="Food">🍽️ Food</option>
+                  <option value="Accommodation">🏨 Accommodation</option>
+                  <option value="Office Supplies">🖇️ Office Supplies</option>
+                  <option value="Other">📦 Other</option>
+                </select>
+              </div>
+              <div class="date-row">
+                <div class="form-group">
+                  <label>Amount (₹)</label>
+                  <input type="number" id="qeAmount" min="1" step="0.01" required placeholder="e.g. 1200" />
+                </div>
+                <div class="form-group">
+                  <label>Expense Date</label>
+                  <input type="date" id="qeDate" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <textarea id="qeDescription" rows="2" placeholder="e.g. Client site visit travel cost"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Receipt URL</label>
+                <input type="url" id="qeReceiptUrl" required placeholder="https://drive.google.com/..." />
+              </div>
+              <button type="submit" class="btn-submit-leave" id="qeSubmitBtn">Submit Expense Claim</button>
+            </form>
+          </div>
+
+          <div class="glass-card my-leaves-card">
+            <div class="section-label" style="margin-bottom:10px; font-size:13.5px;">My Recent Expenses</div>
+            <div id="myExpensesList">
+              <div class="empty-note">Loading...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Bank & Docs Modal (3 tabs: Bank Details | My Documents | Salary Slips) ═══ -->
+  <div class="modal-overlay" id="bankDocsModal">
+    <div class="modal-card wide">
+      <div class="modal-header">
+        <h3>📁 Bank Details &amp; Documents</h3>
+        <button class="modal-close-btn" onclick="closeModal('bankDocsModal')">✕ Close</button>
+      </div>
+
+      <div class="bd-tabs">
+        <div class="bd-tab active" id="tabBtnBank" onclick="switchBdTab('bank')">Bank Details</div>
+        <div class="bd-tab" id="tabBtnDocs" onclick="switchBdTab('docs')">My Documents</div>
+        <div class="bd-tab" id="tabBtnSlips" onclick="switchBdTab('slips')">Salary Slips</div>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Tab 1: Bank Details -->
+        <div class="bd-panel active" id="bdPanelBank">
+          <div id="bankFormWrapper">
+            <div class="bd-note"><strong>Note:</strong> Bank details can only be submitted once. Please ensure the
+              information matches your passbook.</div>
+            <form id="bankDetailsForm" onsubmit="submitBankDetailsForm(event)">
+              <div class="bd-form-grid">
+                <div class="form-group">
+                  <label>Account Holder Name *</label>
+                  <input type="text" id="bdHolderName" required />
+                </div>
+                <div class="form-group">
+                  <label>Account Number *</label>
+                  <input type="text" id="bdAccNumber" required />
+                </div>
+                <div class="form-group">
+                  <label>IFSC Code *</label>
+                  <input type="text" id="bdIfsc" required style="text-transform:uppercase;" />
+                </div>
+                <div class="form-group">
+                  <label>Bank Name *</label>
+                  <input type="text" id="bdBankName" required />
+                </div>
+                <div class="form-group">
+                  <label>Branch Name</label>
+                  <input type="text" id="bdBranchName" />
+                </div>
+                <div class="form-group">
+                  <label>Account Type</label>
+                  <select id="bdAccType">
+                    <option value="Savings">Savings</option>
+                    <option value="Current">Current</option>
+                  </select>
+                </div>
+                <div class="form-group full">
+                  <label>Aadhaar Card Number</label>
+                  <input type="text" id="bdAadhaar" placeholder="e.g. 123456789012" />
+                </div>
+                <div class="form-group full">
+                  <label>Passbook / Cancelled Cheque Photo</label>
+                  <input type="file" id="bdPassbookFile" accept="image/*,application/pdf" />
+                </div>
+              </div>
+              <button type="submit" class="btn-submit-leave" id="bdSubmitBtn" style="margin-top:6px;">Submit Bank
+                Details</button>
+            </form>
+          </div>
+
+          <div id="bankReadonlyWrapper" style="display:none;">
+            <div class="bd-readonly-card">
+              <div class="bd-readonly-row"><span>Account Holder:</span><span id="roHolderName">—</span></div>
+              <div class="bd-readonly-row"><span>Account Number:</span><span id="roAccNumber">—</span></div>
+              <div class="bd-readonly-row"><span>IFSC Code:</span><span id="roIfsc">—</span></div>
+              <div class="bd-readonly-row"><span>Bank Name:</span><span id="roBankName">—</span></div>
+              <div class="bd-readonly-row"><span>Branch:</span><span id="roBranchName">—</span></div>
+              <div class="bd-readonly-row"><span>Account Type:</span><span id="roAccType">—</span></div>
+              <div class="bd-readonly-row"><span>Submitted On:</span><span id="roSubmittedAt">—</span></div>
+            </div>
+            <div class="bd-note" style="margin-top:14px; margin-bottom:0;">Bank details have already been submitted.
+              Contact HR to change.</div>
+          </div>
+        </div>
+
+        <!-- Tab 2: My Documents -->
+        <div class="bd-panel" id="bdPanelDocs">
+          <div class="doc-grid">
+            <div class="doc-tile" onclick="document.getElementById('fileProfilePhoto').click()">
+              <div class="doc-icon">🖼️</div>
+              <div class="doc-label">Profile Photo</div>
+              <div class="doc-status empty" id="statusProfilePhoto">Not uploaded</div>
+              <input type="file" id="fileProfilePhoto" accept="image/*"
+                onchange="handleDocUpload('profile_photo', this)" />
+            </div>
+            <div class="doc-tile" onclick="document.getElementById('fileAadhaarPdf').click()">
+              <div class="doc-icon">📄</div>
+              <div class="doc-label">Aadhar Card (PDF)</div>
+              <div class="doc-status empty" id="statusAadhaarPdf">Not uploaded</div>
+              <input type="file" id="fileAadhaarPdf" accept="application/pdf"
+                onchange="handleDocUpload('aadhaar_pdf', this)" />
+            </div>
+            <div class="doc-tile" onclick="document.getElementById('fileEduExp').click()">
+              <div class="doc-icon">🎓</div>
+              <div class="doc-label">Education/Experience</div>
+              <div class="doc-status empty" id="statusEduExp">Not uploaded</div>
+              <input type="file" id="fileEduExp" accept="image/*,application/pdf"
+                onchange="handleDocUpload('education_experience', this)" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Salary Slips -->
+        <div class="bd-panel" id="bdPanelSlips">
+          <div id="slipsListWrapper">
+            <div class="empty-note">Loading salary slips...</div>
+          </div>
+          <div id="slipDetailWrapper" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+              <button class="nav-btn" onclick="closeSlipDetail()">← Back to list</button>
+              <button class="btn-print-slip" onclick="printSalarySlip()">🖨️ Print / Save PDF</button>
+            </div>
+
+            <div class="slip-card" id="empSlipCard">
+              <div class="slip-header">
+                <div>
+                  <div class="slip-brand-name">Codeline<span>.AI</span></div>
+                  <div class="slip-brand-sub">Enterprise Business Management System</div>
+                </div>
+                <div class="slip-title-block">
+                  <div class="slip-title">Payslip Statement</div>
+                  <div class="slip-period" id="slipPeriod">—</div>
+                </div>
+              </div>
+
+              <div class="slip-meta-grid">
+                <div>
+                  <div class="meta-row"><span class="meta-label">Employee ID</span><span class="meta-val" id="slipEmpId">—</span></div>
+                  <div class="meta-row"><span class="meta-label">Name</span><span class="meta-val" id="slipEmpName">—</span></div>
+                  <div class="meta-row"><span class="meta-label">Designation</span><span class="meta-val" id="slipDesignation">—</span></div>
+                </div>
+                <div>
+                  <div class="meta-row"><span class="meta-label">Slip ID</span><span class="meta-val" id="slipId">—</span></div>
+                  <div class="meta-row"><span class="meta-label">Generated On</span><span class="meta-val" id="slipGenDate">—</span></div>
+                  <div class="meta-row"><span class="meta-label">Employment</span><span class="meta-val" id="slipEmpType">—</span></div>
+                </div>
+              </div>
+
+              <div class="slip-divider"></div>
+
+              <div class="slip-section-title">Attendance Summary</div>
+              <table class="slip-table" style="margin-bottom:20px;">
+                <thead><tr><th>Description</th><th>Days</th></tr></thead>
+                <tbody>
+                  <tr><td>Total Present Days</td><td id="slipPresent">0</td></tr>
+                  <tr><td>Total Absent Days</td><td id="slipAbsent">0</td></tr>
+                </tbody>
+              </table>
+
+              <div class="slip-section-title">Earnings &amp; Deductions</div>
+              <table class="slip-table">
+                <thead><tr><th>Description</th><th>Earnings (₹)</th><th>Deductions (₹)</th></tr></thead>
+                <tbody>
+                  <tr><td>Base Monthly Salary</td><td id="slipGross">0.00</td><td>—</td></tr>
+                  <tr><td>Absentee Deductions</td><td>—</td><td style="color:#EF4444;" id="slipDed">0.00</td></tr>
+                </tbody>
+              </table>
+
+              <div class="net-pay-box">
+                <div class="net-pay-label">Net Pay Disbursed</div>
+                <div class="net-pay-amount">₹<span id="slipNet">0.00</span></div>
+              </div>
+
+              <div class="slip-signatures">
+                <div>
+                  <div style="color:#6B7280; font-size:11.5px;">Authorised Signatory</div>
+                  <div class="sig-line">HR Department</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="color:#6B7280; font-size:11.5px;">Employee Acknowledgement</div>
+                  <div class="sig-line" style="margin-left:auto;">Signature &amp; Date</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Password Modal ═══ -->
+  <div class="modal-overlay" id="passwordModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🔒 Change Password</h3>
+        <button class="modal-close-btn" onclick="closeModal('passwordModal')">✕ Close</button>
+      </div>
+      <div class="modal-body">
+        <form id="changePasswordForm" onsubmit="submitPasswordChange(event)">
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="pwOld" required />
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="pwNew" required minlength="6" />
+          </div>
+          <div class="pw-strength-hint">Must be at least 6 characters.</div>
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <input type="password" id="pwConfirm" required minlength="6" />
+          </div>
+          <button type="submit" class="btn-submit-leave" id="pwSubmitBtn">Update Password</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+  <script>
+    AppSession.protect();
+    const TOKEN = AppSession.getToken();
+    const USER = AppSession.getUser();
+
+    let EMPLOYEE_DATA = null;
+
+    // ── IST-safe helpers ──────────────────────────────────────
+    // Browser new Date() uses the local timezone — but if the
+    // user's device is on UTC or another TZ, the date can shift by
+    // a day. Explicitly calculate IST (UTC+5:30).
+    function getISTDate() {
+      const now = new Date();
+      const ist = new Date(now.getTime() + 330 * 60 * 1000); // IST = UTC + 5:30
+      return new Date(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate(),
+        ist.getUTCHours(), ist.getUTCMinutes(), ist.getUTCSeconds());
+    }
+
+    // Backend sends plain "dd-MM-yyyy" strings for every date field
+    // (joining_date, attendance Date, shift roster date, task due_date, etc).
+    // new Date("18-11-2025") is NOT reliably parseable by JS (Invalid Date),
+    // so this helper parses that exact format.
+    function parseDMY(str) {
+      if (!str) return null;
+      const s = String(str).trim();
+      const m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/); // dd-MM-yyyy
+      if (m) {
+        return new Date(parseInt(m[3], 10), parseInt(m[2], 10) - 1, parseInt(m[1], 10));
+      }
+      const d = new Date(s); // fallback: ISO or other parseable formats
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    // Convert any date/string to a "YYYY-MM-DD" IST string
+    function toISTDateStr(val) {
+      if (!val) return '';
+      // Handle both Google Sheets Date object and ISO string
+      let d;
+      if (val instanceof Date) {
+        d = val;
+      } else {
+        const str = String(val);
+        // Already YYYY-MM-DD format? Return as-is
+        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+        // Backend's plain "dd-MM-yyyy" display format
+        if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(str)) {
+          const parsed = parseDMY(str);
+          return parsed ? formatDateYMD(parsed) : '';
+        }
+        d = new Date(str);
+      }
+      if (isNaN(d.getTime())) return String(val).split('T')[0];
+      const IST_OFFSET_MS = 330 * 60 * 1000;
+      const istD = new Date(d.getTime() + IST_OFFSET_MS);
+      return istD.toISOString().split('T')[0];
+    }
+    // ─────────────────────────────────────────────────────────
+
+    const _istNow = getISTDate();
+    let CAL_MONTH = _istNow.getMonth();
+    let CAL_YEAR = _istNow.getFullYear();
+    // TODAY = IST midnight (for future-date comparison in calendar)
+    const TODAY = new Date(_istNow.getFullYear(), _istNow.getMonth(), _istNow.getDate());
+
+    // ── Shared request cache ──────────────────────────────────
+    // memoizeAsync caches the in-flight PROMISE, not just the resolved
+    // value — so if two callers ask for the same thing at nearly the same
+    // time, the second one reuses the first caller's pending request.
+    function memoizeAsync(fn) {
+      const cache = new Map();
+      const memoized = (key) => {
+        if (!cache.has(key)) {
+          cache.set(key, fn(key).catch(err => { cache.delete(key); throw err; }));
+        }
+        return cache.get(key);
+      };
+      memoized.invalidate = (key) => cache.delete(key);
+      memoized.invalidateAll = () => cache.clear();
+      return memoized;
+    }
+
+    const getShiftTemplatesCached = memoizeAsync(async () => {
+      try {
+        const res = await fetch(`${API_URL}?action=getShifts&token=${TOKEN}&_ts=${Date.now()}`, { cache: 'no-store' });
+        const payload = await res.json();
+        return (payload.status === 'success' ? payload.data : []) || [];
+      } catch (e) { return []; }
+    });
+
+    const getAttendanceCached = memoizeAsync(async () => {
+      try {
+        const res = await fetch(`${API_URL}?action=getAttendance&token=${TOKEN}&limit=200`, { cache: 'no-store' });
+        const payload = await res.json();
+        return (payload.status === 'success' && payload.data && payload.data.data) || [];
+      } catch (e) { return []; }
+    });
+
+    const getRawLeavesCached = memoizeAsync(async () => {
+      try {
+        const res = await fetch(`${API_URL}?action=getLeaves&token=${TOKEN}&_ts=${Date.now()}`, { cache: 'no-store' });
+        const payload = await res.json();
+        return (payload.status === 'success' && payload.data && payload.data.data) || [];
+      } catch (e) { return []; }
+    });
+    async function getApprovedLeavesCached() {
+      const raw = await getRawLeavesCached('all');
+      return raw.filter(l => l.emp_id === USER.employee_id && l.status === 'approved');
+    }
+
+    const getHolidaysCached = memoizeAsync(async (year) => {
+      try {
+        const res = await fetch(`${API_URL}?action=getHolidays&token=${TOKEN}&year=${year}&_ts=${Date.now()}`, { cache: 'no-store' });
+        const payload = await res.json();
+        return (payload.status === 'success' ? payload.data : []) || [];
+      } catch (e) { return []; }
+    });
+
+    const getShiftRosterCachedRaw = memoizeAsync(async (rangeKey) => {
+      const [fromDate, toDate] = rangeKey.split('_');
+      try {
+        const res = await fetch(`${API_URL}?action=getShiftRoster&token=${TOKEN}&from_date=${fromDate}&to_date=${toDate}&_ts=${Date.now()}`, { cache: 'no-store' });
+        const payload = await res.json();
+        return (payload.status === 'success' && Array.isArray(payload.data)) ? payload.data : [];
+      } catch (e) { return []; }
+    });
+    function getShiftRosterCached(fromDate, toDate) {
+      return getShiftRosterCachedRaw(fromDate + '_' + toDate);
+    }
+    // ─────────────────────────────────────────────────────────
+
+    // ── Shift-aware attendance status (Present / Irregular / Absent) ──
+    // Falls back to "never flag" defaults when the employee has no
+    // default shift and no roster override for that specific day.
+    const CAL_DEFAULT_SHIFT_START_MIN = 24 * 60;  // no shift assigned: never flag late-in
+    const CAL_DEFAULT_SHIFT_END_MIN = 0;          // no shift assigned: never flag early-out
+    const CAL_GRACE_MIN = 15;
+
+    function timeToMinutes(t) {
+      if (!t) return null;
+      const str = String(t).trim();
+      if (str.includes('T')) { const p = str.split('T')[1].split(':'); return (+p[0] || 0) * 60 + (+p[1] || 0); }
+      if (str.includes(':')) { const p = str.split(':'); return (+p[0] || 0) * 60 + (+p[1] || 0); }
+      if (!isNaN(parseFloat(str))) return Math.round(parseFloat(str) * 24 * 60); // Sheets decimal time
+      return null;
+    }
+
+    // Returns 'present' | 'irregular' | 'absent' | null (null = nothing
+    // to show, e.g. a future day). isToday days with no punch-out yet
+    // are not flagged irregular — they're just still checked in.
+    function calDayStatus(log, isOffDay, isFuture, isToday, shiftStartMin, shiftEndMin) {
+      if (log && log['In-Time']) {
+        const inMin = timeToMinutes(log['In-Time']);
+        const outMin = log['Out-Time'] ? timeToMinutes(log['Out-Time']) : null;
+        const lateIn = inMin !== null && inMin > shiftStartMin + CAL_GRACE_MIN;
+        const earlyOut = outMin !== null && outMin < shiftEndMin - CAL_GRACE_MIN;
+        const missingPunch = (outMin === null && !isToday);
+        return (lateIn || earlyOut || missingPunch) ? 'irregular' : 'present';
+      }
+      if (isOffDay || isFuture || isToday) return null;
+      return 'absent';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!USER || !USER.employee_id) { window.location.href = 'index.html'; return; }
+      // loadShiftAndAttendanceStats() needs EMPLOYEE_DATA.default_shift_id
+      // (set inside loadProfile()) for its fallback — wait for it first.
+      loadProfile().then(loadShiftAndAttendanceStats);
+      loadCalendar();
+      loadTasks();
+      loadMyLeaves();
+      loadTodayPunchStatus();
+      loadTargetStat();
+      initOnboardingInstructions();
+    });
+
+    /* ── Navbar actions ── */
+    function toggleMobileActions() {
+      document.getElementById('mobileActionsSheet').classList.toggle('open');
+    }
+    function doLogout() {
+      // keep "started tasks" lists, clear everything else
+      const keep = {};
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('started_tasks_')) keep[k] = localStorage.getItem(k);
+      });
+      localStorage.clear();
+      Object.keys(keep).forEach(k => localStorage.setItem(k, keep[k]));
+      window.location.href = 'index.html';
+    }
+
+    function toggleNavMenu(e) {
+      e.stopPropagation();
+      document.getElementById('navMenuDropdown').classList.toggle('open');
+    }
+    function closeNavMenu() {
+      document.getElementById('navMenuDropdown').classList.remove('open');
+    }
+    document.addEventListener('click', (e) => {
+      const wrap = document.getElementById('navMenuWrap');
+      if (wrap && !wrap.contains(e.target)) closeNavMenu();
+    });
+
+    function openLeaveModal() {
+      document.getElementById('leaveModal').classList.add('open');
+      loadMyLeaves();
+      loadLeaveSummary();
+    }
+
+    function openTargetModal() {
+      document.getElementById('targetModal').classList.add('open');
+      loadMyTargets();
+    }
+
+    function openExpenseModal() {
+      document.getElementById('expenseModal').classList.add('open');
+      if (!document.getElementById('qeDate').value) {
+        document.getElementById('qeDate').value = new Date().toISOString().split('T')[0];
+      }
+      loadMyExpenses();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    /* ── ID Card Modal ── */
+    function openIdCardModal() {
+      if (!EMPLOYEE_DATA) { showToast('Profile data is still loading, please try again in a second.'); return; }
+      const emp = EMPLOYEE_DATA;
+      const initials = emp.name ? emp.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'EE';
+
+      document.getElementById('idCardAvatar').textContent = initials;
+      document.getElementById('idCardName').textContent = emp.name || 'Employee';
+      document.getElementById('idCardRole').textContent = (USER.role || 'staff').replace(/_/g, ' ').toUpperCase();
+      document.getElementById('idCardEmpId').textContent = emp.emp_id || '—';
+      // Backend resolves department_name — raw department_id (e.g. "DP001")
+      // should never be shown in the UI.
+      document.getElementById('idCardDept').textContent = emp.department_name || '—';
+      const idCardJoinD = parseDMY(emp.joining_date);
+      document.getElementById('idCardJoin').textContent = idCardJoinD
+        ? idCardJoinD.toLocaleDateString('en-IN', { day: 'numeric', month: 'numeric', year: 'numeric' })
+        : '—';
+      document.getElementById('idCardMobile').textContent = emp.mobile || '—';
+
+      const qrWrap = document.getElementById('idCardQrWrap');
+      qrWrap.innerHTML = '';
+      const qrPayload = `EBMS:${emp.emp_id}:${emp.name}`;
+      if (window.QRCode) {
+        new QRCode(qrWrap, { text: qrPayload, width: 124, height: 124, colorDark: '#000000', colorLight: '#ffffff' });
+      } else {
+        qrWrap.textContent = 'QR unavailable';
+      }
+
+      document.getElementById('idCardModal').classList.add('open');
+    }
+
+    function downloadIdCardPdf() {
+      const cardEl = document.querySelector('#idCardModal .id-card-shell');
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html><head><title>ID Card — ${EMPLOYEE_DATA ? EMPLOYEE_DATA.name : 'Employee'}</title>
+        <style>
+          body { font-family: Inter, sans-serif; background:#0A0A0B; color:#fff; display:flex; justify-content:center; padding:40px; }
+          @media print { body { background: #fff; } }
+        </style></head><body>${cardEl.outerHTML}</body></html>
+      `);
+      printWindow.document.close();
+      setTimeout(() => { printWindow.print(); }, 350);
+    }
+
+    /* ── Bank & Docs Modal ── */
+    let BANK_DETAILS_CACHE = null;
+
+    function openBankDocsModal(initialTab) {
+      document.getElementById('bankDocsModal').classList.add('open');
+      switchBdTab(initialTab || 'bank');
+      loadBankDetails();
+      loadMyDocuments();
+    }
+
+    function switchBdTab(tab) {
+      document.querySelectorAll('.bd-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.bd-panel').forEach(p => p.classList.remove('active'));
+
+      if (tab === 'bank') {
+        document.getElementById('tabBtnBank').classList.add('active');
+        document.getElementById('bdPanelBank').classList.add('active');
+      } else if (tab === 'docs') {
+        document.getElementById('tabBtnDocs').classList.add('active');
+        document.getElementById('bdPanelDocs').classList.add('active');
+      } else if (tab === 'slips') {
+        document.getElementById('tabBtnSlips').classList.add('active');
+        document.getElementById('bdPanelSlips').classList.add('active');
+        loadSalarySlips();
+      }
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function loadBankDetails() {
+      try {
+        const res = await fetch(`${API_URL}?action=getBankDetails&token=${TOKEN}&_ts=${Date.now()}`, { cache: 'no-store' });
+        const payload = await res.json();
+        if (payload.status === 'success' && payload.data) {
+          BANK_DETAILS_CACHE = payload.data;
+          renderBankDetailsReadonly(payload.data);
+        } else {
+          document.getElementById('bankFormWrapper').style.display = 'block';
+          document.getElementById('bankReadonlyWrapper').style.display = 'none';
+        }
+      } catch (e) { showToast('Could not load bank details.'); }
+    }
+
+    function renderBankDetailsReadonly(d) {
+      document.getElementById('bankFormWrapper').style.display = 'none';
+      document.getElementById('bankReadonlyWrapper').style.display = 'block';
+      document.getElementById('roHolderName').textContent = d.account_holder_name || '—';
+      document.getElementById('roAccNumber').textContent = d.account_number || '—';
+      document.getElementById('roIfsc').textContent = d.ifsc_code || '—';
+      document.getElementById('roBankName').textContent = d.bank_name || '—';
+      document.getElementById('roBranchName').textContent = d.branch_name || '—';
+      document.getElementById('roAccType').textContent = d.account_type || '—';
+      document.getElementById('roSubmittedAt').textContent = d.submitted_at
+        ? new Date(d.submitted_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+        : '—';
+    }
+
+    async function submitBankDetailsForm(e) {
+      e.preventDefault();
+      const btn = document.getElementById('bdSubmitBtn');
+      btn.disabled = true; btn.textContent = 'Submitting...';
+
+      try {
+        const payload = {
+          token: TOKEN,
+          action: 'submitBankDetails',
+          account_holder_name: document.getElementById('bdHolderName').value.trim(),
+          account_number: document.getElementById('bdAccNumber').value.trim(),
+          ifsc_code: document.getElementById('bdIfsc').value.trim(),
+          bank_name: document.getElementById('bdBankName').value.trim(),
+          branch_name: document.getElementById('bdBranchName').value.trim(),
+          account_type: document.getElementById('bdAccType').value,
+          aadhaar_number: document.getElementById('bdAadhaar').value.trim()
+        };
+
+        const fileInput = document.getElementById('bdPassbookFile');
+        if (fileInput.files && fileInput.files[0]) {
+          const file = fileInput.files[0];
+          payload.passbook_file_base64 = await fileToBase64(file);
+          payload.passbook_file_name = file.name;
+          payload.passbook_mime_type = file.type;
+        }
+
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('Bank details saved successfully!');
+          loadBankDetails();
+        } else {
+          showToast(out.message || 'Error during submission.');
+        }
+      } catch (err) {
+        showToast('Network error.');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Submit Bank Details';
+      }
+    }
+
+    /* ── My Documents tab ── */
+    const docInputMap = { profile_photo: 'fileProfilePhoto', aadhaar_pdf: 'fileAadhaarPdf', education_experience: 'fileEduExp' };
+    const docStatusMap = { profile_photo: 'statusProfilePhoto', aadhaar_pdf: 'statusAadhaarPdf', education_experience: 'statusEduExp' };
+
+    async function loadMyDocuments() {
+      try {
+        const res = await fetch(`${API_URL}?action=getMyDocuments&token=${TOKEN}&_ts=${Date.now()}`, { cache: 'no-store' });
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          Object.keys(docStatusMap).forEach(cat => {
+            const el = document.getElementById(docStatusMap[cat]);
+            el.textContent = 'Not uploaded';
+            el.classList.add('empty');
+          });
+          (payload.data || []).forEach(doc => {
+            const el = document.getElementById(docStatusMap[doc.doc_category]);
+            if (el) {
+              el.textContent = '✓ Uploaded';
+              el.classList.remove('empty');
+            }
+          });
+        }
+      } catch (e) { /* keep defaults */ }
+    }
+
+    async function handleDocUpload(category, inputEl) {
+      if (!inputEl.files || !inputEl.files[0]) return;
+      const file = inputEl.files[0];
+      const statusEl = document.getElementById(docStatusMap[category]);
+      const prevText = statusEl.textContent;
+      statusEl.textContent = 'Uploading...';
+
+      try {
+        const base64 = await fileToBase64(file);
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            token: TOKEN,
+            action: 'uploadDocument',
+            doc_category: category,
+            file_base64: base64,
+            file_name: file.name,
+            mime_type: file.type
+          })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('Document uploaded successfully!');
+          statusEl.textContent = '✓ Uploaded';
+          statusEl.classList.remove('empty');
+        } else {
+          showToast(out.message || 'Upload error.');
+          statusEl.textContent = prevText;
+        }
+      } catch (e) {
+        showToast('Network error during upload.');
+        statusEl.textContent = prevText;
+      } finally {
+        inputEl.value = '';
+      }
+    }
+
+    /* ── Salary Slips tab ── */
+    async function loadSalarySlips() {
+      const wrapper = document.getElementById('slipsListWrapper');
+      document.getElementById('slipDetailWrapper').style.display = 'none';
+      wrapper.style.display = 'block';
+      wrapper.innerHTML = '<div class="empty-note">Loading salary slips...</div>';
+
+      try {
+        const res = await fetch(`${API_URL}?action=getSalarySlips&token=${TOKEN}`);
+        const payload = await res.json();
+        const slips = (payload.data && payload.data.data) || [];
+        if (!slips.length) {
+          wrapper.innerHTML = '<div class="empty-note">No salary slip has been generated yet.</div>';
+          return;
+        }
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        wrapper.innerHTML = slips.map(s => `
+          <div class="leave-row-item" style="cursor:pointer;" onclick="openSlipDetail('${s.slip_id}')">
+            <div class="leave-row-left">
+              <div class="leave-type-text">${monthNames[(parseInt(s.month) || 1) - 1]} ${s.year}</div>
+              <div class="leave-dates-text">Net Pay: ₹${parseFloat(s.net_salary || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+            </div>
+            <span class="badge badge-completed">View →</span>
+          </div>
+        `).join('');
+      } catch (e) {
+        wrapper.innerHTML = '<div class="empty-note">Could not load salary slips.</div>';
+      }
+    }
+
+    async function openSlipDetail(slipId) {
+      try {
+        const res = await fetch(`${API_URL}?action=getSingleSalarySlip&token=${TOKEN}&slip_id=${slipId}`);
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          const b = payload.data;
+          const s = b.slip;
+          const monthNamesFull = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+          const period = `${monthNamesFull[parseInt(s.month) || 1] || 'Month ' + s.month} — ${s.year}`;
+
+          document.getElementById('slipPeriod').textContent = `Statement Period: ${period}`;
+          document.getElementById('slipEmpId').textContent = s.emp_id || '—';
+          document.getElementById('slipEmpName').textContent = b.employee_name || (EMPLOYEE_DATA && EMPLOYEE_DATA.name) || '—';
+          document.getElementById('slipDesignation').textContent = b.designation || '—';
+          document.getElementById('slipId').textContent = s.slip_id;
+          document.getElementById('slipGenDate').textContent = s.generated_on
+            ? new Date(s.generated_on).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+            : '—';
+          document.getElementById('slipEmpType').textContent = b.employment_type || '—';
+          document.getElementById('slipPresent').textContent = s.present_days ?? '—';
+          document.getElementById('slipAbsent').textContent = s.absent_days ?? '0';
+          document.getElementById('slipGross').textContent = parseFloat(s.gross_salary || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+          document.getElementById('slipDed').textContent = parseFloat(s.deductions || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+          document.getElementById('slipNet').textContent = parseFloat(s.net_salary || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+          document.getElementById('slipsListWrapper').style.display = 'none';
+          document.getElementById('slipDetailWrapper').style.display = 'block';
+        } else {
+          showToast(payload.message || 'Could not load slip detail.');
+        }
+      } catch (e) { showToast('Network error.'); }
+    }
+
+    function printSalarySlip() {
+      const cardEl = document.getElementById('empSlipCard');
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html><head><title>Salary Slip — ${document.getElementById('slipEmpName').textContent}</title>
+        <style>
+          body { font-family: Inter, sans-serif; margin:0; padding:24px; background:#fff; }
+          table { border-collapse: collapse; width: 100%; }
+        </style></head><body>${cardEl.outerHTML}</body></html>
+      `);
+      printWindow.document.close();
+      setTimeout(() => { printWindow.print(); }, 350);
+    }
+
+    function closeSlipDetail() {
+      document.getElementById('slipDetailWrapper').style.display = 'none';
+      document.getElementById('slipsListWrapper').style.display = 'block';
+    }
+
+    /* ── Password Modal ── */
+    function openPasswordModal() {
+      document.getElementById('changePasswordForm').reset();
+      document.getElementById('passwordModal').classList.add('open');
+    }
+
+    async function submitPasswordChange(e) {
+      e.preventDefault();
+      const oldPw = document.getElementById('pwOld').value;
+      const newPw = document.getElementById('pwNew').value;
+      const confirmPw = document.getElementById('pwConfirm').value;
+
+      if (newPw !== confirmPw) { showToast('New password and confirm password do not match.'); return; }
+      if (newPw.length < 6) { showToast('New password must be at least 6 characters.'); return; }
+
+      const btn = document.getElementById('pwSubmitBtn');
+      btn.disabled = true; btn.textContent = 'Updating...';
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ token: TOKEN, action: 'changePassword', old_password: oldPw, new_password: newPw })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('Password changed successfully!');
+          closeModal('passwordModal');
+        } else {
+          showToast(out.message || 'Password change failed.');
+        }
+      } catch (err) {
+        showToast('Network error.');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Update Password';
+      }
+    }
+
+    /* ── Section 1: Profile ── */
+    async function loadProfile() {
+      try {
+        const res = await fetch(`${API_URL}?action=getEmployee&token=${TOKEN}&emp_id=${USER.employee_id}`);
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          EMPLOYEE_DATA = payload.data;
+          bindProfile(EMPLOYEE_DATA);
+        } else {
+          console.error('getEmployee failed:', payload.message);
+          showToast(payload.message || 'Could not load profile.');
+        }
+      } catch (e) {
+        console.error('loadProfile network error:', e);
+        showToast('Could not load profile.');
+      }
+    }
+
+    function bindProfile(emp) {
+      const initials = emp.name ? emp.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'EE';
+      document.getElementById('profileAvatarInitials').textContent = initials;
+      document.getElementById('profileName').textContent = emp.name || 'Employee';
+      // Backend sends department_name / designation_name / branch_name —
+      // raw *_id codes should never be shown in the UI.
+      document.getElementById('profileDesignation').textContent = '💼 ' + (emp.designation_name || 'Staff');
+      document.getElementById('profileDepartment').textContent = '🏷️ ' + (emp.department_name || '—');
+      document.getElementById('profileBranch').textContent = '🏢 ' + (emp.branch_name || '—');
+
+      document.getElementById('infoEmpId').textContent = emp.emp_id || '—';
+      document.getElementById('infoEmail').textContent = emp.email || '—';
+      document.getElementById('infoMobile').textContent = emp.mobile || '—';
+
+      // Date of joining — sent as plain "dd-MM-yyyy", so it must go
+      // through parseDMY(), not new Date().
+      const joinD = parseDMY(emp.joining_date);
+      if (joinD) {
+        document.getElementById('infoJoinDate').textContent = joinD.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        const days = Math.floor((TODAY - joinD) / (1000 * 60 * 60 * 24));
+        if (days >= 0) document.getElementById('infoJoinDays').textContent = `${days} Days with us`;
+      } else {
+        document.getElementById('infoJoinDate').textContent = '—';
+        document.getElementById('infoJoinDays').textContent = '';
+      }
+
+      // Weekly off — one-time lock logic (elements are hidden in the
+      // stats row now, but the IDs are kept so this code does not break)
+      if (emp.weekly_off) {
+        document.getElementById('statWeeklyOff').textContent = emp.weekly_off;
+        document.getElementById('weeklyOffLocked').style.display = 'block';
+        document.getElementById('weeklyOffSetter').style.display = 'none';
+        document.getElementById('weeklyOffIcon').textContent = '🔒';
+      } else {
+        document.getElementById('weeklyOffLocked').style.display = 'none';
+        document.getElementById('weeklyOffSetter').style.display = 'block';
+        document.getElementById('weeklyOffIcon').textContent = '📅';
+      }
+    }
+
+    /* ── Weekly Off — one-time selection ── */
+    function onWeeklyOffChange() {
+      const val = document.getElementById('weeklyOffSelect').value;
+      const confirmBtn = document.getElementById('weeklyOffConfirmBtn');
+      confirmBtn.style.display = val ? 'block' : 'none';
+    }
+
+    function confirmWeeklyOff() {
+      const val = document.getElementById('weeklyOffSelect').value;
+      if (!val) return;
+
+      const confirmed = window.confirm(
+        `Set Weekly Off to "${val}"?\n\n` +
+        `⚠️ This can only be set once. To change it later, you will need to request HR.`
+      );
+      if (!confirmed) return;
+
+      saveWeeklyOff(val);
+    }
+
+    async function saveWeeklyOff(day) {
+      const confirmBtn = document.getElementById('weeklyOffConfirmBtn');
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Saving...';
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            token: TOKEN,
+            action: 'setMyWeeklyOff',  // dedicated route — employee allowed
+            weekly_off: day
+          })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast(`✅ Weekly off set to "${day}"! Saved to the sheet.`);
+
+          document.getElementById('statWeeklyOff').textContent = day;
+          document.getElementById('weeklyOffLocked').style.display = 'block';
+          document.getElementById('weeklyOffSetter').style.display = 'none';
+          document.getElementById('weeklyOffIcon').textContent = '🔒';
+
+          if (EMPLOYEE_DATA) EMPLOYEE_DATA.weekly_off = day;
+          loadCalendar();
+        } else {
+          showToast(out.message || 'Weekly off could not be saved, please try again.');
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = '✓ Confirm Weekly Off';
+        }
+      } catch (e) {
+        showToast('Network error — weekly off could not be saved.');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = '✓ Confirm Weekly Off';
+      }
+    }
+
+    /* ── Section 2: Shift + Monthly Hours ── */
+    async function loadShiftAndAttendanceStats() {
+      const todayStr = formatDateYMD(new Date());
+      const firstDay = formatDateYMD(new Date(CAL_YEAR, CAL_MONTH, 1));
+      const lastDay = formatDateYMD(new Date(CAL_YEAR, CAL_MONTH + 1, 0));
+
+      const [rosterToday, attendanceLogs] = await Promise.all([
+        getShiftRosterCached(todayStr, todayStr),
+        getAttendanceCached()
+      ]);
+
+      const matchedRoster = rosterToday.find(a => a.emp_id === USER.employee_id && toISTDateStr(a.date) === todayStr) || null;
+
+      if (matchedRoster) {
+        document.getElementById('statShiftTime').textContent = `${formatTime12Hour(matchedRoster.start_time)} – ${formatTime12Hour(matchedRoster.end_time)}`;
+        document.getElementById('statShiftName').textContent = matchedRoster.shift_name || '—';
+      } else if (EMPLOYEE_DATA && EMPLOYEE_DATA.default_shift_id) {
+        const templates = await getShiftTemplatesCached();
+        const tmpl = templates.find(s => s.shift_id === EMPLOYEE_DATA.default_shift_id);
+        if (tmpl) {
+          document.getElementById('statShiftTime').textContent = `${formatTime12Hour(tmpl.start_time)} – ${formatTime12Hour(tmpl.end_time)}`;
+          document.getElementById('statShiftName').textContent = tmpl.shift_name + ' (Standard)';
+        } else {
+          document.getElementById('statShiftTime').textContent = '—';
+          document.getElementById('statShiftName').textContent = 'No shift assigned today';
+        }
+      } else {
+        document.getElementById('statShiftTime').textContent = '—';
+        document.getElementById('statShiftName').textContent = 'No shift assigned today';
+      }
+
+      // Monthly hours from attendance. The attendance schema is
+      // Name / Phone / Email / Date / In-Time / Out-Time. For an 'employee'
+      // session the backend already scopes to that employee's own Email,
+      // so we only filter the cached logs down to the current month here.
+      const mine = attendanceLogs.filter(l => {
+        const dk = toISTDateStr(l['Date']);
+        return dk >= firstDay && dk <= lastDay;
+      });
+      let totalMinutes = 0;
+      let presentDays = 0;
+      mine.forEach(l => {
+        const inT = l['In-Time'], outT = l['Out-Time'];
+        if (inT) {
+          presentDays++; // punched in that day = present
+          if (outT) {
+            const mins = diffMinutes(inT, outT);
+            if (mins > 0) totalMinutes += mins;
+          }
+        }
+      });
+      const hrs = Math.floor(totalMinutes / 60);
+      const mins = totalMinutes % 60;
+      document.getElementById('statMonthHours').textContent = `${hrs}h ${mins}m`;
+      document.getElementById('statMonthHoursSub').textContent = `${presentDays} days present`;
+    }
+
+    function diffMinutes(inTime, outTime) {
+      const toMins = (t) => {
+        const str = String(t).trim();
+        if (str.includes('T')) { const p = str.split('T')[1].split(':'); return +p[0] * 60 + +p[1]; }
+        if (str.includes(':')) { const p = str.split(':'); return +p[0] * 60 + +p[1]; }
+        if (!isNaN(parseFloat(str))) {
+          // Google Sheets decimal time: 0.4847 = 11:38
+          return Math.round(parseFloat(str) * 24 * 60);
+        }
+        return 0;
+      };
+      const diff = toMins(outTime) - toMins(inTime);
+      return diff > 0 ? diff : 0;
+    }
+
+    function formatDateYMD(d) {
+      // d is a JS Date object — convert to IST "YYYY-MM-DD"
+      const IST_OFFSET_MS = 330 * 60 * 1000;
+      const ist = new Date(d.getTime() + IST_OFFSET_MS);
+      return ist.toISOString().split('T')[0];
+    }
+
+    /* ── Section 4: Attendance Calendar ── */
+    async function loadCalendar() {
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      document.getElementById('calendarMonthLabel').textContent = `${monthNames[CAL_MONTH]} ${CAL_YEAR}`;
+
+      const now = new Date();
+      document.getElementById('btnCalNext').disabled = (CAL_YEAR === now.getFullYear() && CAL_MONTH === now.getMonth());
+
+      const firstDay = formatDateYMD(new Date(CAL_YEAR, CAL_MONTH, 1));
+      const lastDay = formatDateYMD(new Date(CAL_YEAR, CAL_MONTH + 1, 0));
+      const daysInMonth = new Date(CAL_YEAR, CAL_MONTH + 1, 0).getDate();
+      const startWeekday = new Date(CAL_YEAR, CAL_MONTH, 1).getDay();
+
+      const gridEl = document.getElementById('calendarGrid');
+      const loadingTimer = setTimeout(() => {
+        gridEl.innerHTML = '<div class="empty-note" style="grid-column: 1 / -1;">Loading calendar...</div>';
+      }, 250);
+
+      let attendanceMap = {};
+      let leaveDatesSet = new Set();
+      let holidaySet = new Set();
+      let shiftMap = {}; // dateKey (YYYY-MM-DD) -> { shift_name, start_time, end_time } roster override
+
+      const [attendanceLogs, approvedLeaves, holidays, rosterRows] = await Promise.all([
+        getAttendanceCached(),
+        getApprovedLeavesCached(),
+        getHolidaysCached(CAL_YEAR),
+        getShiftRosterCached(firstDay, lastDay)
+      ]);
+
+      attendanceLogs.forEach(l => {
+        const dateKey = toISTDateStr(l['Date']);
+        if (dateKey >= firstDay && dateKey <= lastDay) attendanceMap[dateKey] = l;
+      });
+
+      approvedLeaves.forEach(l => {
+        let d = new Date(l.from_date);
+        const to = new Date(l.to_date);
+        while (d <= to) { leaveDatesSet.add(formatDateYMD(d)); d.setDate(d.getDate() + 1); }
+      });
+
+      holidays.forEach(h => holidaySet.add(toISTDateStr(h.date)));
+
+      rosterRows.forEach(a => {
+        if (a.emp_id !== USER.employee_id) return;
+        const dk = toISTDateStr(a.date);
+        if (dk) shiftMap[dk] = { shift_name: a.shift_name, start_time: a.start_time, end_time: a.end_time };
+      });
+
+      clearTimeout(loadingTimer);
+
+      // Employee's own standard shift (for late-in/early-out grace window
+      // on days that have no roster override).
+      let defaultTmpl = null;
+      if (EMPLOYEE_DATA && EMPLOYEE_DATA.default_shift_id) {
+        const templates = await getShiftTemplatesCached();
+        defaultTmpl = templates.find(s => s.shift_id === EMPLOYEE_DATA.default_shift_id) || null;
+      }
+
+      const weeklyOff = (EMPLOYEE_DATA && EMPLOYEE_DATA.weekly_off) || null;
+      const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+      let html = '';
+      let cntPresent = 0, cntIrregular = 0, cntAbsent = 0;
+
+      ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(w => html += `<div class="cal-weekday">${w}</div>`);
+      for (let i = 0; i < startWeekday; i++) html += `<div class="cal-cell empty"></div>`;
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateObj = new Date(CAL_YEAR, CAL_MONTH, day);
+        const dateKey = formatDateYMD(dateObj);
+        const isFuture = dateObj > TODAY;
+        const isToday = dateObj.getTime() === TODAY.getTime();
+        const isOffDay = (weeklyOff && weekdayNames[dateObj.getDay()] === weeklyOff) || holidaySet.has(dateKey);
+        const dayShift = shiftMap[dateKey]; // roster override for this specific date, if any
+        const log = attendanceMap[dateKey];
+
+        const shiftStartMin = dayShift ? timeToMinutes(dayShift.start_time)
+          : (defaultTmpl ? timeToMinutes(defaultTmpl.start_time) : null);
+        const shiftEndMin = dayShift ? timeToMinutes(dayShift.end_time)
+          : (defaultTmpl ? timeToMinutes(defaultTmpl.end_time) : null);
+
+        let cls = 'cal-cell';
+        let statusLabel = '';
+        let statusKey = ''; // used by the popup for its coloured badge
+
+        if (isFuture) {
+          if (holidaySet.has(dateKey)) cls += ' cal-holiday';
+          else cls += isOffDay ? ' cal-off' : ' cal-future';
+        } else if (leaveDatesSet.has(dateKey)) {
+          cls += ' cal-leave';
+          statusLabel = 'Approved Leave';
+          statusKey = 'leave';
+        } else {
+          const status = calDayStatus(
+            log, isOffDay, isFuture, isToday,
+            shiftStartMin !== null ? shiftStartMin : CAL_DEFAULT_SHIFT_START_MIN,
+            shiftEndMin !== null ? shiftEndMin : CAL_DEFAULT_SHIFT_END_MIN
+          );
+          if (status === 'present') { cls += ' cal-present'; statusLabel = 'Present'; statusKey = 'present'; cntPresent++; }
+          else if (status === 'irregular') { cls += ' cal-irregular'; statusLabel = 'Irregular Timing'; statusKey = 'irregular'; cntIrregular++; }
+          else if (status === 'absent') { cls += ' cal-absent'; statusLabel = 'Absent'; statusKey = 'absent'; cntAbsent++; }
+          else if (holidaySet.has(dateKey)) { cls += ' cal-holiday'; statusLabel = 'Public Holiday'; statusKey = 'holiday'; }
+          else if (isOffDay) { cls += ' cal-off'; statusLabel = 'Weekly Off'; statusKey = 'off'; }
+        }
+        // Shift-override marker layers on top regardless of the status colour above.
+        if (dayShift) cls += ' cal-hasshift';
+
+        let tipText = `${dateKey}${statusLabel ? ' — ' + statusLabel : ''}`;
+        if (log) {
+          const inT = log['In-Time'] ? log['In-Time'] : '—';
+          const outT = log['Out-Time'] ? log['Out-Time'] : '—';
+          tipText += `\nIN: ${inT}  OUT: ${outT}`;
+        }
+        if (dayShift) {
+          tipText += `\nShift Override: ${dayShift.shift_name || ''} (${dayShift.start_time || '—'}–${dayShift.end_time || '—'})`;
+        }
+
+        // Clickable (opens the day-detail popup) for any non-future day.
+        const isClickable = !isFuture;
+        if (isClickable) {
+          cls += ' cal-clickable';
+          html += `<div class="${cls}" title="${tipText}" data-status="${statusKey}" onclick="calOpenDayModal('${dateKey}')">${day}</div>`;
+        } else {
+          html += `<div class="${cls}" title="${tipText}">${day}</div>`;
+        }
+      }
+
+      // Update the stat cards only for the current month (not when browsing past months)
+      if (CAL_YEAR === _istNow.getFullYear() && CAL_MONTH === _istNow.getMonth()) {
+        const leaveCount = [...leaveDatesSet].filter(d => d >= firstDay && d <= lastDay).length;
+        const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setText('statPresentDays', cntPresent + cntIrregular);
+        setText('statIrregularDays', cntIrregular);
+        setText('statAbsentDays', cntAbsent);
+        setText('statLeaveDays', leaveCount);
+      }
+
+      // Stash for the day-detail popup (calOpenDayModal), so a click doesn't
+      // need to re-fetch anything already loaded for this month's grid.
+      window._calAttMap = attendanceMap;
+      window._calShiftMap = shiftMap;
+      window._calDefaultTmpl = defaultTmpl;
+      window._calLeaveDates = leaveDatesSet;
+      window._calWeeklyOff = weeklyOff;
+      window._calHolidaySet = holidaySet;
+
+      document.getElementById('calendarGrid').innerHTML = html;
+    }
+
+    function calOpenDayModal(dateKey) {
+      loadDailyTasksForDate(dateKey);
+
+      const record = (window._calAttMap || {})[dateKey];
+      const dayShift = (window._calShiftMap || {})[dateKey];
+      const defaultTmpl = window._calDefaultTmpl;
+      const isLeave = (window._calLeaveDates || new Set()).has(dateKey);
+
+      const dateObj = parseYMD(dateKey);
+      const title = dateObj
+        ? dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+        : dateKey;
+      document.getElementById('calDayModalTitle').textContent = title;
+
+      // Status badge
+      const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const isOffDay = dateObj && ((window._calWeeklyOff && weekdayNames[dateObj.getDay()] === window._calWeeklyOff) || (window._calHolidaySet || new Set()).has(dateKey));
+      const isToday = dateObj && dateObj.getTime() === TODAY.getTime();
+      let statusKey = 'absent', statusLabel = 'Absent';
+      if (isLeave) {
+        statusKey = 'leave'; statusLabel = 'Approved Leave';
+      } else if (record && record['In-Time']) {
+        const shiftStartMin = dayShift ? timeToMinutes(dayShift.start_time) : (defaultTmpl ? timeToMinutes(defaultTmpl.start_time) : null);
+        const shiftEndMin = dayShift ? timeToMinutes(dayShift.end_time) : (defaultTmpl ? timeToMinutes(defaultTmpl.end_time) : null);
+        const status = calDayStatus(record, isOffDay, false, isToday,
+          shiftStartMin !== null ? shiftStartMin : CAL_DEFAULT_SHIFT_START_MIN,
+          shiftEndMin !== null ? shiftEndMin : CAL_DEFAULT_SHIFT_END_MIN);
+        statusKey = status; statusLabel = status === 'irregular' ? 'Irregular Timing' : 'Present';
+      } else if ((window._calHolidaySet || new Set()).has(dateKey)) {
+        statusKey = 'holiday'; statusLabel = 'Public Holiday';
+      } else if (isOffDay) {
+        statusKey = 'off'; statusLabel = 'Weekly Off';
+      } else if (isToday) {
+        statusKey = 'off'; statusLabel = 'Today — not punched yet';
+      }
+      const statusEl = document.getElementById('calDayModalStatus');
+      statusEl.className = 'cal-day-modal-status st-' + statusKey;
+      statusEl.textContent = statusLabel;
+
+      // In / Out time
+      document.getElementById('calDayModalIn').textContent = (record && record['In-Time']) ? record['In-Time'] : '—';
+      document.getElementById('calDayModalOut').textContent = (record && record['Out-Time'])
+        ? record['Out-Time']
+        : (record && record['In-Time'] ? (isToday ? 'Still In' : 'Not punched out') : '—');
+
+      // Shift row — prefer a date-specific Admin override; otherwise fall
+      // back to the employee's own standard shift.
+      const shiftLabel = document.getElementById('calDayModalShiftLabel');
+      const shiftEl = document.getElementById('calDayModalShift');
+      if (dayShift) {
+        shiftLabel.textContent = 'Shift Override (by Admin)';
+        shiftEl.textContent = `${dayShift.shift_name || 'Shift'} (${dayShift.start_time || '—'} – ${dayShift.end_time || '—'})`;
+      } else if (defaultTmpl) {
+        shiftLabel.textContent = 'Standard Shift';
+        shiftEl.textContent = `${defaultTmpl.shift_name || 'Shift'} (${defaultTmpl.start_time || '—'} – ${defaultTmpl.end_time || '—'})`;
+      } else {
+        shiftLabel.textContent = 'Shift';
+        shiftEl.textContent = 'No shift assigned';
+      }
+
+      document.getElementById('calDayModalOverlay').classList.add('open');
+    }
+
+    function calCloseDayModal() {
+      document.getElementById('calDayModalOverlay').classList.remove('open');
+    }
+
+    /* ── Daily Tasks (Phase 11 §7.7) — read-only view for whichever ── */
+    /* ── calendar date is currently open; add/edit lives in the      ── */
+    /* ── "📝 Daily Tasks" modal (navbar, next to Leave Requests)      ── */
+    const DT_APPROVAL_BADGE = {
+      'Pending Approval': 'badge-pending-approval',
+      'Approved': 'badge-approved',
+      'Rejected': 'badge-rejected',
+      'Correction Required': 'badge-correction'
+    };
+
+    async function loadDailyTasksForDate(dateKey) {
+      const listEl = document.getElementById('calDayModalTasksList');
+      listEl.innerHTML = '<div class="dt-empty">Loading…</div>';
+      try {
+        const res = await fetch(`${API_URL}?action=getDailyTasks&token=${TOKEN}&date=${dateKey}&_ts=${Date.now()}`, { cache: 'no-store' });
+        const payload = await res.json();
+        if (payload.status !== 'success') {
+          listEl.innerHTML = '<div class="dt-empty">Could not load tasks for this date.</div>';
+          return;
+        }
+        const tasks = (payload.data && payload.data.data) || [];
+
+        if (!tasks.length) {
+          listEl.innerHTML = '<div class="dt-empty">No tasks were added for this date.</div>';
+          return;
+        }
+
+        listEl.innerHTML = tasks.map(t => renderDailyTaskItem(t, { showDate: false, readOnly: true })).join('');
+      } catch (e) {
+        listEl.innerHTML = '<div class="dt-empty">Network error loading tasks.</div>';
+      }
+    }
+
+    // Shared card markup for a single daily task — used by both the
+    // calendar day-popup list (single date, read-only) and the
+    // "📝 Daily Tasks" modal list (spans many dates, editable).
+    function renderDailyTaskItem(t, opts) {
+      opts = opts || {};
+      const badgeClass = DT_APPROVAL_BADGE[t.approval_status] || 'badge-pending-approval';
+      const timeBit = (t.start_time || t.completion_time)
+        ? `${t.start_time || '—'} – ${t.completion_time || '—'}`
+        : '';
+      const canResubmit = !opts.readOnly && t.approval_status === 'Correction Required';
+      const resubmitFn = opts.resubmitFn || 'prefillDtModalEdit';
+      return `
+        <div class="dt-item">
+          <div class="dt-item-top">
+            <div class="dt-item-title">${escapeHtml(t.task_title || 'Untitled task')}${opts.showDate ? ` <span style="color:var(--text-dim); font-weight:500;">· ${escapeHtml(t.task_date || '')}</span>` : ''}</div>
+            <span class="badge ${badgeClass}">${t.approval_status || 'Pending Approval'}</span>
+          </div>
+          ${timeBit ? `<div class="dt-item-desc">${timeBit}</div>` : ''}
+          ${t.task_description ? `<div class="dt-item-desc">${escapeHtml(t.task_description)}</div>` : ''}
+          ${t.admin_remark ? `<div class="dt-item-remark">Admin remark: ${escapeHtml(t.admin_remark)}</div>` : ''}
+          ${canResubmit ? `<button type="button" class="btn-dt-resubmit" onclick="${resubmitFn}('${t.task_id}')">✏️ Edit & Resubmit</button>` : ''}
+        </div>
+      `;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    /* ── Daily Tasks modal (button next to "📅 Leave Requests" in the navbar) ── */
+    /* ── Lists across ALL dates, and lets you pick the date to log ── */
+    let _dtmEditingTaskId = null;
+    let _dtmTasksCache = {};
+
+    function openDailyTasksModal() {
+      document.getElementById('dailyTasksModal').classList.add('open');
+      document.getElementById('dtmAddForm').classList.remove('open');
+      loadMyDailyTasksList();
+    }
+
+    function closeDailyTasksModal() {
+      document.getElementById('dailyTasksModal').classList.remove('open');
+      document.getElementById('dtmAddForm').classList.remove('open');
+      _dtmEditingTaskId = null;
+    }
+
+    async function loadMyDailyTasksList() {
+      const listEl = document.getElementById('dailyTasksList');
+      listEl.innerHTML = '<div class="dt-empty">Loading…</div>';
+      try {
+        const res = await fetch(`${API_URL}?action=getDailyTasks&token=${TOKEN}&_ts=${Date.now()}`, { cache: 'no-store' });
+        const payload = await res.json();
+        if (payload.status !== 'success') {
+          listEl.innerHTML = '<div class="dt-empty">Could not load your daily tasks.</div>';
+          return;
+        }
+        const tasks = (payload.data && payload.data.data) || [];
+        _dtmTasksCache = {};
+        tasks.forEach(t => { _dtmTasksCache[t.task_id] = t; });
+
+        if (!tasks.length) {
+          listEl.innerHTML = '<div class="dt-empty">You haven\'t logged any daily tasks yet.</div>';
+          return;
+        }
+
+        listEl.innerHTML = tasks.map(t => renderDailyTaskItem(t, { showDate: true, resubmitFn: 'prefillDtModalEdit' })).join('');
+      } catch (e) {
+        listEl.innerHTML = '<div class="dt-empty">Network error loading your daily tasks.</div>';
+      }
+    }
+
+    function toggleDtModalAddForm(forceOpen) {
+      const form = document.getElementById('dtmAddForm');
+      const shouldOpen = forceOpen !== undefined ? forceOpen : !form.classList.contains('open');
+      if (!shouldOpen) {
+        form.classList.remove('open');
+        return;
+      }
+      if (forceOpen === undefined) {
+        _dtmEditingTaskId = null;
+        document.getElementById('dtmDate').value = formatDateYMD(new Date());
+        document.getElementById('dtmDate').max = formatDateYMD(new Date());
+        document.getElementById('dtmTaskTitle').value = '';
+        document.getElementById('dtmTaskDescription').value = '';
+        document.getElementById('dtmStartTime').value = '';
+        document.getElementById('dtmCompletionTime').value = '';
+        document.getElementById('dtmTaskStatus').value = 'Completed';
+        document.getElementById('dtmEmployeeRemark').value = '';
+        document.getElementById('dtmSubmitBtn').textContent = 'Submit Task';
+      }
+      form.classList.add('open');
+    }
+
+    function prefillDtModalEdit(taskId) {
+      const t = _dtmTasksCache[taskId];
+      if (!t) return;
+      _dtmEditingTaskId = taskId;
+      // task_date comes back from the server as dd-MM-yyyy — the <input type="date"> needs yyyy-MM-dd.
+      const dm = String(t.task_date || '').match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+      document.getElementById('dtmDate').value = dm ? `${dm[3]}-${dm[2].padStart(2, '0')}-${dm[1].padStart(2, '0')}` : '';
+      document.getElementById('dtmTaskTitle').value = t.task_title || '';
+      document.getElementById('dtmTaskDescription').value = t.task_description || '';
+      document.getElementById('dtmStartTime').value = t.start_time || '';
+      document.getElementById('dtmCompletionTime').value = t.completion_time || '';
+      document.getElementById('dtmTaskStatus').value = t.task_status || 'Completed';
+      document.getElementById('dtmEmployeeRemark').value = t.employee_remark || '';
+      document.getElementById('dtmSubmitBtn').textContent = 'Resubmit Task';
+      toggleDtModalAddForm(true);
+    }
+
+    async function submitDtModalTask() {
+      const title = document.getElementById('dtmTaskTitle').value.trim();
+      const dateVal = document.getElementById('dtmDate').value;
+      if (!title) { showToast('Task title is required.'); return; }
+      if (!dateVal) { showToast('Please pick a date.'); return; }
+
+      const btn = document.getElementById('dtmSubmitBtn');
+      btn.disabled = true;
+      const originalLabel = btn.textContent;
+      btn.textContent = 'Saving…';
+
+      const payload = {
+        token: TOKEN,
+        task_title: title,
+        task_description: document.getElementById('dtmTaskDescription').value.trim(),
+        task_date: dateVal,
+        start_time: document.getElementById('dtmStartTime').value,
+        completion_time: document.getElementById('dtmCompletionTime').value,
+        task_status: document.getElementById('dtmTaskStatus').value,
+        employee_remark: document.getElementById('dtmEmployeeRemark').value.trim()
+      };
+
+      if (_dtmEditingTaskId) {
+        payload.action = 'updateDailyTask';
+        payload.task_id = _dtmEditingTaskId;
+      } else {
+        payload.action = 'addDailyTask';
+      }
+
+      try {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast(out.message || 'Daily task saved.');
+          toggleDtModalAddForm(false);
+          loadMyDailyTasksList();
+        } else {
+          showToast(out.message || 'Could not save the task.');
+        }
+      } catch (e) {
+        showToast('Network error while saving the task.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalLabel;
+      }
+    }
+
+    // dateKey is "YYYY-MM-DD" (from formatDateYMD) — plain local Date parse.
+    function parseYMD(dateKey) {
+      const m = String(dateKey || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!m) return null;
+      return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    }
+
+    function changeCalendarMonth(delta) {
+      CAL_MONTH += delta;
+      if (CAL_MONTH > 11) { CAL_MONTH = 0; CAL_YEAR++; }
+      if (CAL_MONTH < 0) { CAL_MONTH = 11; CAL_YEAR--; }
+      loadCalendar();
+    }
+
+    /* ── Section 5: Task Board (Assigned / In Progress / Review / Done) ── */
+    const priorityClass = { high: 'badge-high', medium: 'badge-medium', low: 'badge-low' };
+    let _submitWorkTaskId = null;
+    let _submitWorkMode = 'submit'; // 'submit' (new / resubmit) or 'edit' (edit an accepted work)
+    let TASK_CACHE = {};
+
+    // due_date comes as "dd-MM-yyyy" — must go through parseDMY(), not new Date()
+    function formatTaskDate(val) {
+      const d = parseDMY(val);
+      return d ? d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+    }
+
+    // Tasks the employee has clicked "Start Work" on (stored per employee in this browser)
+    const STARTED_KEY = 'started_tasks_' + (USER && USER.employee_id);
+
+    function getStartedTasks() {
+      try { return JSON.parse(localStorage.getItem(STARTED_KEY) || '[]'); }
+      catch (e) { return []; }
+    }
+
+    function startTask(taskId) {
+      const list = getStartedTasks();
+      if (!list.includes(taskId)) {
+        list.push(taskId);
+        localStorage.setItem(STARTED_KEY, JSON.stringify(list));
+      }
+      showToast('Task started!');
+      loadTasks();
+    }
+
+    // Decides which board column a task belongs to
+    function getTaskColumn(t) {
+      if (t.status === 'completed') return 'done';
+      if (t.status === 'in_review') return 'review';
+      if (t.submission_status === 'rejected') return 'progress';
+      if (getStartedTasks().includes(t.task_id) || t.submission_link) return 'progress';
+      return 'assigned'; // newly assigned, not started yet
+    }
+
+    async function loadTasks() {
+      try {
+        const res = await fetch(`${API_URL}?action=getTasks&token=${TOKEN}`);
+        const payload = await res.json();
+        if (payload.status !== 'success') return;
+
+        const arr = ((payload.data && payload.data.data) || []).filter(t => t.assigned_to === USER.employee_id);
+
+        TASK_CACHE = {};
+        arr.forEach(t => { TASK_CACHE[t.task_id] = t; });
+
+        const cols = { assigned: [], progress: [], review: [], done: [] };
+        arr.forEach(t => cols[getTaskColumn(t)].push(t));
+        cols.done.sort((a, b) => ((parseDMY(b.due_date) || 0) - (parseDMY(a.due_date) || 0)));
+
+        const emptyText = {
+          assigned: 'No new task assigned.',
+          progress: 'No task in progress.',
+          review: 'Nothing under review.',
+          done: 'No completed task yet.'
+        };
+
+        Object.keys(cols).forEach(key => {
+          const name = key.charAt(0).toUpperCase() + key.slice(1);
+          document.getElementById('col' + name).innerHTML = cols[key].length
+            ? cols[key].map(renderTaskCard).join('')
+            : `<div class="kanban-empty">${emptyText[key]}</div>`;
+          document.getElementById('cnt' + name).textContent = cols[key].length;
+        });
+      } catch (e) { showToast('Could not load tasks.'); }
+    }
+
+    function renderTaskCard(t) {
+      const col = getTaskColumn(t);
+      const dueD = parseDMY(t.due_date);
+      const dueText = formatTaskDate(t.due_date);
+      const isOverdue = dueD && dueD < TODAY && col !== 'done';
+      const isRejected = t.submission_status === 'rejected';
+      const id = t.task_id;
+
+      const subBox = (t.submission_link && (col === 'review' || col === 'done'))
+        ? `<div class="task-sub-box">
+             🔗 <a href="${escapeHtml(t.submission_link)}" target="_blank" rel="noopener">View submitted work</a>
+             ${t.submission_note ? `<div style="margin-top:4px;">📝 ${escapeHtml(t.submission_note)}</div>` : ''}
+           </div>`
+        : '';
+
+      let footerAction = '';
+      if (col === 'done') {
+        footerAction = `
+          <span style="color:var(--success);font-size:12px;font-weight:600;">✓ Accepted</span>
+          <button class="btn-done" onclick="openSubmitModal('${id}', 'edit')">✏️ Edit</button>`;
+      } else if (col === 'review') {
+        footerAction = `<span style="color:#FCD34D;font-size:12px;font-weight:600;">⏳ Under Review</span>`;
+      } else if (col === 'progress') {
+        footerAction = `
+          <button class="btn-done" onclick="openSubmitModal('${id}', 'submit')">${isRejected ? 'Re-Submit 📤' : 'Submit Work 📤'}</button>`;
+      } else {
+        footerAction = `
+          <button class="btn-done" onclick="startTask('${id}')">▶ Start Work</button>`;
+      }
+
+      const rejectBox = (col === 'progress' && isRejected)
+        ? `<div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);border-radius:8px;padding:8px 10px;font-size:11.5px;color:#F87171;margin:6px 0;">
+             ✕ Rejected: ${escapeHtml(t.review_note || 'Reason not given')}
+           </div>`
+        : '';
+
+      return `
+        <div class="glass-card task-card">
+          <div class="task-top">
+            <div class="task-title">${escapeHtml(t.title || '')}</div>
+            <span class="badge ${priorityClass[t.priority] || 'badge-low'}">${(t.priority || '').toUpperCase()}</span>
+          </div>
+          ${t.description ? `<div style="font-size:11.5px;color:var(--text-dim);margin:4px 0;">${escapeHtml(t.description.slice(0, 80))}${t.description.length > 80 ? '…' : ''}</div>` : ''}
+          <div class="task-due" ${isOverdue ? 'style="color:var(--danger);"' : ''}>📅 Due: ${dueText}${isOverdue ? ' ⚠️' : ''}</div>
+          ${rejectBox}
+          ${subBox}
+          <div class="task-footer">${footerAction}</div>
+        </div>
+      `;
+    }
+
+    // mode: 'submit' (new / resubmit) or 'edit' (edit an already accepted work)
+    function openSubmitModal(taskId, mode) {
+      const t = TASK_CACHE[taskId] || {};
+      const isEdit = mode === 'edit';
+      _submitWorkTaskId = taskId;
+      _submitWorkMode = isEdit ? 'edit' : 'submit';
+      document.getElementById('submitWorkTaskTitle').textContent = t.title || '';
+      document.getElementById('submitWorkTaskId').textContent = '🆔 ' + taskId;
+      document.getElementById('submitWorkLink').value = isEdit ? (t.submission_link || '') : '';
+      document.getElementById('submitWorkNote').value = isEdit ? (t.submission_note || '') : '';
+      document.getElementById('submitWorkBtn').textContent = isEdit ? 'Update Work ✏️' : 'Submit Work 📤';
+      document.getElementById('submitWorkModal').classList.add('open');
+    }
+
+    function closeSubmitModal() {
+      document.getElementById('submitWorkModal').classList.remove('open');
+      _submitWorkTaskId = null;
+    }
+
+    async function doSubmitWork() {
+      const link = document.getElementById('submitWorkLink').value.trim();
+      if (!link) { showToast('Please enter the drive link!'); return; }
+      const btn = document.getElementById('submitWorkBtn');
+      const idleLabel = _submitWorkMode === 'edit' ? 'Update Work ✏️' : 'Submit Work 📤';
+      btn.disabled = true; btn.textContent = 'Submitting...';
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            token: TOKEN,
+            action: 'submitTask',
+            task_id: _submitWorkTaskId,
+            submission_link: link,
+            submission_note: document.getElementById('submitWorkNote').value.trim()
+          })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast(_submitWorkMode === 'edit' ? 'Work updated! ✓' : 'Work submitted! Admin will review it. ✓');
+          closeSubmitModal();
+          loadTasks();
+        } else { showToast(out.message || 'Error.'); }
+      } catch (e) { showToast('Network error.'); }
+      finally { btn.disabled = false; btn.textContent = idleLabel; }
+    }
+
+    async function completeMyTask(taskId) {
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ token: TOKEN, action: 'updateTask', task_id: taskId, status: 'completed' })
+        });
+        const out = await res.json();
+        if (out.status === 'success') { showToast('Task completed! ✓'); loadTasks(); }
+        else showToast(out.message || 'Update error.');
+      } catch (e) { showToast('Network error.'); }
+    }
+
+    /* ── Section 6: Leave Request ── */
+    // Leave summary numbers (esp. Total, from the settings sheet's
+    // ANNUAL_LEAVES key) are resolved entirely server-side by
+    // getLeaveSummary — never hardcoded here.
+    async function loadLeaveSummary() {
+      try {
+        const res = await fetch(`${API_URL}?action=getLeaveSummary&token=${TOKEN}&_ts=${Date.now()}`, { cache: 'no-store' });
+        const payload = await res.json();
+        if (payload.status !== 'success') { showToast(payload.message); return; }
+
+        const s = payload.data;
+        document.getElementById('lsTotal').textContent     = s.total_annual_leaves;
+        document.getElementById('lsUsed').textContent      = s.used;
+        document.getElementById('lsRemaining').textContent = s.remaining;
+        document.getElementById('lsPending').textContent   = s.pending;
+        document.getElementById('lsApproved').textContent  = s.approved;
+        document.getElementById('lsRejected').textContent  = s.rejected;
+      } catch (e) { showToast('Failed to load leave summary.'); }
+    }
+
+    /* ── My Target (Phase 11 §7.8) ── */
+    // Achieved/Remaining/Progress% are always resolved server-side by
+    // getEmployeeTargets — never calculated here.
+    let MY_TARGETS = [];
+    const TARGET_MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    async function loadMyTargets() {
+      const selectorWrap = document.getElementById('targetSelectorWrap');
+      const emptyState = document.getElementById('targetEmptyState');
+      const contentWrap = document.getElementById('targetContentWrap');
+      selectorWrap.style.display = 'none';
+      emptyState.style.display = 'none';
+      contentWrap.style.display = 'none';
+
+      try {
+        const res = await fetch(`${API_URL}?action=getEmployeeTargets&token=${TOKEN}&limit=50&_ts=${Date.now()}`, { cache: 'no-store' });
+        const payload = await res.json();
+        if (payload.status !== 'success') { showToast(payload.message || 'Target did not load.'); return; }
+
+        MY_TARGETS = (payload.data && payload.data.data) || [];
+        if (MY_TARGETS.length === 0) {
+          emptyState.style.display = 'block';
+          return;
+        }
+
+        // Latest period first
+        MY_TARGETS.sort((a, b) => (b.target_year - a.target_year) || (b.target_month - a.target_month));
+
+        const select = document.getElementById('targetPeriodSelect');
+        select.innerHTML = MY_TARGETS.map((t, i) => {
+          const label = `${TARGET_MONTH_NAMES[parseInt(t.target_month, 10) - 1] || t.target_month} ${t.target_year} — ${t.target_type}`;
+          return `<option value="${i}">${label}</option>`;
+        }).join('');
+
+        if (MY_TARGETS.length > 1) selectorWrap.style.display = 'block';
+        contentWrap.style.display = 'block';
+        renderSelectedTarget();
+      } catch (e) {
+        showToast('Network error while loading target.');
+      }
+    }
+
+    function renderSelectedTarget() {
+      if (MY_TARGETS.length === 0) return;
+      const idx = parseInt(document.getElementById('targetPeriodSelect').value || '0', 10);
+      const t = MY_TARGETS[idx] || MY_TARGETS[0];
+
+      document.getElementById('tgAssigned').textContent = t.assigned_target;
+      document.getElementById('tgAchieved').textContent = t.achieved_target;
+      document.getElementById('tgRemaining').textContent = t.remaining_target;
+      document.getElementById('tgProgress').textContent = t.progress_percent + '%';
+      document.getElementById('tgProgressBar').style.width = Math.min(parseFloat(t.progress_percent) || 0, 100) + '%';
+
+      const monthLabel = TARGET_MONTH_NAMES[parseInt(t.target_month, 10) - 1] || t.target_month;
+      document.getElementById('tgTypeLabel').textContent =
+        `${t.target_type.charAt(0).toUpperCase() + t.target_type.slice(1)} target for ${monthLabel} ${t.target_year}`;
+    }
+
+    function calcLeaveDays(fromStr, toStr) {
+      if (!fromStr || !toStr) return 1;
+      const from = new Date(fromStr), to = new Date(toStr);
+      const diff = Math.round((to - from) / (1000 * 60 * 60 * 24)) + 1;
+      return diff > 0 ? diff : 1;
+    }
+
+    async function submitQuickLeave(e) {
+      e.preventDefault();
+      const btn = document.getElementById('qlSubmitBtn');
+      btn.disabled = true; btn.textContent = 'Submitting...';
+
+      const fromVal = document.getElementById('qlFrom').value;
+      const toVal = document.getElementById('qlTo').value;
+
+      const payload = {
+        token: TOKEN,
+        action: 'applyLeave',
+        emp_id: USER.employee_id,
+        leave_type: document.getElementById('qlType').value,
+        from_date: fromVal,
+        to_date: toVal,
+        days: calcLeaveDays(fromVal, toVal),
+        reason: document.getElementById('qlReason').value
+      };
+
+      try {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('Leave request submitted!');
+          document.getElementById('quickLeaveForm').reset();
+          getRawLeavesCached.invalidate('all');
+          loadMyLeaves();
+          loadLeaveSummary();
+          loadCalendar();
+        } else {
+          showToast(out.message || 'Error during submission.');
+        }
+      } catch (err) {
+        showToast('Network error.');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Submit Leave Request';
+      }
+    }
+
+    async function loadMyLeaves() {
+      try {
+        const raw = await getRawLeavesCached('all');
+        const mine = raw.filter(l => l.emp_id === USER.employee_id);
+        if (mine.length === 0) {
+          document.getElementById('myLeavesList').innerHTML = '<div class="empty-note">No leave history found.</div>';
+          return;
+        }
+        const badgeClass = { approved: 'badge-approved', rejected: 'badge-rejected', pending: 'badge-pending' };
+        document.getElementById('myLeavesList').innerHTML = mine.slice(0, 8).map(l => {
+          const from = l.from_date ? new Date(l.from_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—';
+          const to = l.to_date ? new Date(l.to_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—';
+          return `
+            <div class="leave-row-item">
+              <div class="leave-row-left">
+                <div class="leave-type-text">${l.leave_type || '—'}</div>
+                <div class="leave-dates-text">${from} – ${to} · ${l.days || '—'} day(s)</div>
+              </div>
+              <span class="badge ${badgeClass[l.status] || 'badge-pending'}">${l.status}</span>
+            </div>
+          `;
+        }).join('');
+      } catch (e) { showToast('Could not load leaves.'); }
+    }
+
+    /* ── Section 6b: Expense Claims ── */
+    async function submitQuickExpense(e) {
+      e.preventDefault();
+      const btn = document.getElementById('qeSubmitBtn');
+      btn.disabled = true; btn.textContent = 'Submitting...';
+
+      const payload = {
+        token: TOKEN,
+        action: 'applyExpense',
+        emp_id: USER.employee_id,
+        category: document.getElementById('qeCategory').value,
+        amount: document.getElementById('qeAmount').value,
+        date: document.getElementById('qeDate').value,
+        description: document.getElementById('qeDescription').value.trim(),
+        receipt_url: document.getElementById('qeReceiptUrl').value.trim()
+      };
+
+      try {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('Expense claim submitted!');
+          document.getElementById('quickExpenseForm').reset();
+          document.getElementById('qeDate').value = new Date().toISOString().split('T')[0];
+          loadMyExpenses();
+        } else {
+          showToast(out.message || 'Error during submission.');
+        }
+      } catch (err) {
+        showToast('Network error.');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Submit Expense Claim';
+      }
+    }
+
+    async function loadMyExpenses() {
+      try {
+        const res = await fetch(`${API_URL}?action=getExpenses&token=${TOKEN}&_ts=${Date.now()}`, { cache: 'no-store' });
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          const mine = (payload.data || []).filter(x => x.emp_id === USER.employee_id);
+          if (mine.length === 0) {
+            document.getElementById('myExpensesList').innerHTML = '<div class="empty-note">No expense claim history found.</div>';
+            return;
+          }
+          const badgeClass = { approved: 'badge-approved', rejected: 'badge-rejected', pending: 'badge-pending' };
+          document.getElementById('myExpensesList').innerHTML = mine.slice(0, 8).map(x => {
+            const dateDisplay = x.date ? new Date(x.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—';
+            const amountDisplay = '₹' + (parseFloat(x.amount) || 0).toLocaleString('en-IN');
+            return `
+              <div class="leave-row-item">
+                <div class="leave-row-left">
+                  <div class="leave-type-text">${x.category || '—'}</div>
+                  <div class="leave-dates-text">${amountDisplay} · ${dateDisplay}</div>
+                </div>
+                <span class="badge ${badgeClass[x.status] || 'badge-pending'}">${x.status}</span>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (e) { showToast('Could not load expenses.'); }
+    }
+
+    /* ── Section 7: Punch Status (read-only) ── */
+    let _workTimerId = null;
+
+    function formatHMS(sec) {
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      return [h, m, s].map(n => String(n).padStart(2, '0')).join(':');
+    }
+
+    function startWorkTimer(inTime, outTime) {
+      const el = document.getElementById('punchHoursToday');
+      if (_workTimerId) { clearInterval(_workTimerId); _workTimerId = null; }
+
+      const inMin = inTime ? timeToMinutes(inTime) : null;
+      if (inMin === null) { el.textContent = '00:00:00'; return; }
+
+      if (outTime) {
+        el.textContent = formatHMS(diffMinutes(inTime, outTime) * 60);
+        return;
+      }
+
+      const tick = () => {
+        const n = getISTDate();
+        const nowSec = n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
+        el.textContent = formatHMS(Math.max(0, nowSec - inMin * 60));
+      };
+      tick();
+      _workTimerId = setInterval(tick, 1000);
+    }
+
+    /* ── Target stat card (e.g. 2/3 admissions) ── */
+    async function loadTargetStat() {
+      const mainEl = document.getElementById('statTarget');
+      const subEl = document.getElementById('statTargetSub');
+      const barEl = document.getElementById('statTargetBar');
+      if (!mainEl) return;
+
+      try {
+        const res = await fetch(`${API_URL}?action=getEmployeeTargets&token=${TOKEN}&limit=50&_ts=${Date.now()}`, { cache: 'no-store' });
+        const payload = await res.json();
+        if (payload.status !== 'success') { subEl.textContent = 'Could not load'; return; }
+
+        const list = (payload.data && payload.data.data) || [];
+        if (!list.length) { mainEl.textContent = '—'; subEl.textContent = 'No target assigned'; return; }
+
+        // Prefer the current month's target, otherwise the latest one
+        const m = _istNow.getMonth() + 1, y = _istNow.getFullYear();
+        list.sort((a, b) => (b.target_year - a.target_year) || (b.target_month - a.target_month));
+        const t = list.find(x => parseInt(x.target_month, 10) === m && parseInt(x.target_year, 10) === y) || list[0];
+
+        const assigned = parseInt(t.assigned_target, 10) || 0;
+        const achieved = parseInt(t.achieved_target, 10) || 0;
+        mainEl.textContent = `${achieved}/${assigned}`;
+        subEl.textContent = `${t.target_type || 'Admission'} target`;
+        barEl.style.width = (assigned ? Math.min(100, (achieved / assigned) * 100) : 0) + '%';
+      } catch (e) {
+        subEl.textContent = 'Network error';
+      }
+    }
+
+    async function loadTodayPunchStatus() {
+      const todayStr = formatDateYMD(new Date());
+      document.getElementById('punchTodayDate').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' });
+
+      try {
+        const res = await fetch(`${API_URL}?action=getAttendance&token=${TOKEN}&date=${todayStr}&limit=5`);
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          const logs = (payload.data && payload.data.data) || [];
+          const mine = logs.find(l => toISTDateStr(l['Date']) === todayStr);
+          if (mine) {
+            const inTime = mine['In-Time'];
+            const outTime = mine['Out-Time'];
+            document.getElementById('punchInTime').textContent = inTime ? formatTime12Hour(inTime) : '—';
+            document.getElementById('punchOutTime').textContent = outTime ? formatTime12Hour(outTime) : '—';
+
+            const badge = document.getElementById('punchLiveBadge');
+            if (inTime && !outTime) {
+              badge.style.display = 'inline-flex';
+              badge.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#22C55E;display:inline-block;animation:pulse 1.5s ease-in-out infinite;"></span> Punched In';
+            } else if (inTime && outTime) {
+              badge.style.display = 'inline-flex';
+              badge.style.background = 'rgba(110,33,125,0.10)';
+              badge.style.color = '#6E217D';
+              badge.style.borderColor = 'rgba(110,33,125,0.28)';
+              badge.innerHTML = '✓ Day Complete';
+            }
+
+            startWorkTimer(inTime, outTime);
+
+            if (inTime) {
+              const card = document.getElementById('punchStatusCard');
+              if (card) card.style.borderColor = 'rgba(34,197,94,0.4)';
+            }
+          } else {
+            document.getElementById('punchInTime').textContent = 'Not punched';
+            document.getElementById('punchOutTime').textContent = '—';
+            document.getElementById('punchHoursToday').textContent = '00:00:00';
+          }
+        }
+      } catch (e) { /* keep defaults */ }
+    }
+  </script>
+
+  <!-- ── Onboarding Instructions Modal (first-time dashboard visit, content from 'instructions' sheet) ── -->
+  <style>
+    .ob-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      z-index: 5000;
+      display: none; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    .ob-overlay.open { display: flex; }
+    .ob-card {
+      background: rgba(18, 18, 20, 0.94);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      max-width: 480px; width: 100%; max-height: 86vh;
+      overflow-y: auto;
+      backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    .ob-header { padding: 24px 24px 14px; text-align: center; border-bottom: 1px solid var(--glass-border); }
+    .ob-header .ob-icon { font-size: 34px; margin-bottom: 8px; }
+    .ob-header h3 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; margin-bottom: 4px; }
+    .ob-header p { color: var(--text-muted); font-size: 13px; }
+    .ob-body { padding: 18px 24px; display: flex; flex-direction: column; gap: 12px; }
+    .ob-item { background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 14px 16px; }
+    .ob-item-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; color: var(--text-primary); }
+    .ob-item-content { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    .ob-footer { padding: 16px 24px 22px; position: sticky; bottom: 0; background: rgba(18, 18, 20, 0.95); }
+    .ob-btn {
+      width: 100%; padding: 12px; border-radius: 10px; border: none;
+      background: var(--accent-glow, #D4D9E6); color: #0A0A0B;
+      font-weight: 700; font-size: 14px; cursor: pointer;
+    }
+    .ob-btn:hover { opacity: 0.9; }
+
+    /* Onboarding modal — light */
+    .ob-card { background: #FFFFFF; }
+    .ob-footer { background: #FFFFFF; }
+    .ob-btn { background: #6E217D; color: #FFFFFF; }
+    .ob-item { background: #FAF7FB; }
+  </style>
+
+  <div class="ob-overlay" id="onboardingModal">
+    <div class="ob-card">
+      <div class="ob-header">
+        <div class="ob-icon">👋</div>
+        <h3>Welcome to Codeline.AI EBMS</h3>
+        <p>Here's a quick overview before you get started</p>
+      </div>
+      <div class="ob-body" id="onboardingBody"></div>
+      <div class="ob-footer">
+        <button class="ob-btn" onclick="dismissOnboarding()">Got it, let's go →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ── Onboarding Instructions (first-time dashboard visit) ── */
+    async function initOnboardingInstructions() {
+      try {
+        const token = AppSession.getToken();
+        const res = await fetch(`${API_URL}?action=getInstructions&token=${token}&_ts=${Date.now()}`, { cache: 'no-store' });
+        const result = await res.json();
+        if (result.status !== 'success') return;
+
+        const { already_seen, instructions } = result.data;
+        if (already_seen || !instructions || !instructions.length) return;
+
+        const body = document.getElementById('onboardingBody');
+        body.innerHTML = instructions.map(item => `
+          <div class="ob-item">
+            <div class="ob-item-title">${item.title || ''}</div>
+            <div class="ob-item-content">${item.content || ''}</div>
+          </div>
+        `).join('');
+
+        document.getElementById('onboardingModal').classList.add('open');
+      } catch (e) { /* silent fail — never block the dashboard */ }
+    }
+
+    async function dismissOnboarding() {
+      document.getElementById('onboardingModal').classList.remove('open');
+      try {
+        const token = AppSession.getToken();
+        await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'markInstructionsSeen', token: token })
+        });
+      } catch (e) { /* silent fail */ }
+    }
+  </script>
+</body>
+
+</html>

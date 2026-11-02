@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reports — Codeline.AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-base: #0A0A0B;
+      --glass: rgba(255, 255, 255, 0.045);
+      --glass-strong: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.09);
+      --glass-blur: 20px;
+      --text-primary: #F4F4F5;
+      --text-muted: #A1A1AA;
+      --text-dim: #6B7280;
+      --accent-glow: #D4D9E6;
+      --success: #34D399;
+      --warning: #FBBF24;
+      --danger: #F87171;
+      --info: #8FAEFF;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      background-image:
+        radial-gradient(circle at 12% -10%, rgba(255, 255, 255, 0.05), transparent 45%),
+        radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.03), transparent 40%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar-spacer {
+      width: 240px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-spacer {
+        display: none;
+      }
+    }
+
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    @media (max-width: 600px) {
+      .main-workspace {
+        padding: 16px;
+      }
+    }
+
+    .mobile-nav-bar {
+      display: none;
+      height: 50px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur));
+      border-radius: var(--radius-sm);
+      align-items: center;
+      padding: 0 16px;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-nav-bar {
+        display: flex;
+      }
+    }
+
+    .header-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .title-area h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .title-area p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-secondary {
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      backdrop-filter: blur(var(--glass-blur));
+    }
+
+    .filter-bar select,
+    .filter-bar input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      padding: 9px 12px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+    }
+
+    .filter-bar select {
+      cursor: pointer;
+    }
+
+    .filter-bar select option {
+      background: #1a1a1e;
+    }
+
+    .filter-bar .btn-generate {
+      background: var(--info);
+      border: none;
+      color: #0A0A0B;
+      border-radius: var(--radius-sm);
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .filter-bar .btn-generate:hover {
+      filter: brightness(1.1);
+    }
+
+    @media (max-width: 900px) {
+
+      .filter-bar select,
+      .filter-bar input {
+        font-size: 16px;
+      }
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .summary-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      backdrop-filter: blur(var(--glass-blur));
+    }
+
+    .summary-card .s-label {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .summary-card .s-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 21px;
+      font-weight: 700;
+      margin-top: 3px;
+    }
+
+    .table-container {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      width: 100%;
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+      min-width: 700px;
+    }
+
+    .data-table th {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+      padding: 12px 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .data-table tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .empty-state {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-dim);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
+
+    .hr-standalone-topbar {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--glass-border);
+      background: var(--glass);
+      backdrop-filter: blur(var(--glass-blur));
+    }
+
+    .hr-back-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.15s;
+    }
+
+    .hr-back-link:hover {
+      color: var(--text-primary);
+    }
+
+    html.hr-standalone-mode body {
+      flex-direction: column;
+    }
+
+    html.hr-standalone-mode .hr-standalone-topbar {
+      display: block !important;
+    }
+
+    html.hr-standalone-mode .mobile-nav-bar {
+      display: none !important;
+    }
+
+    html.hr-standalone-mode .main-workspace {
+      min-height: calc(100vh - 49px);
+    }
+
+    @media print {
+
+      .sidebar-spacer,
+      .mobile-nav-bar,
+      .hr-standalone-topbar,
+      .filter-bar,
+      .header-actions {
+        display: none !important;
+      }
+
+      body {
+        background: #fff;
+        color: #000;
+      }
+
+      .data-table th {
+        background: #eee !important;
+        color: #000 !important;
+      }
+
+      .data-table td {
+        color: #000;
+      }
+
+      .summary-card,
+      .table-container {
+        border: 1px solid #ccc;
+        background: #fff;
+        backdrop-filter: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="sidebar-spacer"></div>
+  <script>
+    (function () {
+      try {
+        var u = JSON.parse(localStorage.getItem('ebms_user') || '{}');
+        if (u.role === 'hr') {
+          var spacer = document.querySelector('.sidebar-spacer');
+          if (spacer) spacer.remove();
+          document.documentElement.classList.add('hr-standalone-mode');
+        }
+      } catch (e) { }
+    })();
+  </script>
+
+  <div class="hr-standalone-topbar" style="display:none;">
+    <a href="hr_dashboard.html" class="hr-back-link">← Back to HR Dashboard</a>
+  </div>
+
+  <div class="main-workspace">
+    <div class="mobile-nav-bar" onclick="openSidebar()">
+      ☰ <span style="font-size:14px; margin-left:12px; font-weight:600;">Menu</span>
+    </div>
+
+    <div class="header-block">
+      <div class="title-area">
+        <h1>📈 Reports</h1>
+        <p>Month-wise reports — attendance, leave, daily tasks, targets, candidates, admissions, joinings</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-secondary" id="btnExportCsv" onclick="exportCsv()" disabled>⬇️ Export CSV</button>
+        <button class="btn-secondary" id="btnPrint" onclick="window.print()" disabled>🖨️ Print</button>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <select id="fReportType" onchange="onReportTypeChange()">
+        <option value="attendance">Attendance</option>
+        <option value="leave">Leave</option>
+        <option value="daily_task">Daily Task</option>
+        <option value="target">Target Performance</option>
+        <option value="candidate">Job Candidates</option>
+        <option value="admission">Admission Leads</option>
+        <option value="joining">Joinings</option>
+      </select>
+      <select id="fMonth">
+        <option value="">Whole Year</option>
+      </select>
+      <select id="fYear"></select>
+      <input type="text" id="fDepartment" placeholder="Department (optional)" />
+      <select id="fEmployee">
+        <option value="">All Employees</option>
+      </select>
+      <button class="btn-generate" onclick="generateReport()">Generate Report</button>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-row" id="summaryRow" style="display:none;"></div>
+
+    <!-- Table -->
+    <div class="table-container">
+      <table class="data-table">
+        <thead id="reportTableHead"></thead>
+        <tbody id="reportTableBody">
+          <tr>
+            <td>
+              <div class="empty-state">
+                <div class="empty-icon">📈</div>
+                <p>Pick a report type and filters, then hit "Generate Report".</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    AppSession.protect();
+    const TOKEN = AppSession.getToken();
+    const USER = AppSession.getUser();
+
+    const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    // Column configs per report type — [ {key, label}, ... ]
+    //
+    // 🆕 A3-tiny FIX [2026-09-27]: `target` config was pointing at the
+    // retired per-employee schema (emp_id / name / department_name /
+    // target_type). Phase 11 §7.8's scope correction moved targets to
+    // HR-level (hr_id / hr_name). Backend (`buildTargetReport()` in
+    // appscript_reports.gs) now returns rows shaped for HR, so the
+    // column keys here must match that shape — otherwise every cell
+    // renders as "—".
+    const REPORT_COLUMNS = {
+      attendance: [
+        { key: 'emp_id', label: 'Emp ID' }, { key: 'name', label: 'Name' },
+        { key: 'department_name', label: 'Department' }, { key: 'branch_name', label: 'Branch' },
+        { key: 'date', label: 'Date' }, { key: 'in_time', label: 'In' }, { key: 'out_time', label: 'Out' },
+        { key: 'status', label: 'Status' }
+      ],
+      leave: [
+        { key: 'emp_id', label: 'Emp ID' }, { key: 'name', label: 'Name' },
+        { key: 'department_name', label: 'Department' }, { key: 'leave_type', label: 'Type' },
+        { key: 'from_date', label: 'From' }, { key: 'to_date', label: 'To' },
+        { key: 'days', label: 'Days' }, { key: 'status', label: 'Status' }
+      ],
+      daily_task: [
+        { key: 'emp_id', label: 'Emp ID' }, { key: 'name', label: 'Name' },
+        { key: 'department_name', label: 'Department' }, { key: 'task_title', label: 'Task' },
+        { key: 'task_date', label: 'Date' }, { key: 'task_status', label: 'Task Status' },
+        { key: 'approval_status', label: 'Approval' }
+      ],
+      // 🆕 A3-tiny: HR-level target columns (was: emp_id/name/department_name/target_type)
+      target: [
+        { key: 'hr_id', label: 'HR ID' }, { key: 'hr_name', label: 'HR Name' },
+        { key: 'month', label: 'Month' }, { key: 'year', label: 'Year' },
+        { key: 'assigned_target', label: 'Assigned' }, { key: 'achieved_target', label: 'Achieved' },
+        { key: 'remaining_target', label: 'Remaining' }, { key: 'progress_percent', label: 'Progress %' }
+      ],
+      candidate: [
+        { key: 'candidate_id', label: 'Candidate ID' }, { key: 'name', label: 'Name' },
+        { key: 'department', label: 'Department' }, { key: 'role', label: 'Role' },
+        { key: 'stage', label: 'Stage' }, { key: 'applied_on', label: 'Applied On' }
+      ],
+      admission: [
+        { key: 'lead_id', label: 'Lead ID' }, { key: 'name', label: 'Name' },
+        { key: 'course_interested', label: 'Course' }, { key: 'branch_id', label: 'Branch' },
+        { key: 'assigned_to', label: 'Assigned To' }, { key: 'status', label: 'Status' },
+        { key: 'created_at', label: 'Created' }
+      ],
+      joining: [
+        { key: 'emp_id', label: 'Emp ID' }, { key: 'name', label: 'Name' },
+        { key: 'department_name', label: 'Department' }, { key: 'designation_name', label: 'Designation' },
+        { key: 'branch_name', label: 'Branch' }, { key: 'joining_date', label: 'Joining Date' },
+        { key: 'status', label: 'Status' }
+      ]
+    };
+
+    let currentRows = [];
+    let currentColumns = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateMonthYear();
+      loadEmployeeNames();
+    });
+
+    function populateMonthYear() {
+      const now = new Date();
+      const curMonth = now.getMonth() + 1;
+      const curYear = now.getFullYear();
+
+      const fMonth = document.getElementById('fMonth');
+      fMonth.innerHTML = '<option value="">Whole Year</option>' +
+        MONTH_NAMES.map((m, i) => `<option value="${i + 1}" ${i + 1 === curMonth ? 'selected' : ''}>${m}</option>`).join('');
+
+      const fYear = document.getElementById('fYear');
+      let yOpts = '';
+      for (let y = curYear - 1; y <= curYear + 1; y++) yOpts += `<option value="${y}" ${y === curYear ? 'selected' : ''}>${y}</option>`;
+      fYear.innerHTML = yOpts;
+    }
+
+    async function loadEmployeeNames() {
+      try {
+        const res = await fetch(`${API_URL}?action=getEmployees&token=${TOKEN}&limit=500`, { cache: 'no-store' });
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          const arr = (payload.data && payload.data.data) || payload.data || [];
+          const sel = document.getElementById('fEmployee');
+          arr.forEach(emp => {
+            if (!emp.emp_id) return;
+            const o = document.createElement('option');
+            o.value = emp.emp_id; o.textContent = emp.name || emp.emp_id;
+            sel.appendChild(o);
+          });
+        }
+      } catch (e) { /* fallback: emp_id filter still works without name dropdown */ }
+    }
+
+    // 🆕 A3-tiny FIX [2026-09-27]: Employee dropdown hidden for `target`
+    // report type too — HR targets are keyed by hr_id (admin_users.user_id),
+    // not emp_id, so passing an emp_id filter returns zero rows in every
+    // case (server intentionally ignores it). Department filter also hidden
+    // for `target` — HR users have no department attribute.
+    function onReportTypeChange() {
+      const type = document.getElementById('fReportType').value;
+      // Employee filter hidden for: candidate (no emp_id), target (HR-keyed, not emp-keyed)
+      document.getElementById('fEmployee').style.display =
+        (type === 'candidate' || type === 'target') ? 'none' : '';
+      // Department filter hidden for: admission, candidate (no dept), target (HR has no dept)
+      document.getElementById('fDepartment').style.display =
+        (type === 'admission' || type === 'candidate' || type === 'target') ? 'none' : '';
+    }
+
+    async function generateReport() {
+      const type = document.getElementById('fReportType').value;
+      const month = document.getElementById('fMonth').value;
+      const year = document.getElementById('fYear').value;
+      const department = document.getElementById('fDepartment').value.trim();
+      const empId = document.getElementById('fEmployee').value;
+
+      const tbody = document.getElementById('reportTableBody');
+      tbody.innerHTML = `<tr><td><div class="empty-state"><div class="empty-icon" style="animation:spin 1s linear infinite;display:inline-block;">⏳</div><p>Generating report...</p></div></td></tr>`;
+      document.getElementById('btnExportCsv').disabled = true;
+      document.getElementById('btnPrint').disabled = true;
+
+      let url = `${API_URL}?action=getMonthlyReport&token=${TOKEN}&report_type=${type}&_ts=${Date.now()}`;
+      if (month) url += `&month=${month}`;
+      if (year) url += `&year=${year}`;
+      if (department) url += `&department=${encodeURIComponent(department)}`;
+      if (empId) url += `&emp_id=${encodeURIComponent(empId)}`;
+
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        const payload = await res.json();
+        if (payload.status !== 'success') {
+          showToast(payload.message || 'Failed to generate report.');
+          tbody.innerHTML = `<tr><td><div class="empty-state"><div class="empty-icon">⚠️</div><p>${payload.message || 'Error generating report.'}</p></div></td></tr>`;
+          return;
+        }
+        const report = payload.data;
+        currentRows = report.rows || [];
+        currentColumns = REPORT_COLUMNS[type] || [];
+        renderSummary(report.summary || {});
+        renderTable(currentColumns, currentRows);
+        document.getElementById('btnExportCsv').disabled = currentRows.length === 0;
+        document.getElementById('btnPrint').disabled = currentRows.length === 0;
+      } catch (e) {
+        showToast('Network error while generating the report.');
+        tbody.innerHTML = `<tr><td><div class="empty-state"><div class="empty-icon">⚠️</div><p>Network error.</p></div></td></tr>`;
+      }
+    }
+
+    function renderSummary(summary) {
+      const row = document.getElementById('summaryRow');
+      const keys = Object.keys(summary);
+      if (!keys.length) { row.style.display = 'none'; row.innerHTML = ''; return; }
+      row.style.display = 'grid';
+      row.innerHTML = keys.map(k => `
+        <div class="summary-card">
+          <div class="s-label">${k.replace(/_/g, ' ')}</div>
+          <div class="s-value">${summary[k]}</div>
+        </div>`).join('');
+    }
+
+    function renderTable(columns, rows) {
+      const thead = document.getElementById('reportTableHead');
+      const tbody = document.getElementById('reportTableBody');
+
+      thead.innerHTML = `<tr>${columns.map(c => `<th>${c.label}</th>`).join('')}</tr>`;
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="${columns.length}"><div class="empty-state"><div class="empty-icon">📭</div><p>No records found for this filter.</p></div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(r => `<tr>${columns.map(c => `<td>${r[c.key] !== undefined && r[c.key] !== '' ? r[c.key] : '—'}</td>`).join('')}</tr>`).join('');
+    }
+
+    function exportCsv() {
+      if (!currentRows.length) return;
+      const headerRow = currentColumns.map(c => `"${c.label.replace(/"/g, '""')}"`).join(',');
+      const dataRows = currentRows.map(r =>
+        currentColumns.map(c => {
+          const val = r[c.key] !== undefined && r[c.key] !== null ? String(r[c.key]) : '';
+          return `"${val.replace(/"/g, '""')}"`;
+        }).join(',')
+      );
+      const csv = [headerRow, ...dataRows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const type = document.getElementById('fReportType').value;
+      a.href = url;
+      a.download = `report_${type}_${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,630 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Codeline.AI — EBMS Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:             #F4F5F9;
+      --glass:               #FFFFFF;
+      --glass-strong:        #F9FAFB;
+      --glass-border:        #E5E7EB;
+      --glass-border-focus:  #6B21A8;
+      --glass-blur:          0px;
+      --text-primary:        #1F2937;
+      --text-muted:          #6B7280;
+      --text-dim:            #9CA3AF;
+      --success:             #10B981;
+      --danger:              #EF4444;
+      --radius:              12px;
+      --radius-sm:           8px;
+    }
+
+    html { height: 100%; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      min-height: 100vh;
+      display: flex;
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+
+    /* ── Left panel — branding ── */
+    .left-panel {
+      display: none;
+      width: 42%;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+      background: #FFFFFF;
+      border-right: 1px solid var(--glass-border);
+    }
+
+    @media (min-width: 900px) { .left-panel { display: flex; flex-direction: column; justify-content: space-between; padding: 48px; } }
+
+    /* fine dot-grid texture on left panel */
+    .left-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(107, 33, 168, 0.08) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: radial-gradient(ellipse 80% 80% at 40% 50%, black 20%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 80% at 40% 50%, black 20%, transparent 100%);
+      pointer-events: none;
+    }
+
+    /* large faint wordmark echo */
+    .left-panel::after {
+      content: 'C.AI';
+      position: absolute;
+      bottom: -20px;
+      right: -10px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 200px;
+      font-weight: 700;
+      color: rgba(107, 33, 168, 0.04);
+      letter-spacing: -8px;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .left-top { position: relative; z-index: 2; }
+
+    .left-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 64px;
+    }
+
+    .left-logo-icon {
+      width: 40px; height: 40px;
+      background: #6B21A8;
+      border: none;
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      color: #FFFFFF;
+    }
+
+    .left-logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: #111827;
+    }
+    .left-logo-text span { color: #6B21A8; font-weight: 500; }
+
+    .left-headline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 38px;
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      color: #111827;
+      margin-bottom: 18px;
+    }
+
+    .left-headline em {
+      font-style: normal;
+      color: #6B21A8;
+    }
+
+    .left-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 320px;
+    }
+
+    .left-bottom { position: relative; z-index: 2; }
+
+    .left-stats {
+      display: flex;
+      gap: 32px;
+    }
+
+    .stat-item .stat-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1;
+    }
+
+    .stat-item .stat-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    /* ── Right panel — form ── */
+    .right-panel {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      padding-top: max(24px, env(safe-area-inset-top));
+      padding-bottom: max(24px, env(safe-area-inset-bottom));
+      position: relative;
+      min-height: 100vh;
+      background: #F4F5F9;
+    }
+
+    /* very subtle noise on right */
+    .right-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 80% 10%, rgba(107, 33, 168, 0.03) 0%, transparent 55%),
+        radial-gradient(ellipse at 20% 90%, rgba(107, 33, 168, 0.02) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .form-shell {
+      width: 100%;
+      max-width: 380px;
+      position: relative;
+      z-index: 2;
+      animation: fadeUp 0.45s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile-only logo */
+    .mobile-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+    @media (min-width: 900px) { .mobile-logo { display: none; } }
+
+    .mobile-logo-icon {
+      width: 34px; height: 34px;
+      background: #6B21A8;
+      border: none;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      color: #FFFFFF;
+    }
+
+    .mobile-logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: #111827;
+    }
+    .mobile-logo-text span { color: #6B21A8; font-weight: 500; }
+
+    /* heading */
+    .form-heading { margin-bottom: 28px; }
+    .form-heading h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      color: #111827;
+    }
+    .form-heading p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    /* Role pills */
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(2,1fr);
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+
+    .role-pill {
+      padding: 10px 8px;
+      border: 1px solid var(--glass-border);
+      border-radius: 9px;
+      background: #FFFFFF;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .role-pill:hover {
+      background: var(--glass-strong);
+      color: var(--text-primary);
+    }
+
+    .role-pill.active {
+      background: #F3E8FF;
+      border-color: #D8B4FE;
+      color: #6B21A8;
+      font-weight: 600;
+    }
+
+    .role-pill .pill-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #D1D5DB;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .role-pill.active .pill-dot { background: #6B21A8; }
+
+    /* Alert */
+    .alert {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 14px;
+      border-radius: 9px;
+      font-size: 13px;
+      margin-bottom: 18px;
+      border: 1px solid transparent;
+    }
+    .alert.show { display: flex; }
+    .alert-error   { background: #FEF2F2; color: #EF4444; border-color: #FECACA; }
+    .alert-success { background: #ECFDF5; color: #10B981; border-color: #A7F3D0; }
+
+    /* Fields */
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 7px;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-icon {
+      position: absolute;
+      left: 13px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      color: #9CA3AF;
+      pointer-events: none;
+    }
+
+    .field input {
+      width: 100%;
+      background: #FFFFFF;
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px 11px 38px;
+      font-size: 14px;
+      color: var(--text-primary);
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+    }
+
+    .field input::placeholder { color: var(--text-dim); }
+
+    .field input:focus {
+      border-color: #6B21A8;
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(107, 33, 168, 0.1);
+    }
+
+    .eye-toggle {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 13px;
+      color: #9CA3AF;
+      user-select: none;
+      transition: color 0.15s;
+    }
+    .eye-toggle:hover { color: #6B7280; }
+
+    /* Login button */
+    .btn-login {
+      width: 100%;
+      padding: 12px;
+      background: #6B21A8;
+      color: #FFFFFF;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+      margin-top: 6px;
+      letter-spacing: 0.1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-login::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .btn-login:hover:not(:disabled) {
+      background: #581C87;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 28px rgba(107, 33, 168, 0.25);
+    }
+
+    .btn-login:active:not(:disabled) { transform: translateY(0); }
+    .btn-login:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Divider line */
+    .form-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #E5E7EB, transparent);
+      margin: 22px 0;
+    }
+
+    /* Footer */
+    .form-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-footer span {
+      font-size: 11.5px;
+      color: var(--text-dim);
+    }
+
+    .form-footer a {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .form-footer a:hover { color: var(--text-primary); }
+
+    @media (max-width: 380px) {
+      .role-pill { font-size: 11.3px; padding: 10px 5px; gap: 4px; }
+    }
+
+    @media (max-width: 900px) {
+      .field input { font-size: 16px; }
+    }
+
+    /* ── Full-screen post-login loader ── */
+    #loginLoaderOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      background: rgba(244, 245, 249, 0.9);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      opacity: 0;
+      transition: opacity 0.18s ease;
+    }
+    #loginLoaderOverlay.show { display: flex; opacity: 1; }
+    #loginLoaderOverlay .login-loader-ring {
+      width: 42px; height: 42px;
+      border: 3px solid rgba(107, 33, 168, 0.15);
+      border-top-color: #6B21A8;
+      border-radius: 50%;
+      animation: loginLoaderSpin 0.7s linear infinite;
+    }
+    #loginLoaderOverlay .login-loader-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 13.5px;
+      color: #1F2937;
+      letter-spacing: 0.2px;
+    }
+    @keyframes loginLoaderSpin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div id="loginLoaderOverlay">
+    <div class="login-loader-ring"></div>
+    <div class="login-loader-text" id="loginLoaderText">Signing in...</div>
+  </div>
+
+  <div class="left-panel">
+    <div class="left-top">
+      <div class="left-logo">
+        <div class="left-logo-icon">⚡</div>
+        <div class="left-logo-text">Codeline<span>.AI</span></div>
+      </div>
+      <div class="left-headline">
+        Run your<br/>workforce<br/><em>without friction.</em>
+      </div>
+      <p class="left-desc">
+        One platform for attendance, payroll, leaves, assets, and documents — built for teams that move fast.
+      </p>
+    </div>
+
+    <div class="left-bottom">
+      <div class="left-stats">
+        <div class="stat-item">
+          <div class="stat-num">4</div>
+          <div class="stat-label">Role types</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">10+</div>
+          <div class="stat-label">Modules</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">v1.0</div>
+          <div class="stat-label">EBMS</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="form-shell">
+
+      <div class="mobile-logo">
+        <div class="mobile-logo-icon">⚡</div>
+        <div class="mobile-logo-text">Codeline<span>.AI</span></div>
+      </div>
+
+      <div class="form-heading">
+        <h1>Welcome back</h1>
+        <p>sign in to continue</p>
+      </div>
+
+      <div class="alert alert-error" id="alertBox">
+        <span>⚠</span><span id="alertMsg">Error message</span>
+      </div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉</span>
+          <input type="email" id="email" placeholder="you@company.com"
+            value="" autocomplete="email" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">⬤</span>
+          <input type="password" id="password" placeholder="••••••••"
+            value="" autocomplete="current-password" />
+          <span class="eye-toggle" id="eyeBtn" onclick="togglePass()">◎</span>
+        </div>
+      </div>
+
+      <button class="btn-login" id="loginBtn" onclick="doLogin()">Sign in to EBMS</button>
+
+      <div class="form-divider"></div>
+
+      <div class="form-footer">
+        <span>Codeline.AI EBMS v1.0</span>
+        <a href="#">Forgot password?</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let selectedRole = 'super_admin';
+
+    function selectRole(btn) {
+      document.querySelectorAll('.role-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedRole = btn.dataset.role;
+      if (selectedRole === 'super_admin') {
+        document.getElementById('email').value    = 'admin@codelineai.com';
+        document.getElementById('password').value = 'Admin@123';
+      } else {
+        document.getElementById('email').value    = '';
+        document.getElementById('password').value = '';
+      }
+    }
+
+    function togglePass() {
+      const inp = document.getElementById('password');
+      const btn = document.getElementById('eyeBtn');
+      if (inp.type === 'password') { inp.type = 'text';     btn.textContent = '◉'; }
+      else                          { inp.type = 'password'; btn.textContent = '◎'; }
+    }
+
+    function showAlert(msg, type = 'error') {
+      const box = document.getElementById('alertBox');
+      document.getElementById('alertMsg').textContent = msg;
+      box.className = 'alert alert-' + type + ' show';
+    }
+
+    function showLoginLoader(message) {
+      const overlay = document.getElementById('loginLoaderOverlay');
+      const textEl  = document.getElementById('loginLoaderText');
+      if (textEl) textEl.textContent = message || 'Signing in...';
+      overlay.classList.add('show');
+    }
+
+    function hideLoginLoader() {
+      document.getElementById('loginLoaderOverlay').classList.remove('show');
+    }
+
+    async function doLogin() {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if (!email || !password) { showAlert('Please enter both your email and password..'); return; }
+
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+      showLoginLoader('Signing in...');
+
+      try {
+        const url = `${API_URL}?action=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+        const res  = await fetch(url);
+        const data = await res.json();
+
+        if (data.status === 'success') {
+          localStorage.setItem('ebms_token', data.data.token);
+          localStorage.setItem('ebms_user',  JSON.stringify(data.data.user));
+          localStorage.setItem('ebms_role',  data.data.user.role);
+          showAlert('Login successful! Redirecting...', 'success');
+          showLoginLoader('Taking you to your dashboard...');
+          const isAdminPanelUser = data.data.is_admin_panel_user === true;
+          const role = data.data.user.role;
+          const destination = role === 'hr'
+            ? 'hr_dashboard.html'
+            : (isAdminPanelUser ? 'dashboard.html' : 'employee_dashboard.html');
+          window.location.href = destination;
+        } else {
+          hideLoginLoader();
+          showAlert(data.message || 'Login failed. Please try again.');
+          btn.disabled = false;
+          btn.textContent = 'Sign in to EBMS';
+        }
+      } catch (err) {
+        hideLoginLoader();
+        showAlert('Network error. Please check your connection.');
+        btn.disabled = false;
+        btn.textContent = 'Sign in to EBMS';
+      }
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    window.addEventListener('pageshow', hideLoginLoader);
+  </script>
+</body>
+</html>

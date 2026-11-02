@@ -1,0 +1,980 @@
+ <!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salary Setup — Codeline.AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-base: #0A0A0B;
+      --glass: rgba(255, 255, 255, 0.045);
+      --glass-strong: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.09);
+      --glass-blur: 20px;
+      --text-primary: #F4F4F5;
+      --text-muted: #A1A1AA;
+      --text-dim: #6B7280;
+      --accent-glow: #D4D9E6;
+      --success: #34D399;
+      --warning: #FBBF24;
+      --danger: #F87171;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      background-image:
+        radial-gradient(circle at 12% -10%, rgba(255, 255, 255, 0.05), transparent 45%),
+        radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.03), transparent 40%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar-spacer {
+      width: 240px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-spacer {
+        display: none;
+      }
+    }
+
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    @media (max-width: 600px) {
+      .main-workspace {
+        padding: 16px;
+      }
+    }
+
+    .mobile-nav-bar {
+      display: none;
+      height: 50px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur));
+      border-radius: var(--radius-sm);
+      align-items: center;
+      padding: 0 16px;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-nav-bar {
+        display: flex;
+      }
+    }
+
+    .header-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .title-area h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .title-area p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .btn-action {
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(var(--glass-blur));
+      transition: background 0.18s, border-color 0.18s, transform 0.18s;
+      white-space: nowrap;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    /* Stats */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      backdrop-filter: blur(var(--glass-blur));
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .stat-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* Two-panel layout */
+    .two-panel {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .two-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Form panel */
+    .form-panel {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    }
+
+    .form-panel-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent-glow);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.18s, background 0.18s;
+    }
+
+    .form-group select {
+      background-color: #1a1a1e;
+      color-scheme: dark;
+    }
+
+    .form-group select option {
+      background: #1a1a1e;
+      color: #F4F4F5;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    @media (max-width: 900px) {
+      .form-group input,
+      .form-group select {
+        font-size: 16px;
+      }
+    }
+
+    /* Salary preview box */
+    .salary-preview {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+
+    .preview-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .preview-row:last-child {
+      border-bottom: none;
+    }
+
+    .preview-row .key {
+      color: var(--text-muted);
+    }
+
+    .preview-row .val {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .preview-row.net .val {
+      color: var(--success);
+      font-size: 15px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: var(--glass-strong);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.18s, transform 0.18s;
+    }
+
+    .btn-submit:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Table panel */
+    .table-container {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+      min-width: 600px;
+    }
+
+    .data-table th {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+      padding: 14px 16px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .data-table tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .emp-type-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .type-full {
+      background: rgba(52, 211, 153, 0.12);
+      color: #34D399;
+    }
+
+    .type-part {
+      background: rgba(251, 191, 36, 0.12);
+      color: #FBBF24;
+    }
+
+    .type-contract {
+      background: rgba(212, 217, 230, 0.10);
+      color: #D4D9E6;
+    }
+
+    .btn-edit-row {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-edit-row:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    /* Generate slip button */
+    .btn-gen-slip {
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      color: #34D399;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-gen-slip:hover {
+      background: rgba(52, 211, 153, 0.2);
+    }
+
+    .empty-state {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-dim);
+    }
+
+    .empty-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+
+    /* Generate Slip Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background: rgba(18, 18, 20, 0.88);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      max-width: 420px;
+      width: 100%;
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .month-year-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 360px) {
+      .month-year-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="sidebar-spacer"></div>
+
+  <div class="main-workspace">
+    <div class="mobile-nav-bar" onclick="openSidebar()">
+      ☰ <span style="font-size:14px; margin-left:12px; font-weight:600;">Menu</span>
+    </div>
+
+    <div class="header-block">
+      <div class="title-area">
+        <h1>💰 Salary Setup</h1>
+        <p>Configure employee salary structures and generate payslips</p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Employees</div>
+        <div class="stat-value" id="statTotal">—</div>
+        <div class="stat-sub">On payroll</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg. Basic Salary</div>
+        <div class="stat-value" id="statAvg" style="color:var(--accent-glow);">—</div>
+        <div class="stat-sub">Across all staff</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Payroll</div>
+        <div class="stat-value" id="statTotal2" style="color:var(--success);">—</div>
+        <div class="stat-sub">Monthly gross</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Full Time</div>
+        <div class="stat-value" id="statFullTime">—</div>
+        <div class="stat-sub">Permanent staff</div>
+      </div>
+    </div>
+
+    <!-- Two panel layout -->
+    <div class="two-panel">
+
+      <!-- Left: Setup Form -->
+      <div class="form-panel" id="salaryFormPanel">
+        <div class="form-panel-title">⚙️ Configure Salary Structure</div>
+        <form id="salaryForm" onsubmit="submitSalarySetup(event)">
+          <div class="form-group">
+            <label>Employee ID *</label>
+            <input type="text" id="sEmpId" placeholder="e.g. EMP004" required oninput="updatePreview()" />
+          </div>
+          <div class="form-group">
+            <label>Employment Type *</label>
+            <select id="sEmpType" required onchange="updatePreview()">
+              <option value="Full Time">Full Time</option>
+              <option value="Part Time">Part Time</option>
+              <option value="Contract">Contract</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Basic Salary (₹) *</label>
+            <input type="number" id="sBasic" placeholder="e.g. 25000" min="0" required oninput="updatePreview()" />
+          </div>
+          <div class="form-group">
+            <label>HRA (₹)</label>
+            <input type="number" id="sHra" placeholder="e.g. 5000" min="0" oninput="updatePreview()" />
+          </div>
+          <div class="form-group">
+            <label>Allowances (₹)</label>
+            <input type="number" id="sAllowances" placeholder="e.g. 2000" min="0" oninput="updatePreview()" />
+          </div>
+          <div class="form-group">
+            <label>PF Deduction (₹)</label>
+            <input type="number" id="sPf" placeholder="e.g. 1800" min="0" oninput="updatePreview()" />
+          </div>
+
+          <!-- Live Preview -->
+          <div class="salary-preview" id="salaryPreviewBox" style="display:none;">
+            <div
+              style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">
+              Live Preview</div>
+            <div class="preview-row">
+              <span class="key">Basic Salary</span>
+              <span class="val" id="prevBasic">₹0</span>
+            </div>
+            <div class="preview-row">
+              <span class="key">HRA</span>
+              <span class="val" id="prevHra">₹0</span>
+            </div>
+            <div class="preview-row">
+              <span class="key">Allowances</span>
+              <span class="val" id="prevAllow">₹0</span>
+            </div>
+            <div class="preview-row">
+              <span class="key">Gross</span>
+              <span class="val" id="prevGross">₹0</span>
+            </div>
+            <div class="preview-row">
+              <span class="key">PF Deduction</span>
+              <span class="val" style="color:var(--danger);" id="prevPf">₹0</span>
+            </div>
+            <div class="preview-row net">
+              <span class="key" style="font-weight:600; color:var(--text-primary);">Net Salary</span>
+              <span class="val" id="prevNet">₹0</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit" id="salarySubmitBtn">💾 Save Salary Structure</button>
+        </form>
+      </div>
+
+      <!-- Right: Table -->
+      <div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Type</th>
+                <th>Basic (₹)</th>
+                <th>HRA (₹)</th>
+                <th>Allowances (₹)</th>
+                <th>PF (₹)</th>
+                <th>Net Salary (₹)</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="salaryRowsContainer">
+              <tr>
+                <td colspan="8">
+                  <div class="empty-state">
+                    <div class="empty-icon">💰</div>
+                    <p>Loading salary structures....</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generate Slip Modal -->
+  <div class="modal-overlay" id="genSlipModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🧾 Generate Salary Slip</h3>
+        <button style="background:none;border:none;color:var(--text-muted);font-size:24px;cursor:pointer;line-height:1;padding:10px;margin:-10px;border-radius:8px;"
+          onclick="toggleGenModal(false)">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Employee: <strong id="genSlipEmpId"
+            style="color:var(--accent-glow);">—</strong></p>
+        <div class="month-year-row">
+          <div class="form-group">
+            <label>Month *</label>
+            <select id="genMonth" onchange="refreshGenState()">
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6" selected>June</option>
+              <option value="7">July</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Year *</label>
+            <input type="number" id="genYear" value="2026" min="2020" max="2099" oninput="refreshGenState()" />
+          </div>
+        </div>
+        <div id="genSlipInfo" style="font-size:12.5px; color:var(--text-muted); margin-bottom:14px; line-height:1.5;"></div>
+        <button class="btn-submit" id="genSlipSubmitBtn" onclick="submitGenerateSlip()">Generate & Save Slip</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    AppSession.protect();
+
+    // PAGE_* names avoid clashing with variables already declared in app.js
+    const PAGE_TOKEN = AppSession.getToken();
+    const PAGE_USER = AppSession.getUser() || {};
+
+    // Fallback toast in case app.js does not provide one
+    if (typeof showToast !== 'function') {
+      window.showToast = function (msg) { alert(msg); };
+    }
+
+    let currentGenEmpId = null;
+    let JOIN_MAP = {}; // emp_id -> joining date string
+
+    // Slip opens this many days before the employee's salary date
+    const SLIP_LEAD_DAYS = 4;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Only super_admin and hr can setup salaries
+      if (PAGE_USER.role === 'employee' || PAGE_USER.role === 'branch_manager') {
+        document.getElementById('salaryFormPanel').style.display = 'none';
+      }
+      loadSalaries();
+    });
+
+    /* ── Joining-date based salary cycle helpers ── */
+    function parseJoiningDate(value) {
+      if (!value) return null;
+      const s = String(value).trim();
+      const m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+      const d = m ? new Date(+m[3], +m[2] - 1, +m[1]) : new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    // Salary date for a month = joining day, clamped to the month's last day
+    function getPayDate(joinDate, month, year) {
+      const lastDay = new Date(year, month, 0).getDate();
+      return new Date(year, month - 1, Math.min(joinDate.getDate(), lastDay));
+    }
+
+    function getOpenDate(payDate, leadDays = SLIP_LEAD_DAYS) {
+      return new Date(payDate.getFullYear(), payDate.getMonth(), payDate.getDate() - leadDays);
+    }
+
+    function fmtDay(d) {
+      return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function startOfToday() {
+      const n = new Date();
+      return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+    }
+
+    // Latest month whose slip window is already open
+    function latestAvailableMonth(joinDate) {
+      const t = startOfToday();
+      let y = t.getFullYear();
+      let m = t.getMonth() + 1;
+      if (t < getOpenDate(getPayDate(joinDate, m, y))) {
+        m -= 1;
+        if (m === 0) { m = 12; y -= 1; }
+      }
+      return { month: m, year: y };
+    }
+
+    function cycleLabel(joiningValue) {
+      const j = parseJoiningDate(joiningValue);
+      if (!j) return `<div style="font-size:11px;color:var(--warning);margin-top:3px;">Joining date missing</div>`;
+      return `<div style="font-size:11px;color:var(--text-dim);margin-top:3px;">Salary day: ${j.getDate()} · Slip opens ${SLIP_LEAD_DAYS} days before</div>`;
+    }
+
+    /* ── Live Preview ── */
+    function updatePreview() {
+      const basic = parseFloat(document.getElementById('sBasic').value) || 0;
+      const hra = parseFloat(document.getElementById('sHra').value) || 0;
+      const allow = parseFloat(document.getElementById('sAllowances').value) || 0;
+      const pf = parseFloat(document.getElementById('sPf').value) || 0;
+      const gross = basic + hra + allow;
+      const net = gross - pf;
+
+      const box = document.getElementById('salaryPreviewBox');
+      if (basic > 0) {
+        box.style.display = 'block';
+        document.getElementById('prevBasic').textContent = '₹' + basic.toLocaleString('en-IN');
+        document.getElementById('prevHra').textContent = '₹' + hra.toLocaleString('en-IN');
+        document.getElementById('prevAllow').textContent = '₹' + allow.toLocaleString('en-IN');
+        document.getElementById('prevGross').textContent = '₹' + gross.toLocaleString('en-IN');
+        document.getElementById('prevPf').textContent = '₹' + pf.toLocaleString('en-IN');
+        document.getElementById('prevNet').textContent = '₹' + net.toLocaleString('en-IN');
+      } else {
+        box.style.display = 'none';
+      }
+    }
+
+    /* ── Load salaries ── */
+    async function loadSalaries() {
+      try {
+        const res = await fetch(`${API_URL}?action=getSalaries&token=${PAGE_TOKEN}&limit=500`);
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          // Backend sends a paginated wrapper: { data: { data: [...], total, page, ... } }
+          const raw = (payload.data && payload.data.data) || payload.data || [];
+          const data = Array.isArray(raw) ? raw : [];
+          updateStats(data);
+          renderRows(data);
+        } else {
+          showToast(payload.message || 'Failed to fetch salaries.');
+        }
+      } catch (e) {
+        console.error('loadSalaries error:', e);
+        showToast('Network error: could not load salaries.');
+      }
+    }
+
+    function updateStats(data) {
+      const total = data.length;
+      const gross = data.reduce((s, r) => s + (parseFloat(r.basic_salary) || 0) + (parseFloat(r.hra) || 0) + (parseFloat(r.allowances) || 0), 0);
+      const avg = total ? Math.round(gross / total) : 0;
+      const fullCnt = data.filter(r => r.employment_type === 'Full Time').length;
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statAvg').textContent = total ? '₹' + avg.toLocaleString('en-IN') : '—';
+      document.getElementById('statTotal2').textContent = total ? '₹' + gross.toLocaleString('en-IN') : '—';
+      document.getElementById('statFullTime').textContent = fullCnt;
+    }
+
+    function renderRows(data) {
+      const tbody = document.getElementById('salaryRowsContainer');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📭</div><p> No salary structures found.</p></div></td></tr>`;
+        return;
+      }
+
+      const canEdit = PAGE_USER.role === 'super_admin' || PAGE_USER.role === 'hr';
+      const canGenerate = PAGE_USER.role !== 'employee';
+
+      // Remember each employee's joining date for the slip window logic
+      data.forEach(r => { JOIN_MAP[r.emp_id] = r.joining_date; });
+
+      tbody.innerHTML = data.map(r => {
+        const basic = parseFloat(r.basic_salary) || 0;
+        const hra = parseFloat(r.hra) || 0;
+        const allow = parseFloat(r.allowances) || 0;
+        const pf = parseFloat(r.pf_deduction) || 0;
+        const net = (basic + hra + allow) - pf;
+
+        const typeClass =
+          r.employment_type === 'Full Time' ? 'type-full' :
+            r.employment_type === 'Part Time' ? 'type-part' : 'type-contract';
+
+        const actions = `
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${canEdit ? `<button class="btn-edit-row" onclick="prefillEditForm('${r.emp_id}', ${basic}, ${hra}, ${allow}, ${pf}, '${r.employment_type}')">✏️ Edit</button>` : ''}
+          ${canGenerate ? `<button class="btn-gen-slip" onclick="openGenModal('${r.emp_id}')">🧾 Slip</button>` : ''}
+        </div>`;
+
+        return `
+        <tr>
+          <td><strong style="color:var(--accent-glow);">${r.emp_id}</strong>${cycleLabel(r.joining_date)}</td>
+          <td><span class="emp-type-badge ${typeClass}">${r.employment_type || '—'}</span></td>
+          <td>₹${basic.toLocaleString('en-IN')}</td>
+          <td>₹${hra.toLocaleString('en-IN')}</td>
+          <td>₹${allow.toLocaleString('en-IN')}</td>
+          <td style="color:var(--danger);">₹${pf.toLocaleString('en-IN')}</td>
+          <td style="color:var(--success); font-weight:700;">₹${net.toLocaleString('en-IN')}</td>
+          <td>${actions}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    /* ── Prefill form for edit ── */
+    function prefillEditForm(empId, basic, hra, allow, pf, type) {
+      document.getElementById('sEmpId').value = empId;
+      document.getElementById('sEmpType').value = type;
+      document.getElementById('sBasic').value = basic;
+      document.getElementById('sHra').value = hra;
+      document.getElementById('sAllowances').value = allow;
+      document.getElementById('sPf').value = pf;
+      updatePreview();
+      document.getElementById('salaryFormPanel').scrollIntoView({ behavior: 'smooth' });
+      showToast('Form prefilled. Edit the values and save.');
+    }
+
+    /* ── Submit salary structure ── */
+    async function submitSalarySetup(e) {
+      e.preventDefault();
+      const btn = document.getElementById('salarySubmitBtn');
+      btn.disabled = true; btn.textContent = 'Saving...';
+
+      const payload = {
+        token: PAGE_TOKEN,
+        action: 'setSalary',
+        emp_id: document.getElementById('sEmpId').value.trim(),
+        employment_type: document.getElementById('sEmpType').value,
+        basic_salary: document.getElementById('sBasic').value,
+        hra: document.getElementById('sHra').value,
+        allowances: document.getElementById('sAllowances').value,
+        pf_deduction: document.getElementById('sPf').value
+      };
+
+      try {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('Salary structure saved!');
+          document.getElementById('salaryForm').reset();
+          document.getElementById('salaryPreviewBox').style.display = 'none';
+          loadSalaries();
+        } else {
+          showToast(out.message || 'Failed to save changes.');
+        }
+      } catch (err) {
+        showToast('Network error.');
+      } finally {
+        btn.disabled = false; btn.textContent = '💾 Save Salary Structure';
+      }
+    }
+
+    /* ── Generate Slip Modal ── */
+    function openGenModal(empId) {
+      currentGenEmpId = empId;
+      document.getElementById('genSlipEmpId').textContent = empId;
+
+      // Default to the latest month whose slip window is already open
+      const joinDate = parseJoiningDate(JOIN_MAP[empId]);
+      if (joinDate) {
+        const latest = latestAvailableMonth(joinDate);
+        document.getElementById('genMonth').value = String(latest.month);
+        document.getElementById('genYear').value = latest.year;
+      }
+
+      document.getElementById('genSlipModal').style.display = 'flex';
+      refreshGenState();
+    }
+
+    function toggleGenModal(on) {
+      document.getElementById('genSlipModal').style.display = on ? 'flex' : 'none';
+    }
+
+    // Enables or disables the Generate button based on the employee's slip window
+    function refreshGenState() {
+      const btn = document.getElementById('genSlipSubmitBtn');
+      const info = document.getElementById('genSlipInfo');
+      const joinDate = parseJoiningDate(JOIN_MAP[currentGenEmpId]);
+
+      if (!joinDate) {
+        info.style.color = 'var(--warning)';
+        info.textContent = 'Joining date not found for this employee.';
+        btn.disabled = true;
+        return;
+      }
+
+      const month = parseInt(document.getElementById('genMonth').value, 10);
+      const year = parseInt(document.getElementById('genYear').value, 10);
+      if (!month || !year) { btn.disabled = true; return; }
+
+      const payDate = getPayDate(joinDate, month, year);
+      const openDate = getOpenDate(payDate);
+
+      if (startOfToday() < openDate) {
+        info.style.color = 'var(--warning)';
+        info.textContent = `Salary date: ${fmtDay(payDate)}. Slip can be generated from ${fmtDay(openDate)}.`;
+        btn.disabled = true;
+      } else {
+        info.style.color = 'var(--success)';
+        info.textContent = `Salary date: ${fmtDay(payDate)}. Slip is available to generate.`;
+        btn.disabled = false;
+      }
+    }
+
+    async function submitGenerateSlip() {
+      if (!currentGenEmpId) return;
+      const btn = document.getElementById('genSlipSubmitBtn');
+      btn.disabled = true; btn.textContent = 'Generating...';
+
+      const payload = {
+        token: PAGE_TOKEN,
+        action: 'generateSlip',
+        emp_id: currentGenEmpId,
+        month: document.getElementById('genMonth').value,
+        year: document.getElementById('genYear').value
+      };
+
+      try {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('Payslip generated successfully. You can view it on the Salary Slips page.');
+          toggleGenModal(false);
+        } else {
+          showToast(out.message || 'Failed to generate payslip.');
+        }
+      } catch (err) {
+        showToast('Network error.');
+      } finally {
+        btn.textContent = 'Generate & Save Slip';
+        refreshGenState();
+      }
+    }
+  </script>
+</body>
+
+</html>

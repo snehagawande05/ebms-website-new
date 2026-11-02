@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR Recruitment — Codeline.AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="top-loading-bar" id="topLoadingBar"></div>
+
+  <!-- ============================================================
+       Standalone HR top navbar — NOT connected to sidebar.html /
+       app.js's injectSidebar(). HR's recruitment section is fully
+       self-contained: just this page + hr_dashboard.html.
+       ============================================================ -->
+  <div class="hr-top-navbar">
+    <div class="hr-navbar-logo">
+      <div class="hr-navbar-logo-icon">⚡</div>
+      <div class="hr-navbar-logo-text">Codeline<span>.AI</span> <small>HR</small></div>
+    </div>
+    <div class="hr-navbar-actions">
+      <a class="hr-nav-btn" href="hr_dashboard.html">📊 Dashboard</a>
+      <a class="hr-nav-btn active" href="hr_recruitment.html">🧑‍💼 Recruitment</a>
+      <button class="hr-nav-btn logout" onclick="localStorage.clear(); window.location.href='index.html';">🚪
+        Logout</button>
+    </div>
+  </div>
+
+  <div class="main-workspace" style="margin-left: 0;">
+    <div class="mobile-nav-bar" style="display:none;">
+      ☰ <span>Menu</span>
+    </div>
+
+    <div class="header-block">
+      <div class="title-area">
+        <h1>🧑‍💼 Recruitment Tracker</h1>
+        <p>The pipeline of registered candidates is displayed here — approve step by step.</p>
+       </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn-secondary" href="hr_dashboard.html"
+          style="text-decoration:none; display:inline-flex; align-items:center;">← Back to Dashboard</a>
+        <button class="btn-action" id="refreshBtn" onclick="loadCandidates()">
+          <span id="refreshIcon">🔄</span> <span id="refreshLabel">Refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsBar">
+      <div class="stat-card cyan">
+        <div class="stat-label">Total Candidates</div>
+        <div class="stat-row">
+          <div class="stat-value rec-stat-num skeleton" id="statTotal">—</div>
+          <div class="stat-icon cyan">🧑‍💼</div>
+        </div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Applied</div>
+        <div class="stat-row">
+          <div class="stat-value rec-stat-num skeleton" id="statApplied">—</div>
+          <div class="stat-icon blue">📝</div>
+        </div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Screening</div>
+        <div class="stat-row">
+          <div class="stat-value rec-stat-num skeleton" id="statScreening">—</div>
+          <div class="stat-icon yellow">🔍</div>
+        </div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-label">HR Calling</div>
+        <div class="stat-row">
+          <div class="stat-value rec-stat-num skeleton" id="statHrCalling">—</div>
+          <div class="stat-icon amber">☎️</div>
+        </div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-label">Interview</div>
+        <div class="stat-row">
+          <div class="stat-value rec-stat-num skeleton" id="statInterview">—</div>
+          <div class="stat-icon purple">🎤</div>
+        </div>
+      </div>
+      <div class="stat-card indigo">
+        <div class="stat-label">Round 1 / 2</div>
+        <div class="stat-row">
+          <div class="stat-value rec-stat-num skeleton" id="statRounds">—</div>
+          <div class="stat-icon indigo">🎯</div>
+        </div>
+      </div>
+      <div class="stat-card pink">
+        <div class="stat-label">Offered</div>
+        <div class="stat-row">
+          <div class="stat-value rec-stat-num skeleton" id="statOffered">—</div>
+          <div class="stat-icon pink">📨</div>
+        </div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-label">On Hold</div>
+        <div class="stat-row">
+          <div class="stat-value rec-stat-num skeleton" id="statHold">—</div>
+          <div class="stat-icon orange">⏸️</div>
+        </div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Hired</div>
+        <div class="stat-row">
+          <div class="stat-value rec-stat-num skeleton" id="statHired">—</div>
+          <div class="stat-icon green">✅</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="filter-deck">
+      <input type="text" class="search-input-box" id="searchInput"
+        placeholder="🔍  Naam, mobile, role se search karein…" oninput="filterAndRender()" />
+    </div>
+
+    <!-- Candidates Table -->
+    <div class="candidates-table-wrap">
+      <table class="candidates-table">
+        <thead>
+          <tr>
+            <th>Naam</th>
+            <th>Details</th>
+            <th>Stage</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="candidatesTableBody">
+          <!-- filled by renderSkeletonBoard() / renderPipeline() -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Candidate Detail Drawer -->
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+  <div class="drawer" id="candidateDrawer">
+    <div class="drawer-header">
+      <h3>👤 Candidate Details</h3>
+      <button class="drawer-close" onclick="closeDrawer()">×</button>
+    </div>
+    <div class="drawer-body" id="drawerBody">
+      <div class="rec-loading"><span class="spinner-ring"></span> Loading…</div>
+    </div>
+  </div>
+
+  <!-- Hire Candidate Modal — asks Branch / Department / Joining Date / Reporting Manager / Shift -->
+  <div class="modal-overlay" id="hireModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>✅ Hire Candidate</h3>
+        <button
+          style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer; padding:10px; margin:-10px; border-radius:8px; line-height:1;"
+          onclick="closeHireModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p id="hireModalCandName" style="margin:0 0 16px; color:var(--text-muted); font-size:13.5px;"></p>
+        <form id="hireForm" onsubmit="submitHireForm(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Branch *</label>
+              <select id="hireBranch" required onchange="onHireBranchChange()">
+                <option value="">Select branch…</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Department *</label>
+              <select id="hireDepartment" required>
+                <option value="">Select department…</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Designation</label>
+              <select id="hireDesignation">
+                <option value="">Select designation…</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Joining Date *</label>
+              <input type="date" id="hireJoiningDate" required />
+            </div>
+            <div class="form-group">
+              <label>Reporting Manager</label>
+              <select id="hireReportingManager">
+                <option value="">None</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Shift</label>
+              <select id="hireShift">
+                <option value="">Select shift…</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Employment Type</label>
+              <select id="hireEmploymentType">
+                <option value="Internship">Internship</option>
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn-action" id="hireSubmitBtn"
+            style="width: 100%; justify-content: center; margin-top:20px;">✓ Confirm Hire</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    AppSession.protect();
+    const TOKEN = AppSession.getToken();
+    const USER = AppSession.getUser();
+    const IS_ADMIN = USER && (USER.role === 'super_admin' || USER.role === 'hr');
+
+    // ── Full pipeline order ──
+    // applied -> screening -> hr_calling -> interview -> round1 -> round2 -> offered -> hired
+    // 'hold' branches off 'offered' (put candidate on hold) and resumes back to 'offered'.
+    // 'rejected' can happen from any non-final stage (see renderCard/renderDrawer reject button).
+    const STAGE_LABELS = {
+      applied: 'Applied', screening: 'Screening',
+      hr_calling: 'HR Calling', interview: 'Interview',
+      round1: 'Round 1', round2: 'Round 2',
+      offered: 'Offered', hold: 'On Hold',
+      hired: 'Hired', rejected: 'Rejected'
+    };
+    const NEXT_STAGE = {
+      applied: 'screening', screening: 'hr_calling',
+      hr_calling: 'interview', interview: 'round1',
+      round1: 'round2', round2: 'offered',
+      offered: 'hired', hold: 'offered'
+    };
+    const NEXT_LABEL = {
+      applied: '→ Screening', screening: '→ HR Calling',
+      hr_calling: '→ Interview', interview: '→ Round 1',
+      round1: '→ Round 2', round2: '→ Offered',
+      offered: '✓ Hire', hold: '↩ Resume'
+    };
+    // Stage(s) that get an extra secondary action button besides the
+    // default "next stage" + "reject" pair.
+    const EXTRA_ACTION = {
+      offered: { stage: 'hold', label: '⏸ Hold' }
+    };
+
+    let allCandidates = [];
+    let activeCandidateId = null;
+
+    // Order in which candidates are listed in the table (pipeline order,
+    // final stages at the bottom).
+    const STAGE_ORDER = [
+      'applied', 'screening', 'hr_calling', 'interview',
+      'round1', 'round2', 'offered', 'hold', 'hired', 'rejected'
+    ];
+
+    function renderSkeletonBoard() {
+      return Array.from({ length: 6 }).map(() => `
+        <tr class="skeleton-row">
+          <td><span class="skeleton-bar" style="width:140px"></span></td>
+          <td><span class="skeleton-bar" style="width:64px"></span></td>
+          <td><span class="skeleton-bar" style="width:80px"></span></td>
+          <td><span class="skeleton-bar" style="width:110px"></span></td>
+        </tr>`).join('');
+    }
+
+    function setRefreshLoading(isLoading) {
+      const btn = document.getElementById('refreshBtn');
+      const icon = document.getElementById('refreshIcon');
+      const label = document.getElementById('refreshLabel');
+      btn.disabled = isLoading;
+      icon.classList.toggle('spin', isLoading);
+      label.textContent = isLoading ? 'Refreshing…' : 'Refresh';
+    }
+
+    function setStatsLoading(isLoading) {
+      document.querySelectorAll('.rec-stat-num').forEach(el => {
+        el.classList.toggle('skeleton', isLoading);
+      });
+    }
+
+    async function loadCandidates() {
+      setRefreshLoading(true);
+      setStatsLoading(true);
+      document.getElementById('candidatesTableBody').innerHTML = renderSkeletonBoard();
+      try {
+        const res = await fetch(
+          `${API_URL}?action=getCandidates&token=${TOKEN}&_ts=${Date.now()}`,
+          { cache: 'no-store' }
+        );
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          allCandidates = payload.data || [];
+          updateStats();
+          filterAndRender();
+        } else {
+          showToast(payload.message || 'Error loading candidates.');
+          renderBoardError('Error loading candidates.');
+        }
+      } catch (e) {
+        showToast('Network error — candidates could not be loaded.');
+        renderBoardError('Network error — candidates could not be loaded.');
+      } finally {
+        setRefreshLoading(false);
+        setStatsLoading(false);
+      }
+    }
+
+    function renderBoardError(message) {
+      document.getElementById('candidatesTableBody').innerHTML = `
+        <tr><td colspan="4">
+          <div class="rec-loading" style="color:var(--danger);flex-direction:column;gap:10px">
+            <span>${message}</span>
+            <button class="btn-action" onclick="loadCandidates()">↻ Retry</button>
+          </div>
+        </td></tr>`;
+    }
+
+    function updateStats() {
+      document.getElementById('statTotal').textContent = allCandidates.length;
+      document.getElementById('statApplied').textContent = allCandidates.filter(c => c.stage === 'applied').length;
+      document.getElementById('statScreening').textContent = allCandidates.filter(c => c.stage === 'screening').length;
+      document.getElementById('statHrCalling').textContent = allCandidates.filter(c => c.stage === 'hr_calling').length;
+      document.getElementById('statInterview').textContent = allCandidates.filter(c => c.stage === 'interview').length;
+      document.getElementById('statRounds').textContent = allCandidates.filter(c => c.stage === 'round1' || c.stage === 'round2').length;
+      document.getElementById('statOffered').textContent = allCandidates.filter(c => c.stage === 'offered').length;
+      document.getElementById('statHold').textContent = allCandidates.filter(c => c.stage === 'hold').length;
+      document.getElementById('statHired').textContent = allCandidates.filter(c => c.stage === 'hired').length;
+    }
+
+    function filterAndRender() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const filtered = q
+        ? allCandidates.filter(c =>
+          (c.name || '').toLowerCase().includes(q) ||
+          (c.mobile || '').toLowerCase().includes(q) ||
+          (c.role || '').toLowerCase().includes(q) ||
+          (c.email || '').toLowerCase().includes(q) ||
+          (c.department || '').toLowerCase().includes(q)
+        )
+        : allCandidates;
+      renderPipeline(filtered);
+    }
+
+    function renderPipeline(candidates) {
+      const tbody = document.getElementById('candidatesTableBody');
+      if (!candidates.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="table-empty-hint">No candidate found.</td></tr>`;
+        return;
+      }
+      const sorted = [...candidates].sort(
+        (a, b) => STAGE_ORDER.indexOf(a.stage) - STAGE_ORDER.indexOf(b.stage)
+      );
+      tbody.innerHTML = sorted.map(c => renderTableRow(c)).join('');
+    }
+
+    function renderTableRow(c) {
+      const isFinal = c.stage === 'hired' || c.stage === 'rejected';
+      const avatarHtml = c.photo_url
+        ? `<img class="c-avatar" src="${c.photo_url}" alt="${c.name}" onerror="this.style.display='none'" />`
+        : `<div class="c-avatar-placeholder">👤</div>`;
+      let actionsHtml = '';
+      if (IS_ADMIN && !isFinal) {
+        const ns = NEXT_STAGE[c.stage];
+        const nl = NEXT_LABEL[c.stage];
+        const extra = EXTRA_ACTION[c.stage];
+        const extraBtn = extra
+          ? `<button class="btn-move btn-hold" onclick="moveStage('${c.candidate_id}','${extra.stage}')">${extra.label}</button>`
+          : '';
+        const nextClick = ns === 'hired' ? `openHireModal('${c.candidate_id}')` : `moveStage('${c.candidate_id}','${ns}')`;
+        actionsHtml = `
+          <button class="btn-move btn-primary" onclick="${nextClick}">${nl}</button>
+          ${extraBtn}
+          <button class="btn-move btn-reject" onclick="moveStage('${c.candidate_id}','rejected')">✕ Reject</button>`;
+      } else {
+        actionsHtml = `<span class="no-action-hint">—</span>`;
+      }
+      const stageLabel = STAGE_LABELS[c.stage] || c.stage;
+      return `
+        <tr class="cand-row">
+          <td class="td-name">
+            <div class="row-name-block">
+              ${avatarHtml}
+              <div>
+                <div class="c-name">${c.name || '—'}</div>
+                <div class="c-contact">${c.mobile || ''}${c.role ? ' · ' + c.role : ''}</div>
+              </div>
+            </div>
+          </td>
+          <td class="td-details">
+            <button class="btn-view" onclick="openDrawer('${c.candidate_id}')">Details</button>
+          </td>
+          <td class="td-stage">
+            <span class="current-stage-badge badge-${c.stage}">${stageLabel.toUpperCase()}</span>
+          </td>
+          <td class="td-action">
+            <div class="row-actions">${actionsHtml}</div>
+          </td>
+        </tr>`;
+    }
+
+    function openDrawer(candidateId) {
+      activeCandidateId = candidateId;
+      const c = allCandidates.find(x => x.candidate_id === candidateId);
+      if (!c) return;
+      document.getElementById('drawerOverlay').classList.add('open');
+      document.getElementById('candidateDrawer').classList.add('open');
+      document.getElementById('drawerBody').innerHTML =
+        '<div class="rec-loading"><span class="spinner-ring"></span> Loading…</div>';
+      // Tiny delay lets the open animation start before we swap in content —
+      // drawer feels responsive instead of content just appearing instantly.
+      requestAnimationFrame(() => renderDrawer(c));
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawerOverlay').classList.remove('open');
+      document.getElementById('candidateDrawer').classList.remove('open');
+      activeCandidateId = null;
+    }
+
+    function renderDrawer(c) {
+      const isFinal = c.stage === 'hired' || c.stage === 'rejected';
+      const photoHtml = c.photo_url
+        ? `<img class="drawer-photo" src="${c.photo_url}" alt="${c.name}" onerror="this.outerHTML='<div class=drawer-photo-placeholder>👤</div>'" />`
+        : `<div class="drawer-photo-placeholder">👤</div>`;
+      const appliedDate = c.applied_on
+        ? new Date(c.applied_on).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+        : '—';
+      const dobFormatted = c.dob
+        ? new Date(c.dob).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+        : (c.dob || '—');
+      let stageActionsHtml = '';
+      if (IS_ADMIN && !isFinal) {
+        const ns = NEXT_STAGE[c.stage];
+        const nl = NEXT_LABEL[c.stage];
+        const extra = EXTRA_ACTION[c.stage];
+        const extraBtn = extra
+          ? `<button class="btn-stage-action btn-hold-drawer" onclick="moveStage('${c.candidate_id}','${extra.stage}')">${extra.label}</button>`
+          : '';
+        const nextClick = ns === 'hired' ? `openHireModal('${c.candidate_id}')` : `moveStage('${c.candidate_id}','${ns}')`;
+        stageActionsHtml = `
+          <div class="stage-action-row">
+            <button class="btn-stage-action btn-approve" onclick="${nextClick}">${nl}</button>
+            ${extraBtn}
+            <button class="btn-stage-action btn-reject-drawer" onclick="moveStage('${c.candidate_id}','rejected')">✕ Reject</button>
+          </div>`;
+      }
+      const stageLabel = STAGE_LABELS[c.stage] || c.stage;
+      const signatureHtml = c.signature_url
+        ? `<a href="${c.signature_url}" target="_blank" rel="noopener">
+             <img class="signature-img" src="${c.signature_url}" alt="Signature" onerror="this.style.display='none'" />
+           </a>`
+        : '<span style="color:var(--text-muted);font-size:12px">Not uploaded</span>';
+      const docLinks = [
+        { label: '📄 Aadhar Card', url: c.aadhar_url },
+        { label: '🎓 Experience / Degree', url: c.experience_doc_url },
+        { label: '🖼️ Photo', url: c.photo_url },
+      ].filter(d => d.url);
+      const docLinksHtml = docLinks.length
+        ? docLinks.map(d => `<a class="doc-link" href="${d.url}" target="_blank" rel="noopener">${d.label}</a>`).join('')
+        : '<span style="color:var(--text-muted);font-size:12px">No documents</span>';
+
+      document.getElementById('drawerBody').innerHTML = `
+        <div class="drawer-photo-row">
+          ${photoHtml}
+          <div>
+            <div class="drawer-name">${c.name}</div>
+            <div class="drawer-sub">${c.role || ''} ${c.department ? '· ' + c.department : ''}</div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">Current Stage</div>
+          <span class="current-stage-badge badge-${c.stage}">${stageLabel.toUpperCase()}</span>
+          ${stageActionsHtml}
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">Personal Information</div>
+          <div class="detail-row"><span class="d-label">Date of Birth</span><span class="d-value">${dobFormatted}</span></div>
+          <div class="detail-row"><span class="d-label">Gender</span><span class="d-value">${c.gender || '—'}</span></div>
+          <div class="detail-row"><span class="d-label">Mobile</span><span class="d-value">${c.mobile || '—'}</span></div>
+          <div class="detail-row"><span class="d-label">Email</span><span class="d-value">${c.email || '—'}</span></div>
+          <div class="detail-row"><span class="d-label">Current Address</span><span class="d-value">${c.current_address || '—'}</span></div>
+          <div class="detail-row"><span class="d-label">Permanent Address</span><span class="d-value">${c.permanent_address || '—'}</span></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">Professional Details</div>
+          <div class="detail-row"><span class="d-label">Role</span><span class="d-value">${c.role || '—'}</span></div>
+          <div class="detail-row"><span class="d-label">Department</span><span class="d-value">${c.department || '—'}</span></div>
+          <div class="detail-row"><span class="d-label">Qualification</span><span class="d-value">${c.qualification || '—'}</span></div>
+          <div class="detail-row"><span class="d-label">Applied On</span><span class="d-value">${appliedDate}</span></div>
+          <div class="detail-row"><span class="d-label">Candidate ID</span><span class="d-value" style="font-size:11px;opacity:0.6">${c.candidate_id}</span></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">Signature</div>
+          ${signatureHtml}
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">Uploaded Documents</div>
+          ${docLinksHtml}
+        </div>
+      `;
+    }
+
+    function showTopBar() {
+      const el = document.getElementById('topLoadingBar');
+      el.classList.remove('done');
+      el.classList.add('active');
+    }
+
+    function hideTopBar() {
+      const el = document.getElementById('topLoadingBar');
+      el.classList.add('done');
+      setTimeout(() => { el.classList.remove('active', 'done'); }, 300);
+    }
+
+    async function moveStage(candidateId, newStage, extraFields) {
+      showTopBar();
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(Object.assign({
+            token: TOKEN, action: 'updateCandidateStage',
+            candidate_id: candidateId, stage: newStage
+          }, extraFields || {}))
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('✓ Stage updated.: ' + (STAGE_LABELS[newStage] || newStage));
+          const idx = allCandidates.findIndex(c => c.candidate_id === candidateId);
+          if (idx !== -1) allCandidates[idx].stage = newStage;
+          updateStats();
+          filterAndRender();
+          if (activeCandidateId === candidateId) renderDrawer(allCandidates[idx]);
+          return true;
+        } else {
+          showToast(out.message || 'Error occurred.');
+          return false;
+        }
+      } catch (e) { showToast('Network error.'); return false; } finally { hideTopBar(); }
+    }
+
+    // ============================================================
+    // HIRE MODAL — Branch / Department / Designation / Joining Date /
+    // Reporting Manager / Shift, collected before candidate becomes
+    // an employee (updateCandidateStage → 'hired').
+    // ============================================================
+    let hireLookupsLoaded = false;
+    let hireLookupsLoading = null;
+    let hireBranches = [];
+    let hireDepartments = [];
+    let hireDesignations = [];
+    let hireShifts = [];
+    let hireEmployees = [];
+    let hireAdmins = [];
+    let hireCandidateId = null;
+
+    // Fetches one lookup action and safely returns its `.data` array.
+    // Any failure (network error, non-JSON response, status !== 'success',
+    // permission error on a restricted action, etc.) is swallowed here and
+    // resolves to [] instead of throwing — so ONE bad lookup (e.g. an HR
+    // user without permission for getAdminUsers) can no longer blank out
+    // every other dropdown in the Hire modal.
+    async function fetchHireLookup(action, extraParams) {
+      try {
+        const res = await fetch(`${API_URL}?action=${action}&token=${TOKEN}${extraParams || ''}`);
+        const out = await res.json();
+        if (out.status === 'success') return out.data || [];
+        console.warn(`Hire lookup "${action}" returned an error:`, out.message || out);
+        return [];
+      } catch (e) {
+        console.warn(`Hire lookup "${action}" failed:`, e);
+        return [];
+      }
+    }
+
+    async function loadHireLookups() {
+      if (hireLookupsLoaded) return;
+      if (hireLookupsLoading) return hireLookupsLoading;
+      hireLookupsLoading = (async () => {
+        const [branchData, deptData, desigData, shiftData, empData, adminData] = await Promise.all([
+          fetchHireLookup('getBranches'),
+          fetchHireLookup('getDepartments'),
+          fetchHireLookup('getDesignations'),
+          fetchHireLookup('getShifts'),
+          fetchHireLookup('getEmployees', '&limit=1000&status=active'),
+          // Admin/HR/Branch Manager users — so Reporting Manager dropdown
+          // can also point to an admin, not just an already-hired employee.
+          // Needs the new 'getAdminUsers' GET action (super_admin/hr
+          // only) — see appscript_auth.gs. If the logged-in user lacks
+          // permission for this one, it just resolves to [] and every
+          // other dropdown still loads fine.
+          fetchHireLookup('getAdminUsers')
+        ]);
+        hireBranches = branchData.filter(b => b.status === 'active');
+        hireDepartments = deptData;
+        hireDesignations = desigData;
+        hireShifts = shiftData;
+        hireEmployees = (empData && empData.data) ? empData.data : [];
+        hireAdmins = adminData;
+        hireLookupsLoaded = true;
+
+        if (!hireDepartments.length && !hireDesignations.length && !hireBranches.length) {
+          showToast('Failed to load hire form dropdowns — network/permission error. Please refresh the page and try again.');
+        }
+      })();
+      return hireLookupsLoading;
+    }
+
+    function fillSelect(selectEl, items, valueKey, labelFn, placeholder) {
+      const current = selectEl.value;
+      selectEl.innerHTML = `<option value="">${placeholder}</option>` +
+        items.map(it => `<option value="${it[valueKey]}">${labelFn(it)}</option>`).join('');
+      if (current && items.some(it => String(it[valueKey]) === String(current))) {
+        selectEl.value = current;
+      }
+    }
+
+    async function openHireModal(candidateId) {
+      hireCandidateId = candidateId;
+      const c = allCandidates.find(x => x.candidate_id === candidateId);
+      if (!c) return;
+
+      document.getElementById('hireModalCandName').textContent =
+        `${c.name} — ${c.role || 'Candidate'}${c.department ? ' · ' + c.department : ''}`;
+      document.getElementById('hireJoiningDate').valueAsDate = new Date();
+      document.getElementById('hireModal').classList.add('open');
+
+      const submitBtn = document.getElementById('hireSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Loading form…';
+
+      await loadHireLookups();
+
+      fillSelect(document.getElementById('hireBranch'), hireBranches, 'branch_id',
+        b => `${b.branch_id} — ${b.branch_name || b.name || b.branch_id}`, 'Select branch…');
+      fillSelect(document.getElementById('hireDepartment'), hireDepartments, 'dept_id',
+        d => d.dept_name || d.dept_id, 'Select department…');
+      fillSelect(document.getElementById('hireDesignation'), hireDesignations, 'desig_id',
+        d => d.desig_name || d.desig_id, 'Select designation…');
+
+      onHireBranchChange(); // populates shift + manager lists scoped to (initially empty) branch
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✓ Confirm Hire';
+    }
+
+    function onHireBranchChange() {
+      const branchId = document.getElementById('hireBranch').value;
+
+      const scopedShifts = branchId
+        ? hireShifts.filter(s => !s.branch_id || s.branch_id === branchId)
+        : hireShifts;
+      fillSelect(document.getElementById('hireShift'), scopedShifts, 'shift_id',
+        s => `${s.shift_name} (${s.start_time || ''}–${s.end_time || ''})`, 'Select shift…');
+
+      // Reporting Manager list = admins/HR/branch managers (always shown,
+      // since they oversee staff regardless of branch) + employees already
+      // hired in the selected branch.
+      const scopedEmployees = branchId
+        ? hireEmployees.filter(e => e.branch_id === branchId)
+        : hireEmployees;
+
+      const roleLabel = { super_admin: 'Super Admin', hr: 'HR', branch_manager: 'Branch Manager' };
+      const managerOptions = [
+        ...hireAdmins.map(a => ({
+          manager_id: a.user_id,
+          label: `${a.name} — ${roleLabel[a.role] || a.role}`
+        })),
+        ...scopedEmployees.map(e => ({
+          manager_id: e.emp_id,
+          label: `${e.name} (${e.emp_id})`
+        }))
+      ];
+
+      fillSelect(document.getElementById('hireReportingManager'), managerOptions, 'manager_id',
+        m => m.label, 'None');
+    }
+
+    function closeHireModal() {
+      document.getElementById('hireModal').classList.remove('open');
+      hireCandidateId = null;
+      document.getElementById('hireForm').reset();
+    }
+
+    async function submitHireForm(event) {
+      event.preventDefault();
+      if (!hireCandidateId) return;
+
+      const branchId = document.getElementById('hireBranch').value;
+      const departmentId = document.getElementById('hireDepartment').value;
+      if (!branchId || !departmentId) {
+        showToast('Both Branch and Department must be selected.');
+        return;
+      }
+
+      const submitBtn = document.getElementById('hireSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Hiring…';
+
+      const ok = await moveStage(hireCandidateId, 'hired', {
+        branch_id: branchId,
+        department_id: departmentId,
+        designation_id: document.getElementById('hireDesignation').value,
+        joining_date: document.getElementById('hireJoiningDate').value,
+        reporting_manager: document.getElementById('hireReportingManager').value,
+        default_shift_id: document.getElementById('hireShift').value,
+        employment_type: document.getElementById('hireEmploymentType').value
+      });
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✓ Confirm Hire';
+
+      if (ok) closeHireModal();
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCandidates);
+  </script>
+
+</body>
+
+</html>

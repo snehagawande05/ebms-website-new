@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR Targets — Codeline.AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-base: #0A0A0B;
+      --glass: rgba(255, 255, 255, 0.045);
+      --glass-strong: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.09);
+      --glass-border-hi: rgba(255, 255, 255, 0.16);
+      --glass-blur: 20px;
+      --text-primary: #F4F4F5;
+      --text-muted: #A1A1AA;
+      --text-dim: #6B7280;
+      --accent-glow: #D4D9E6;
+      --success: #34D399;
+      --warning: #FBBF24;
+      --danger: #F87171;
+      --info: #8FAEFF;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      background-image:
+        radial-gradient(circle at 12% -10%, rgba(255, 255, 255, 0.05), transparent 45%),
+        radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.03), transparent 40%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar-spacer {
+      width: 240px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-spacer {
+        display: none;
+      }
+    }
+
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    @media (max-width: 600px) {
+      .main-workspace {
+        padding: 16px;
+      }
+    }
+
+    .mobile-nav-bar {
+      display: none;
+      height: 50px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur));
+      border-radius: var(--radius-sm);
+      align-items: center;
+      padding: 0 16px;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-nav-bar {
+        display: flex;
+      }
+    }
+
+    .header-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .title-area h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .title-area p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .btn-primary {
+      background: var(--info);
+      color: #0A0A0B;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px 18px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: filter 0.15s;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.1);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: none;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      backdrop-filter: blur(var(--glass-blur));
+    }
+
+    .stat-card .stat-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .stat-card .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .stat-card .stat-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-bar select {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      cursor: pointer;
+      backdrop-filter: blur(var(--glass-blur));
+    }
+
+     .filter-bar select,
+.form-group select {
+  background-color: #1a1a1e;
+  color: #F4F4F5;
+  color-scheme: dark;
+}
+
+.filter-bar select option,
+.form-group select option {
+  background: #1a1a1e;
+  color: #F4F4F5;
+}
+
+    .filter-bar .btn-refresh {
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .filter-bar select {
+        font-size: 16px;
+      }
+    }
+
+    .table-container {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      width: 100%;
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+      min-width: 860px;
+    }
+
+    .data-table th {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+      padding: 14px 16px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .data-table tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-active {
+      background: rgba(52, 211, 153, 0.12);
+      color: #34D399;
+    }
+
+    .badge-inactive {
+      background: rgba(107, 114, 128, 0.16);
+      color: #A1A1AA;
+    }
+
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 130px;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 7px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #8FAEFF, #34D399);
+      transition: width 0.3s ease;
+    }
+
+    .progress-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+      min-width: 38px;
+      text-align: right;
+    }
+
+    .btn-edit {
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-edit:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: rgba(18, 18, 20, 0.92);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      max-width: 480px;
+      width: 100%;
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+      max-height: 88vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: rgba(18, 18, 20, 0.95);
+      z-index: 2;
+    }
+
+    .modal-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 24px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 10px;
+      margin: -10px;
+      border-radius: 8px;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .form-group select,
+    .form-group input {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.18s, background 0.18s;
+    }
+
+    .form-group select:focus,
+    .form-group input:focus {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .form-hint {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      margin-top: -2px;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .modal-footer button {
+      flex: 1;
+      padding: 11px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      border: 1px solid transparent;
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .modal-footer button:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-save {
+      background: rgba(52, 211, 153, 0.12);
+      border-color: rgba(52, 211, 153, 0.3);
+      color: #34D399;
+    }
+
+    .btn-save:hover {
+      background: rgba(52, 211, 153, 0.22);
+    }
+
+    .btn-cancel {
+      background: var(--glass);
+      border-color: var(--glass-border);
+      color: var(--text-muted);
+    }
+
+    .empty-state {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-dim);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
+
+    .banner-note {
+      background: rgba(251, 191, 36, 0.08);
+      border: 1px solid rgba(251, 191, 36, 0.22);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-size: 12.5px;
+      color: #FBBF24;
+      margin-bottom: 18px;
+      display: none;
+    }
+
+    .hr-standalone-topbar {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--glass-border);
+      background: var(--glass);
+      backdrop-filter: blur(var(--glass-blur));
+    }
+
+    .hr-back-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.15s;
+    }
+
+    .hr-back-link:hover {
+      color: var(--text-primary);
+    }
+
+    html.hr-standalone-mode body {
+      flex-direction: column;
+    }
+
+    html.hr-standalone-mode .hr-standalone-topbar {
+      display: block !important;
+    }
+
+    html.hr-standalone-mode .mobile-nav-bar {
+      display: none !important;
+    }
+
+    html.hr-standalone-mode .main-workspace {
+      min-height: calc(100vh - 49px);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="sidebar-spacer"></div>
+  <script>
+    (function () {
+      try {
+        var u = JSON.parse(localStorage.getItem('ebms_user') || '{}');
+        if (u.role === 'hr') {
+          var spacer = document.querySelector('.sidebar-spacer');
+          if (spacer) spacer.remove();
+          document.documentElement.classList.add('hr-standalone-mode');
+        }
+      } catch (e) { }
+    })();
+  </script>
+
+  <div class="hr-standalone-topbar" style="display:none;">
+    <a href="hr_dashboard.html" class="hr-back-link">← Back to HR Dashboard</a>
+  </div>
+
+  <div class="main-workspace">
+    <div class="mobile-nav-bar" onclick="openSidebar()">
+      ☰ <span style="font-size:14px; margin-left:12px; font-weight:600;">Menu</span>
+    </div>
+
+    <div class="header-block">
+      <div class="title-area">
+        <h1>🎯 HR Targets</h1>
+        <p>Admins set monthly admission targets for each HR, tracking Assigned, Achieved, Remaining, and Progress percentage here.</p>
+      </div>
+      <button class="btn-primary" id="assignTargetBtn" onclick="openAssignModal()">➕ Assign Target</button>
+    </div>
+
+    <!-- Shown to HR viewers (read-only) — they see their own target(s) only -->
+    <div class="banner-note" id="hrReadOnlyBanner">
+      👀 This is your personal monthly target (read-only). Only the admin can assign or edit a new target.
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Targets</div>
+        <div class="stat-value" id="statTotal">—</div>
+        <div class="stat-sub">Active, this view</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Assigned</div>
+        <div class="stat-value" id="statAssigned" style="color:var(--info);">—</div>
+        <div class="stat-sub">Across all rows shown</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Achieved</div>
+        <div class="stat-value" id="statAchieved" style="color:var(--success);">—</div>
+        <div class="stat-sub">Live-computed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Progress</div>
+        <div class="stat-value" id="statProgress" style="color:var(--warning);">—</div>
+        <div class="stat-sub">Simple average %</div>
+      </div>
+    </div>
+
+    <!-- Filter Bar (Admin only — HR view has no HR-picker since they only see their own) -->
+    <div class="filter-bar">
+      <select id="filterHr" style="display:none;" onchange="loadTargets()">
+        <option value="">All HR Users</option>
+      </select>
+      <select id="filterMonth" onchange="loadTargets()"></select>
+      <select id="filterYear" onchange="loadTargets()"></select>
+      <select id="filterStatus" onchange="loadTargets()">
+        <option value="active" selected>Active</option>
+        <option value="inactive">Inactive</option>
+        <option value="">All</option>
+      </select>
+      <button class="btn-refresh" onclick="loadTargets()">🔄 Refresh</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>HR</th>
+            <th>Month / Year</th>
+            <th>Assigned</th>
+            <th>Achieved</th>
+            <th>Remaining</th>
+            <th>Progress</th>
+            <th>Status</th>
+            <th id="actionsHeader">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="targetsRowsContainer">
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">
+                <div class="empty-icon">🎯</div>
+                <p>Targets are loading...</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Assign / Edit Modal (Admin only) -->
+  <div class="modal-overlay" id="targetModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="targetModalTitle">➕ Assign Target to HR</h3>
+        <button class="modal-close-btn" onclick="closeTargetModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" id="fgHr">
+          <label>HR User</label>
+          <select id="tmHr"></select>
+          <div class="form-hint">Only users with an active HR role appear in the list.</div>
+        </div>
+        <div style="display:flex; gap:12px;">
+          <div class="form-group" style="flex:1;">
+            <label>Month</label>
+            <select id="tmMonth"></select>
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Year</label>
+            <select id="tmYear"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Assigned Target (Admissions)</label>
+          <input type="number" id="tmAssigned" min="0"
+            placeholder="Leave blank to use the business-default (Settings)" />
+          <div class="form-hint">The achieved count is live-computed from admission leads assigned to that HR (status = "Admission Completed").</div>
+        </div>
+        <div class="form-group" id="fgStatus" style="display:none;">
+          <label>Status</label>
+          <select id="tmStatus">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" onclick="closeTargetModal()">Cancel</button>
+          <button class="btn-save" id="tmSaveBtn" onclick="submitTargetModal()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    AppSession.protect();
+    const TOKEN = AppSession.getToken();
+    const USER = AppSession.getUser();
+    const IS_ADMIN = USER && USER.role === 'super_admin';
+
+    let allTargets = [];
+    let hrNameMap = {};
+    let editingTargetId = null;
+
+    const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateMonthYearSelects();
+      applyRoleView();
+      loadHrUsers().then(() => loadTargets());
+    });
+
+    // ── Role-based UI: only super_admin can assign/edit; HR sees read-only ──
+    function applyRoleView() {
+      if (!IS_ADMIN) {
+        document.getElementById('assignTargetBtn').style.display = 'none';
+        document.getElementById('hrReadOnlyBanner').style.display = 'block';
+        document.getElementById('actionsHeader').style.display = 'none';
+      } else {
+        document.getElementById('filterHr').style.display = 'inline-block';
+      }
+    }
+
+    function populateMonthYearSelects() {
+      const now = new Date();
+      const curMonth = now.getMonth() + 1;
+      const curYear = now.getFullYear();
+
+      const filterMonth = document.getElementById('filterMonth');
+      filterMonth.innerHTML = '<option value="">All Months</option>' +
+        MONTH_NAMES.map((m, i) => `<option value="${i + 1}" ${i + 1 === curMonth ? 'selected' : ''}>${m}</option>`).join('');
+
+      const filterYear = document.getElementById('filterYear');
+      let yOpts = '';
+      for (let y = curYear - 1; y <= curYear + 1; y++) yOpts += `<option value="${y}" ${y === curYear ? 'selected' : ''}>${y}</option>`;
+      filterYear.innerHTML = yOpts;
+
+      const tmMonth = document.getElementById('tmMonth');
+      tmMonth.innerHTML = MONTH_NAMES.map((m, i) => `<option value="${i + 1}" ${i + 1 === curMonth ? 'selected' : ''}>${m}</option>`).join('');
+
+      const tmYear = document.getElementById('tmYear');
+      let tmYOpts = '';
+      for (let y = curYear - 1; y <= curYear + 1; y++) tmYOpts += `<option value="${y}" ${y === curYear ? 'selected' : ''}>${y}</option>`;
+      tmYear.innerHTML = tmYOpts;
+    }
+
+    // ── Load HR users (role === 'hr') for the picker + name display ──
+    // Only super_admin needs this call — HR viewers already know it's
+    // themselves and don't need the full list.
+    async function loadHrUsers() {
+      if (!IS_ADMIN) {
+        hrNameMap[USER.user_id || USER.emp_id] = USER.name || 'You';
+        return;
+      }
+      try {
+        const res = await fetch(`${API_URL}?action=getAdminUsers&token=${TOKEN}`, { cache: 'no-store' });
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          const arr = (payload.data && payload.data.data) || payload.data || [];
+          const filterSelect = document.getElementById('filterHr');
+          const tmSelect = document.getElementById('tmHr');
+          arr.filter(u => u.role === 'hr' && u.status !== 'inactive').forEach(hr => {
+            if (!hr.user_id) return;
+            hrNameMap[hr.user_id] = hr.name || hr.email || hr.user_id;
+            const o1 = document.createElement('option');
+            o1.value = hr.user_id; o1.textContent = hr.name || hr.email || hr.user_id;
+            filterSelect.appendChild(o1);
+            const o2 = document.createElement('option');
+            o2.value = hr.user_id; o2.textContent = hr.name || hr.email || hr.user_id;
+            tmSelect.appendChild(o2);
+          });
+        }
+      } catch (e) { /* fallback to hr_id/hr_name display from the target rows themselves */ }
+    }
+
+    async function loadTargets() {
+      const tbody = document.getElementById('targetsRowsContainer');
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon" style="animation:spin 1s linear infinite;display:inline-block;">⏳</div><p>Loading targets...</p></div></td></tr>`;
+
+      const hrId = IS_ADMIN ? document.getElementById('filterHr').value : '';
+      const month = document.getElementById('filterMonth').value;
+      const year = document.getElementById('filterYear').value;
+      const status = document.getElementById('filterStatus').value;
+
+      let url = `${API_URL}?action=getHrTargets&token=${TOKEN}&limit=300&_ts=${Date.now()}`;
+      if (hrId) url += `&hr_id=${encodeURIComponent(hrId)}`;
+      if (month) url += `&month=${month}`;
+      if (year) url += `&year=${year}`;
+      if (status) url += `&status=${status}`;
+
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          allTargets = (payload.data && payload.data.data) || payload.data || [];
+          updateStats(allTargets);
+          renderRows(allTargets);
+        } else {
+          showToast(payload.message || 'Error occurred while fetching targets.');
+        }
+      } catch (e) {
+        showToast('Network error — targets could not be loaded.');
+      }
+    }
+
+    function updateStats(data) {
+      document.getElementById('statTotal').textContent = data.length;
+      const totalAssigned = data.reduce((s, t) => s + (parseFloat(t.assigned_target) || 0), 0);
+      const totalAchieved = data.reduce((s, t) => s + (parseFloat(t.achieved_target) || 0), 0);
+      const avgProgress = data.length ? (data.reduce((s, t) => s + (parseFloat(t.progress_percent) || 0), 0) / data.length) : 0;
+      document.getElementById('statAssigned').textContent = totalAssigned;
+      document.getElementById('statAchieved').textContent = totalAchieved;
+      document.getElementById('statProgress').textContent = Math.round(avgProgress * 10) / 10 + '%';
+    }
+
+    function renderRows(data) {
+      const tbody = document.getElementById('targetsRowsContainer');
+      const colCount = IS_ADMIN ? 8 : 7;
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `
+        <tr><td colspan="${colCount}">
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <p>No targets found for this filter.</p>
+          </div>
+        </td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(t => {
+        const hrDisplayName = hrNameMap[t.hr_id] || t.hr_name || t.hr_id || '—';
+        const progress = Math.min(parseFloat(t.progress_percent) || 0, 100);
+        const statusClass = t.status === 'inactive' ? 'badge-inactive' : 'badge-active';
+        const statusLabel = t.status === 'inactive' ? 'Inactive' : 'Active';
+
+        return `
+        <tr>
+          <td>
+            <div style="font-weight:600; color:var(--text-primary); font-size:13.5px;">${hrDisplayName}</div>
+            <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">${t.hr_id}</div>
+          </td>
+          <td style="font-size:13px;">${MONTH_NAMES[(parseInt(t.target_month, 10) || 1) - 1]} ${t.target_year}</td>
+          <td style="font-family:'Space Grotesk', sans-serif; font-weight:600;">${t.assigned_target}</td>
+          <td style="font-family:'Space Grotesk', sans-serif; font-weight:600; color:var(--success);">${t.achieved_target}</td>
+          <td style="color:var(--text-muted);">${t.remaining_target}</td>
+          <td>
+            <div class="progress-wrap">
+              <div class="progress-track"><div class="progress-fill" style="width:${progress}%;"></div></div>
+              <div class="progress-label">${Math.round(progress)}%</div>
+            </div>
+          </td>
+          <td><span class="badge ${statusClass}">${statusLabel}</span></td>
+          ${IS_ADMIN ? `<td><button class="btn-edit" onclick="openEditModal('${t.target_id}')">✏️ Edit</button></td>` : ''}
+        </tr>`;
+      }).join('');
+    }
+
+    function openAssignModal() {
+      if (!IS_ADMIN) return; // safety — button is hidden for non-admins anyway
+      editingTargetId = null;
+      document.getElementById('targetModalTitle').textContent = '➕ Assign Target to HR';
+      document.getElementById('fgHr').style.display = 'flex';
+      document.getElementById('fgStatus').style.display = 'none';
+      document.getElementById('tmHr').disabled = false;
+      document.getElementById('tmMonth').disabled = false;
+      document.getElementById('tmYear').disabled = false;
+      document.getElementById('tmAssigned').value = '';
+      document.getElementById('tmSaveBtn').textContent = 'Assign';
+      document.getElementById('targetModal').classList.add('open');
+    }
+
+    function openEditModal(targetId) {
+      if (!IS_ADMIN) return;
+      const t = allTargets.find(x => x.target_id === targetId);
+      if (!t) return;
+      editingTargetId = targetId;
+      document.getElementById('targetModalTitle').textContent = '✏️ Edit Target';
+      document.getElementById('fgHr').style.display = 'none';
+      document.getElementById('fgStatus').style.display = 'flex';
+      document.getElementById('tmHr').value = t.hr_id;
+      document.getElementById('tmMonth').value = t.target_month;
+      document.getElementById('tmMonth').disabled = true;
+      document.getElementById('tmYear').value = t.target_year;
+      document.getElementById('tmYear').disabled = true;
+      document.getElementById('tmAssigned').value = t.assigned_target;
+      document.getElementById('tmStatus').value = t.status || 'active';
+      document.getElementById('tmSaveBtn').textContent = 'Save Changes';
+      document.getElementById('targetModal').classList.add('open');
+    }
+
+    function closeTargetModal() {
+      document.getElementById('targetModal').classList.remove('open');
+      editingTargetId = null;
+    }
+
+    async function submitTargetModal() {
+      const btn = document.getElementById('tmSaveBtn');
+      btn.disabled = true;
+      const originalLabel = btn.textContent;
+      btn.textContent = 'Saving…';
+
+      try {
+        let payload;
+        if (editingTargetId) {
+          payload = {
+            token: TOKEN,
+            action: 'updateHrTarget',
+            target_id: editingTargetId,
+            assigned_target: document.getElementById('tmAssigned').value,
+            status: document.getElementById('tmStatus').value
+          };
+        } else {
+          const hrId = document.getElementById('tmHr').value;
+          if (!hrId) { showToast('Please select an HR user.'); btn.disabled = false; btn.textContent = originalLabel; return; }
+          payload = {
+            token: TOKEN,
+            action: 'assignHrTarget',
+            hr_id: hrId,
+            target_month: document.getElementById('tmMonth').value,
+            target_year: document.getElementById('tmYear').value,
+            assigned_target: document.getElementById('tmAssigned').value
+          };
+        }
+
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast(out.message || 'Target saved.');
+          closeTargetModal();
+          loadTargets();
+        } else {
+          showToast(out.message || 'Could not save the target.');
+        }
+      } catch (e) {
+        showToast('Network error while saving the target.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalLabel;
+      }
+    }
+  </script>
+</body>
+
+</html>

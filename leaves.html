@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leave Requests — Codeline.AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-base: #0A0A0B;
+      --glass: rgba(255, 255, 255, 0.045);
+      --glass-strong: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.09);
+      --glass-blur: 20px;
+      --text-primary: #F4F4F5;
+      --text-muted: #A1A1AA;
+      --text-dim: #6B7280;
+      --accent-glow: #D4D9E6;
+      --success: #34D399;
+      --warning: #FBBF24;
+      --danger: #F87171;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      background-image:
+        radial-gradient(circle at 12% -10%, rgba(255, 255, 255, 0.05), transparent 45%),
+        radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.03), transparent 40%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar-spacer {
+      width: 240px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-spacer {
+        display: none;
+      }
+    }
+
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    @media (max-width: 600px) {
+      .main-workspace {
+        padding: 16px;
+      }
+    }
+
+    .mobile-nav-bar {
+      display: none;
+      height: 50px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur));
+      border-radius: var(--radius-sm);
+      align-items: center;
+      padding: 0 16px;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-nav-bar {
+        display: flex;
+      }
+    }
+
+    .header-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .title-area h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .title-area p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .btn-action {
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(var(--glass-blur));
+      transition: background 0.18s, border-color 0.18s, transform 0.18s;
+      white-space: nowrap;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      backdrop-filter: blur(var(--glass-blur));
+    }
+
+    .stat-card .stat-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .stat-card .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .stat-card .stat-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Filter bar */
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-bar select {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      cursor: pointer;
+      backdrop-filter: blur(var(--glass-blur));
+    }
+
+    .filter-bar select option {
+      background: #1a1a1e;
+    }
+
+    @media (max-width: 900px) {
+      .filter-bar select {
+        font-size: 16px;
+      }
+    }
+
+    .table-container {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      width: 100%;
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+      min-width: 750px;
+    }
+
+    .data-table th {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+      padding: 14px 16px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .data-table tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    /* Status badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-pending {
+      background: rgba(251, 191, 36, 0.12);
+      color: #FBBF24;
+    }
+
+    .badge-approved {
+      background: rgba(52, 211, 153, 0.12);
+      color: #34D399;
+    }
+
+    .badge-rejected {
+      background: rgba(248, 113, 113, 0.12);
+      color: #F87171;
+    }
+
+    /* Leave type pill */
+    .type-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text-muted);
+      border: 1px solid var(--glass-border);
+    }
+
+    /* Action buttons in table */
+    .btn-approve {
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      color: #34D399;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-approve:hover {
+      background: rgba(52, 211, 153, 0.2);
+    }
+
+    .btn-reject {
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      color: #F87171;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-reject:hover {
+      background: rgba(248, 113, 113, 0.2);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background: rgba(18, 18, 20, 0.85);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      max-width: 480px;
+      width: 100%;
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.18s, background 0.18s;
+      width: 100%;
+    }
+
+    .form-group select option {
+      background: #1a1a1e;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .form-group textarea {
+      resize: none;
+      height: 80px;
+    }
+
+    .date-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 380px) {
+      .date-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        font-size: 16px;
+      }
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: var(--glass-strong);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.18s, transform 0.18s;
+      margin-top: 4px;
+    }
+
+    .btn-submit:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .empty-state {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-dim);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
+  .stat-card {
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, transform 0.18s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .stat-card.stat-active {
+      border-color: rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .stat-card[data-filter="pending"].stat-active {
+      border-color: rgba(251, 191, 36, 0.5);
+      background: rgba(251, 191, 36, 0.07);
+    }
+
+    .stat-card[data-filter="approved"].stat-active {
+      border-color: rgba(52, 211, 153, 0.5);
+      background: rgba(52, 211, 153, 0.07);
+    }
+
+    .stat-card[data-filter="rejected"].stat-active {
+      border-color: rgba(248, 113, 113, 0.5);
+      background: rgba(248, 113, 113, 0.07);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="sidebar-spacer"></div>
+
+  <div class="main-workspace">
+    <div class="mobile-nav-bar" onclick="openSidebar()">
+      ☰ <span style="font-size:14px; margin-left:12px; font-weight:600;">Menu</span>
+    </div>
+
+    <div class="header-block">
+      <div class="title-area">
+        <h1>📅 Leave Requests</h1>
+        <p>Manage and approve employee leave applications.</p>
+      </div>
+      <button class="btn-action" id="applyLeaveBtn" onclick="toggleLeaveModal(true)">➕ Apply Leave</button>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card">
+        <div class="stat-label">Total Requests</div>
+        <div class="stat-value" id="statTotal">—</div>
+        <div class="stat-sub">All time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value" id="statPending" style="color:var(--warning);">—</div>
+        <div class="stat-sub">Awaiting review</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Approved</div>
+        <div class="stat-value" id="statApproved" style="color:var(--success);">—</div>
+        <div class="stat-sub">This cycle</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Rejected</div>
+        <div class="stat-value" id="statRejected" style="color:var(--danger);">—</div>
+        <div class="stat-sub">This cycle</div>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <select id="filterStatus" onchange="applyFilters()">
+        <option value="">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
+      <select id="filterType" onchange="applyFilters()">
+        <option value="">All Types</option>
+        <option value="Sick Leave">Sick Leave</option>
+        <option value="Casual Leave">Casual Leave</option>
+        <option value="Annual Leave">Annual Leave</option>
+        <option value="Emergency Leave">Emergency Leave</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Leave ID</th>
+            <th>Employee</th>
+            <th>Type</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Days</th>
+            <th>Reason</th>
+            <th>Applied On</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="leavesRowsContainer">
+          <tr>
+            <td colspan="9">
+              <div class="empty-state">
+                <div class="empty-icon">📅</div>
+                <p>Leave requests are loading...</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Apply Leave Modal -->
+  <div class="modal-overlay" id="leaveModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📅 Apply for Leave</h3>
+        <button
+          style="background:none; border:none; color:var(--text-muted); font-size:24px; cursor:pointer; line-height:1; padding:10px; margin:-10px; border-radius:8px;"
+          onclick="toggleLeaveModal(false)">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="newLeaveForm" onsubmit="submitLeaveRequest(event)">
+          <div class="form-group" id="empIdGroup">
+            <label>Employee ID *</label>
+            <input type="text" id="lEmpId" placeholder="e.g. EMP004" />
+          </div>
+          <div class="form-group">
+            <label>Leave Type *</label>
+            <select id="lType" required>
+              <option value="Sick Leave">🤒 Sick Leave</option>
+              <option value="Casual Leave">🏖️ Casual Leave</option>
+              <option value="Annual Leave">📆 Annual Leave</option>
+              <option value="Emergency Leave">🚨 Emergency Leave</option>
+            </select>
+          </div>
+          <div class="date-row">
+            <div class="form-group">
+              <label>From Date *</label>
+              <input type="date" id="lFrom" required />
+            </div>
+            <div class="form-group">
+              <label>To Date *</label>
+              <input type="date" id="lTo" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Reason</label>
+            <textarea id="lReason" placeholder="Brief reason for leave..."></textarea>
+          </div>
+          <button type="submit" class="btn-submit" id="leaveSubmitBtn">Submit Leave Request</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    AppSession.protect();
+    const TOKEN = AppSession.getToken();
+    const USER = AppSession.getUser();
+
+    let allLeaves = [];
+    let empNameMap = {}; // emp_id -> name lookup
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Employees apna hi leave apply kar sakte hain — emp_id field hide karo
+      if (USER.role === 'employee') {
+        const empIdGroup = document.getElementById('empIdGroup');
+        if (empIdGroup) empIdGroup.style.display = 'none';
+      }
+      // Pehle employees load karo naam mapping ke liye, phir leaves
+      initStatCardFilters();
+      loadEmployeeNames().then(() => loadLeaves());
+    });
+
+    // ── Employee naam preload karo (emp_id → name map) ──────────────────
+    async function loadEmployeeNames() {
+      try {
+        const res = await fetch(`${API_URL}?action=getEmployees&token=${TOKEN}&limit=500`, { cache: 'no-store' });
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          const arr = (payload.data && payload.data.data) || payload.data || [];
+          arr.forEach(emp => {
+            if (emp.emp_id) empNameMap[emp.emp_id] = emp.name || emp.emp_id;
+          });
+        }
+      } catch (e) { /* naam nahi mila toh emp_id fallback chalega */ }
+    }
+
+    function toggleLeaveModal(on) {
+      document.getElementById('leaveModal').style.display = on ? 'flex' : 'none';
+      if (!on) document.getElementById('newLeaveForm').reset();
+    }
+
+    // ── Leaves fetch — limit=200 taaki sab records aayein ───────────────
+    async function loadLeaves() {
+      const tbody = document.getElementById('leavesRowsContainer');
+      tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon" style="animation:spin 1s linear infinite;display:inline-block;">⏳</div><p>Loading leave requests...</p></div></td></tr>`;
+      try {
+        const res = await fetch(`${API_URL}?action=getLeaves&token=${TOKEN}&limit=200&page=1&_ts=${Date.now()}`, { cache: 'no-store' });
+        const payload = await res.json();
+
+        if (payload.status === 'success') {
+          allLeaves = (payload.data && payload.data.data) || [];
+          updateStats(allLeaves);
+
+          // Default: pending tab dikhao taaki admin turant action le sake
+          const filterStatus = document.getElementById('filterStatus');
+          if (USER.role !== 'employee' && filterStatus.value === '') {
+            const hasPending = allLeaves.some(l => l.status === 'pending');
+            if (hasPending) filterStatus.value = 'pending';
+          }
+
+          applyFilters();
+        } else {
+          showToast(payload.message || 'Error fetching leaves..');
+          tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">⚠️</div><p>${payload.message || 'Error loading leaves.'}</p></div></td></tr>`;
+        }
+      } catch (e) {
+        showToast('Network error — failed to load leaves.');
+        tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📡</div><p>Network error. Please retry..</p></div></td></tr>`;
+      }
+    }
+
+    function updateStats(data) {
+      document.getElementById('statTotal').textContent = data.length;
+      const pendingCount = data.filter(l => l.status === 'pending').length;
+      document.getElementById('statPending').textContent = pendingCount;
+      document.getElementById('statApproved').textContent = data.filter(l => l.status === 'approved').length;
+      document.getElementById('statRejected').textContent = data.filter(l => l.status === 'rejected').length;
+
+      // Pending count highlight — admin ko dikhe
+      const pendingCard = document.getElementById('statPending').closest('.stat-card');
+      if (pendingCount > 0 && pendingCard) {
+        pendingCard.style.border = '1px solid rgba(251,191,36,0.35)';
+        pendingCard.style.background = 'rgba(251,191,36,0.05)';
+      }
+    }
+
+    // The stat cards work as quick filters: clicking one sets the Status filter.
+    const STAT_CARD_FILTERS = ['', 'pending', 'approved', 'rejected'];
+
+    function initStatCardFilters() {
+      document.querySelectorAll('#statsRow .stat-card').forEach((card, i) => {
+        card.dataset.filter = STAT_CARD_FILTERS[i];
+        card.addEventListener('click', () => {
+          document.getElementById('filterStatus').value = STAT_CARD_FILTERS[i];
+          applyFilters();
+        });
+      });
+    }
+
+    // Highlights only the card that matches the current Status filter.
+    function syncStatCards() {
+      const current = document.getElementById('filterStatus').value;
+      document.querySelectorAll('#statsRow .stat-card').forEach(card => {
+        card.style.border = '';
+        card.style.background = '';
+        card.classList.toggle('stat-active', card.dataset.filter === current);
+      });
+    }
+
+    function applyFilters() {
+      const status = document.getElementById('filterStatus').value;
+      const type = document.getElementById('filterType').value;
+      let filtered = allLeaves;
+      if (status) filtered = filtered.filter(l => l.status === status);
+      if (type) filtered = filtered.filter(l => l.leave_type === type);
+      renderRows(filtered);
+      syncStatCards();
+    }
+
+    function renderRows(data) {
+      const tbody = document.getElementById('leavesRowsContainer');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `
+        <tr><td colspan="10">
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <p>No leave requests found.</p>
+          </div>
+        </td></tr>`;
+        return;
+      }
+
+      const isManager = USER.role !== 'employee';
+
+      tbody.innerHTML = data.map(l => {
+        const from = l.from_date ? parseLeaveDate(l.from_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—';
+        const to   = l.to_date   ? parseLeaveDate(l.to_date).toLocaleDateString('en-IN',   { day: '2-digit', month: 'short' }) : '—';
+        const days = l.days || '—';
+
+        // Employee ka naam dikhao, fallback emp_id
+        const empName = empNameMap[l.emp_id] || l.emp_id || '—';
+
+        // Applied on date
+        const appliedOn = l.applied_on
+          ? parseLeaveDate(l.applied_on).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' })
+          : '—';
+
+        const badgeClass =
+          l.status === 'approved' ? 'badge-approved' :
+          l.status === 'rejected' ? 'badge-rejected' : 'badge-pending';
+
+        const actions = (isManager && l.status === 'pending')
+          ? `<div style="display:flex;gap:6px;flex-wrap:wrap;">
+               <button class="btn-approve" onclick="confirmLeaveAction('${l.leave_id}','approved','${empName}')">✓ Approve</button>
+               <button class="btn-reject"  onclick="confirmLeaveAction('${l.leave_id}','rejected','${empName}')">✕ Reject</button>
+             </div>`
+          : `<span style="color:var(--text-dim); font-size:12px;">${l.approved_by ? '👤 ' + (empNameMap[l.approved_by] || l.approved_by) : '—'}</span>`;
+
+        return `
+        <tr>
+          <td><code style="font-size:11px; color:var(--text-dim);">${l.leave_id}</code></td>
+          <td>
+            <div style="font-weight:600; color:var(--text-primary); font-size:13.5px;">${empName}</div>
+            <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">${l.emp_id}</div>
+          </td>
+          <td><span class="type-pill">${l.leave_type || '—'}</span></td>
+          <td style="font-size:13px;">${from}</td>
+          <td style="font-size:13px;">${to}</td>
+          <td style="font-weight:600; color:var(--text-primary);">${days}</td>
+          <td style="font-size:13px; color:var(--text-muted); max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${l.reason || ''}">${l.reason || '—'}</td>
+          <td style="font-size:12px; color:var(--text-dim);">${appliedOn}</td>
+          <td><span class="badge ${badgeClass}">${l.status}</span></td>
+          <td>${actions}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ── Confirm dialog before approve/reject ────────────────────────────
+     function confirmLeaveAction(leaveId, newStatus, empName) {
+  const actionLabel = newStatus === 'approved' ? 'Approve' : 'Reject';
+  const msg = `Are you sure you want to ${actionLabel.toLowerCase()} the leave request for ${empName}?`;
+  if (!window.confirm(msg)) return;
+  updateLeaveStatus(leaveId, newStatus);
+}
+    async function updateLeaveStatus(leaveId, newStatus) {
+      const action = newStatus === 'approved' ? 'approveLeave' : 'rejectLeave';
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ token: TOKEN, action: action, leave_id: leaveId })
+        });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast(newStatus === 'approved' ? '✅ Leave approved!' : '❌ Leave rejected.');
+          loadLeaves();
+        } else {
+          showToast(out.message || 'Error updating status.');
+        }
+      } catch (e) {
+        showToast('Network error.');
+      }
+    }
+
+    // The backend sends dates as dd-MM-yyyy. new Date() reads that as MM-dd-yyyy,
+    // which swaps day and month, or returns Invalid Date. This parses it correctly.
+    function parseLeaveDate(str) {
+      const s = String(str || '').trim();
+      const m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+      if (m) return new Date(parseInt(m[3], 10), parseInt(m[2], 10) - 1, parseInt(m[1], 10));
+      return new Date(s);
+    }
+
+    function calculateLeaveDays(fromStr, toStr) {
+      if (!fromStr || !toStr) return 1;
+      const from = new Date(fromStr);
+      const to = new Date(toStr);
+      const diffDays = Math.round((to - from) / (1000 * 60 * 60 * 24)) + 1;
+      return diffDays > 0 ? diffDays : 1;
+    }
+
+    async function submitLeaveRequest(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('leaveSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      // BUG FIX: USER.employee_id use karo, USER.emp_id nahi
+      const empId = USER.role === 'employee'
+        ? (USER.employee_id || USER.emp_id)
+        : (document.getElementById('lEmpId').value.trim());
+
+      const fromDateVal = document.getElementById('lFrom').value;
+      const toDateVal   = document.getElementById('lTo').value;
+      const daysCount   = calculateLeaveDays(fromDateVal, toDateVal);
+
+      if (!empId) {
+        showToast('Employee ID missing — please enter emp_id.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Leave Request';
+        return;
+      }
+
+      const payload = {
+        token:      TOKEN,
+        action:     'applyLeave',
+        emp_id:     empId,
+        leave_type: document.getElementById('lType').value,
+        from_date:  fromDateVal,
+        to_date:    toDateVal,
+        days:       daysCount,
+        reason:     document.getElementById('lReason').value
+      };
+
+      try {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const out = await res.json();
+        if (out.status === 'success') {
+          showToast('✅ Leave request submitted successfully!');
+          toggleLeaveModal(false);
+          loadLeaves();
+        } else {
+          showToast(out.message || 'Error submitting request.');
+        }
+      } catch (err) {
+        showToast('Network error.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Leave Request';
+      }
+    }
+  </script>
+</body>
+
+</html>

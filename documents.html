@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR Documentation Center — Codeline.AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-base: #0A0A0B;
+      --glass: rgba(255, 255, 255, 0.045);
+      --glass-strong: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.09);
+      --glass-blur: 20px;
+      --text-primary: #F4F4F5;
+      --text-muted: #A1A1AA;
+      --text-dim: #52525B;
+      --success: #34D399;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      background-image:
+        radial-gradient(ellipse at 15% 0%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 100%, rgba(255, 255, 255, 0.025) 0%, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar-spacer {
+      width: 240px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-spacer {
+        display: none;
+      }
+    }
+
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    @media (max-width: 600px) {
+      .main-workspace {
+        padding: 14px;
+      }
+    }
+
+    /* Mobile nav */
+    .mobile-nav-bar {
+      display: none;
+      height: 48px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur));
+      border-radius: var(--radius-sm);
+      align-items: center;
+      padding: 0 16px;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-bottom: 16px;
+      gap: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-nav-bar {
+        display: flex;
+      }
+    }
+
+    /* Header */
+    .header-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .title-area h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .title-area p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    /* Two-column grid */
+    .docs-panel-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .docs-panel-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Generator panel */
+    .generation-box {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 22px;
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      height: max-content;
+      position: sticky;
+      top: 24px;
+    }
+
+    @media (max-width: 960px) {
+      .generation-box {
+        position: static;
+      }
+    }
+
+    .gen-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Form elements */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      color: var(--text-primary);
+      font-size: 13.5px;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.18s, background 0.18s;
+      backdrop-filter: blur(10px);
+      width: 100%;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--text-dim);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: rgba(255, 255, 255, 0.22);
+      background: var(--glass-strong);
+    }
+
+    .form-group select option {
+      background: #1a1a1c;
+      color: var(--text-primary);
+    }
+
+    .form-group textarea {
+      resize: none;
+      height: 88px;
+    }
+
+    .btn-generate {
+      width: 100%;
+      background: rgba(244, 244, 245, 0.9);
+      color: #0A0A0B;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+      transition: all 0.2s;
+      margin-top: 6px;
+      letter-spacing: 0.2px;
+    }
+
+    .btn-generate:hover:not(:disabled) {
+      background: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .btn-generate:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Right panel — table + pagination */
+    .archive-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .table-container {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+      min-width: 600px;
+    }
+
+    .data-table th {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+      padding: 13px 16px;
+      font-weight: 600;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    /* Doc type badge */
+    .doc-type-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+    }
+
+    .btn-preview {
+      background: none;
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 5px 11px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+
+    .btn-preview:hover {
+      background: var(--glass-strong);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    /* Pagination */
+    .pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-dim);
+      font-size: 13px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn-nav {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.18s;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-nav:hover:not(:disabled) {
+      background: var(--glass-strong);
+      color: var(--text-primary);
+    }
+
+    .btn-nav:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Document viewer modal */
+    .viewer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .viewer-card {
+      background: rgba(14, 14, 16, 0.85);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      max-width: 660px;
+      width: 100%;
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .viewer-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .viewer-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .viewer-body {
+      margin: 16px 20px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      color: #D4D4D8;
+      font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+      white-space: pre-wrap;
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .viewer-footer {
+      padding: 14px 22px;
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .btn-print {
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.18s;
+    }
+
+    .btn-print:hover {
+      background: rgba(255, 255, 255, 0.13);
+    }
+
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      border-radius: 5px;
+      padding: 2px 6px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="sidebar-spacer"></div>
+
+  <div class="main-workspace">
+    <div class="mobile-nav-bar" onclick="openSidebar()">
+      ☰ <span style="font-size:14px; font-weight:600;">Menu</span>
+    </div>
+
+    <div class="header-block">
+      <div class="title-area">
+        <h1>📄 HR Documentation Center</h1>
+        <p>Generate employment letters — Offer, Appointment, and Warning letters.</p>
+      </div>
+    </div>
+
+    <div class="docs-panel-grid">
+
+      <!-- Generator Panel -->
+      <div class="generation-box">
+        <div class="gen-title">⚡ Document Generator</div>
+        <form id="documentGenerationFormNode" onsubmit="executeDocumentGenerationProcess(event)">
+          <div class="form-group">
+            <label>Employee ID *</label>
+            <input type="text" id="docEmpId" required placeholder="e.g. EMP004" />
+          </div>
+          <div class="form-group">
+            <label>Letter Type *</label>
+            <select id="docTemplateType" required>
+              <option value="Offer Letter">Offer Letter</option>
+              <option value="Appointment Letter">Appointment Letter</option>
+              <option value="Warning Letter">Warning Letter</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Custom Notes (Optional)</label>
+            <textarea id="docCustomNotes" placeholder=" Write additional clauses or notes...."></textarea>
+          </div>
+          <button type="submit" class="btn-generate" id="engineSubmitBtnLabelNode">
+            ⚡ Generate Document
+          </button>
+        </form>
+      </div>
+
+      <!-- Archive Panel -->
+      <div class="archive-panel">
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Doc ID</th>
+                <th>Employee</th>
+                <th>Type</th>
+                <th>Generated On</th>
+                <th>Issued By</th>
+                <th>Preview</th>
+              </tr>
+            </thead>
+            <tbody id="documentsArchiveRowsContainer">
+              <tr>
+                <td colspan="6" style="padding:32px; text-align:center; color:var(--text-dim);">
+                  Documents are loading...
+                 </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination-bar">
+          <span id="paginationInfoTrackerLabel">Page 0 of 0</span>
+          <div style="display:flex; gap:8px;">
+            <button id="btnPrevPage" class="btn-nav" onclick="changeArchivePage(-1)" disabled>← Prev</button>
+            <button id="btnNextPage" class="btn-nav" onclick="changeArchivePage(1)" disabled>Next →</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Document Viewer Modal -->
+  <div class="viewer-overlay" id="documentTextContentLiveViewerOverlay">
+    <div class="viewer-card">
+      <div class="viewer-header">
+        <h3 id="viewerHeaderDocTitle">📄 Document Preview</h3>
+        <button
+          style="background:none; border:none; color:var(--text-muted); font-size:22px; cursor:pointer; line-height:1;"
+          onclick="closeDocumentLiveViewerPopup()">×</button>
+      </div>
+      <div class="viewer-body" id="viewerContainerTextPlaneBody">Loading...</div>
+      <div class="viewer-footer">
+        <button class="btn-print" onclick="executePrintSimulationDocBlock()">🖨️ Print / Download</button>
+        <button class="btn-nav" onclick="closeDocumentLiveViewerPopup()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    AppSession.protect();
+    const CACHED_TOKEN_DOCS = AppSession.getToken();
+
+    let CURRENT_PAGE_TRACKER = 1;
+    let TOTAL_PAGES_LIMIT = 1;
+    let LOCAL_CACHED_ARCHIVE_DATA_MATRIX_ARRAY = [];
+
+    document.addEventListener('DOMContentLoaded', () => { downloadGeneratedDocumentsArchive(); });
+
+    function closeDocumentLiveViewerPopup() {
+      document.getElementById('documentTextContentLiveViewerOverlay').style.display = 'none';
+    }
+
+    async function downloadGeneratedDocumentsArchive() {
+      try {
+        const res = await fetch(`${API_URL}?action=getDocuments&token=${CACHED_TOKEN_DOCS}&page=${CURRENT_PAGE_TRACKER}&limit=10`);
+        const jsonPayload = await res.json();
+
+        if (jsonPayload.status === 'success') {
+          LOCAL_CACHED_ARCHIVE_DATA_MATRIX_ARRAY = jsonPayload.data.data;
+          renderArchiveDatasetRowsGrid(LOCAL_CACHED_ARCHIVE_DATA_MATRIX_ARRAY);
+          updatePaginationDisplayNodes(jsonPayload.data);
+        } else {
+          showToast(jsonPayload.message || 'Documents load karne mein error.');
+        }
+      } catch (err) { showToast('Network error. Documents fetch nahi ho paye.'); }
+    }
+
+    function renderArchiveDatasetRowsGrid(dataMatrix) {
+      const container = document.getElementById('documentsArchiveRowsContainer');
+      if (!dataMatrix || dataMatrix.length === 0) {
+        container.innerHTML = `<tr><td colspan="6" style="padding:28px; text-align:center; color:var(--text-dim);"> There are no documents right now.</td></tr>`;
+        return;
+      }
+      container.innerHTML = dataMatrix.map((doc, idx) => {
+        const date = doc.generated_on
+          ? new Date(doc.generated_on).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+          : '—';
+        return `
+          <tr>
+            <td><code>${doc.doc_id}</code></td>
+            <td><strong>${doc.emp_id}</strong></td>
+            <td><span class="doc-type-badge">${doc.doc_type}</span></td>
+            <td style="font-size:13px;">${date}</td>
+            <td><code>${doc.generated_by || 'System'}</code></td>
+            <td>
+              <button class="btn-preview" onclick="openDocumentLiveTextPlanePreviewer(${idx})">
+                👁️ Preview
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updatePaginationDisplayNodes(pag) {
+      CURRENT_PAGE_TRACKER = pag.page;
+      TOTAL_PAGES_LIMIT = pag.totalPages;
+      document.getElementById('paginationInfoTrackerLabel').textContent =
+        `Page ${CURRENT_PAGE_TRACKER} of ${TOTAL_PAGES_LIMIT || 1} (${pag.total} documents)`;
+      document.getElementById('btnPrevPage').disabled = CURRENT_PAGE_TRACKER <= 1;
+      document.getElementById('btnNextPage').disabled = CURRENT_PAGE_TRACKER >= TOTAL_PAGES_LIMIT;
+    }
+
+    function changeArchivePage(delta) {
+      CURRENT_PAGE_TRACKER += delta;
+      downloadGeneratedDocumentsArchive();
+    }
+
+    async function executeDocumentGenerationProcess(e) {
+      e.preventDefault();
+      const btn = document.getElementById('engineSubmitBtnLabelNode');
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+
+      const payload = {
+        token: CACHED_TOKEN_DOCS,
+        action: 'generateDocument',
+        emp_id: document.getElementById('docEmpId').value.trim(),
+        doc_type: document.getElementById('docTemplateType').value,
+        custom_notes: document.getElementById('docCustomNotes').value
+      };
+
+      try {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const output = await res.json();
+        if (output.status === 'success') {
+          showToast('Document generated successfully!');
+          document.getElementById('documentGenerationFormNode').reset();
+          CURRENT_PAGE_TRACKER = 1;
+          downloadGeneratedDocumentsArchive();
+        } else { showToast(output.message || 'Error in generation.'); }
+      } catch (err) { showToast('Network error.'); }
+      finally {
+        btn.disabled = false;
+        btn.textContent = '⚡ Generate Document';
+      }
+    }
+
+    function openDocumentLiveTextPlanePreviewer(idx) {
+      const doc = LOCAL_CACHED_ARCHIVE_DATA_MATRIX_ARRAY[idx];
+      if (!doc) return;
+      document.getElementById('viewerHeaderDocTitle').textContent = `📄 ${doc.doc_type} — [${doc.doc_id}]`;
+      document.getElementById('viewerContainerTextPlaneBody').textContent = doc.content || 'Content is not available.';
+      document.getElementById('documentTextContentLiveViewerOverlay').style.display = 'flex';
+    }
+
+    function executePrintSimulationDocBlock() {
+      const text = document.getElementById('viewerContainerTextPlaneBody').textContent;
+      const win = window.open('', '_blank');
+      win.document.write(`<html><head><title>Document — Codeline.AI</title><style>body{font-family:monospace;padding:40px;white-space:pre-wrap;line-height:1.7;color:#000;font-size:14px;}</style></head><body>${text}</body></html>`);
+      win.document.close();
+      win.print();
+    }
+  </script>
+</body>
+
+</html>
